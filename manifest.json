@@ -1,11 +1,9 @@
 {
     "manifest_version": 3,
-    "name": "Fake Filler Pro",
-    "version": "1.0.0",
+    "name": "Filler Max",
+    "version": "1.1.0",
     "description": "Advanced multi-language form filler for developers and testers.",
     "permissions": [
-        "activeTab",
-        "scripting",
         "storage",
         "contextMenus"
     ],
@@ -36,7 +34,8 @@
                 "scripts/generator.js",
                 "scripts/content.js"
             ],
-            "run_at": "document_idle"
+            "run_at": "document_idle",
+            "all_frames": true
         }
     ],
     "options_page": "options/options.html",
@@ -54,6 +53,13 @@
                 "mac": "Command+Shift+D"
             },
             "description": "Chaos Mode (Fuzz Testing)"
+        },
+        "undo_fill": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+U",
+                "mac": "Command+Shift+U"
+            },
+            "description": "Undo fake fill"
         }
     }
 }

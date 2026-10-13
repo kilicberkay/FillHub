@@ -3,7 +3,7 @@ const fieldPatterns = {
     lastName: /last.?name|family.?name|surname|soyadınız|soyad|nachname|nom|apellido|cognome|sobrenome|família|фамилия|姓|姓氏|اسم العائلة/i,
     fullName: /full.?name|name|ad.?soyad|isim|tam.?ad|ganzer.?name|nom.?complet|nombre.?completo|nome.?completo|фио|полное.?имя|姓名|氏名|الاسم الكامل/i,
     email: /email|e-mail|mail|eposta|e-posta|courriel|correo|correio|электронная.?почта|邮件|メール|البريد الإلكتروني/i,
-    phone: /phone|tel|gsm|mobile|cep|telefon|handy|téléphone|teléfono|teleforne|celular|телефон|电话|電話|الهاتف/i,
+    phone: /phone|(?:^|[^a-z])tel(?:no|_|-|\.|:|\s|$)|gsm|mobile|cep|telefon|handy|téléphone|teléfono|teleforne|celular|телефон|电话|電話|الهاتف/i,
     address: /address|street|adres|cadde|sokak|straße|adresse|dirección|endereço|morada|адрес|地址|住所|العنوان/i,
     city: /city|town|şehir|sehir|ilçe|vilayet|stadt|ville|ciudad|cidade|город|城市|市|المدينة/i,
     zip: /zip|postal|post.?code|posta.?kodu|plz|code.?postal|código.?postal|cep|почтовый.?индекс|邮编|郵便番号|الرمز البريدي/i,
@@ -27,6 +27,416 @@ let sessionData = {
     password: null
 };
 
+// Snapshot of every field touched by the last fill, used by the undo action
+let fillSnapshot = new Map();
+let filledCount = 0;
+
+// Async work queue (date-picker interaction); drained serially so fills stay deterministic
+let pendingTasks = [];
+let taskRunning = false;
+
+async function drainTasks() {
+    if (taskRunning) return;
+    taskRunning = true;
+    try {
+        while (pendingTasks.length) {
+            const task = pendingTasks.shift();
+            try {
+                await task();
+            } catch (e) {
+                console.debug('[Filler Max] görev atlandı:', e);
+            }
+        }
+    } finally {
+        taskRunning = false;
+    }
+}
+
+const NATIVE_EVENTS = ['input', 'change', 'blur'];
+const NATIVE_DATE_TYPES = new Set(['date', 'datetime-local', 'time', 'month', 'week']);
+const NATIVE_TYPED_INPUTS = new Set([...NATIVE_DATE_TYPES, 'color', 'range']);
+const TEXT_INPUT_TYPES = new Set(['text', 'search', 'email', 'tel', 'url', 'password']);
+const FIELD_SELECTOR = 'input:not([type="hidden"]):not([type="submit"]):not([type="button"]), textarea, select';
+
+function setNativeValue(el, value) {
+    const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype
+        : el instanceof HTMLSelectElement ? HTMLSelectElement.prototype
+            : HTMLInputElement.prototype;
+    const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+    if (setter) setter.call(el, value); else el.value = value;
+}
+
+function setNativeChecked(el, checked) {
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'checked')?.set;
+    if (setter) setter.call(el, checked); else el.checked = checked;
+}
+
+function dispatchFieldEvents(el, events = NATIVE_EVENTS) {
+    events.forEach(name => el.dispatchEvent(new Event(name, { bubbles: true, composed: true })));
+}
+
+function snapshotField(el) {
+    if (fillSnapshot.has(el)) return;
+    fillSnapshot.set(el, {
+        value: el.value,
+        checked: el.checked,
+        selectedIndex: el.selectedIndex,
+        files: el.files ? Array.from(el.files) : null
+    });
+}
+
+function clampTextValue(input, value) {
+    const max = input.maxLength;
+    const isTextLike = input.tagName === 'TEXTAREA' || (input.tagName === 'INPUT' && TEXT_INPUT_TYPES.has(input.type));
+    if (isTextLike && typeof max === 'number' && max > 0) return String(value).slice(0, max);
+    return value;
+}
+
+function clampNumberValue(input, value) {
+    let num = Number(value);
+    if (!Number.isFinite(num)) num = 0;
+    const min = input.min === '' ? null : Number(input.min);
+    const max = input.max === '' ? null : Number(input.max);
+    const stepAttr = Number(input.step);
+    const step = Number.isFinite(stepAttr) && stepAttr > 0 ? stepAttr : 1;
+    const base = Number.isFinite(min) ? min : 0;
+    num = base + Math.round((num - base) / step) * step;
+    if (Number.isFinite(min)) num = Math.max(num, min);
+    if (Number.isFinite(max)) num = Math.min(num, max);
+    return String(Math.round(num * 1e6) / 1e6);
+}
+
+function clampIsoValue(input, value) {
+    let out = String(value);
+    if (input.min && out < input.min) out = input.min;
+    if (input.max && out > input.max) out = input.max;
+    return out;
+}
+
+function isoWeekParts(date) {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = Date.UTC(d.getUTCFullYear(), 0, 1);
+    const week = Math.ceil((((d.getTime() - yearStart) / 86400000) + 1) / 7);
+    return { year: d.getUTCFullYear(), week };
+}
+
+// Single write path for value-bearing fields: snapshot, clamp, assign natively, notify, count
+function assignFieldValue(input, value) {
+    try {
+        snapshotField(input);
+        let out = value;
+        if (input.tagName === 'INPUT' && (input.type === 'number' || input.type === 'range')) {
+            out = clampNumberValue(input, out);
+        } else if (input.tagName === 'INPUT' && (input.type === 'date' || input.type === 'datetime-local')) {
+            out = clampIsoValue(input, out);
+        } else {
+            out = clampTextValue(input, out);
+        }
+        setNativeValue(input, out);
+        dispatchFieldEvents(input);
+        filledCount++;
+        return true;
+    } catch (e) {
+        console.debug('[Filler Max] alan atlandı:', input, e);
+        return false;
+    }
+}
+
+function fillNativeTypedInput(input, settings) {
+    const locale = settings.preferredLocale;
+    const context = { chaosMode: settings.chaosMode, piiSafe: settings.piiSafe };
+    switch (input.type) {
+        case 'date':
+            return assignFieldValue(input, FakeDataGenerator.generate('date', locale, context));
+        case 'datetime-local':
+            return assignFieldValue(input, FakeDataGenerator.generate('datetime', locale, context));
+        case 'time':
+            return assignFieldValue(input, FakeDataGenerator.generate('datetime', locale, context).split('T')[1]);
+        case 'month':
+            return assignFieldValue(input, FakeDataGenerator.generate('date', locale).slice(0, 7));
+        case 'week': {
+            const [y, m, d] = FakeDataGenerator.generate('date', locale).split('-').map(Number);
+            const parts = isoWeekParts(new Date(y, m - 1, d));
+            return assignFieldValue(input, `${parts.year}-W${String(parts.week).padStart(2, '0')}`);
+        }
+        case 'color': {
+            const value = settings.chaosMode
+                ? '#000000'
+                : '#' + Math.floor(Math.random() * 0x1000000).toString(16).padStart(6, '0');
+            return assignFieldValue(input, value);
+        }
+        case 'range': {
+            const min = input.min === '' ? 0 : Number(input.min);
+            const max = input.max === '' ? 100 : Number(input.max);
+            const stepAttr = Number(input.step);
+            const step = Number.isFinite(stepAttr) && stepAttr > 0 ? stepAttr : 1;
+            const steps = Math.max(1, Math.floor((max - min) / step) + 1);
+            return assignFieldValue(input, String(min + Math.floor(Math.random() * steps) * step));
+        }
+        default:
+            return false;
+    }
+}
+
+// Fake payloads used to satisfy client-side accept/MIME/size checks on file inputs
+const FILE_TYPES = {
+    pdf: { mime: 'application/pdf', text: '%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n' },
+    docx: { mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', text: 'Filler Max test belgesi.' },
+    doc: { mime: 'application/msword', text: 'Filler Max test belgesi.' },
+    xlsx: { mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', text: 'Filler Max test tablosu.' },
+    txt: { mime: 'text/plain', text: 'Filler Max test metni.' },
+    csv: { mime: 'text/csv', text: 'ad,soyad\nTest,Kullanici\n' },
+    zip: { mime: 'application/zip', text: 'Filler Max test arsivi.' },
+    png: { mime: 'image/png', base64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=' },
+    jpg: { mime: 'image/jpeg', base64: '/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AKp//2Q==' }
+};
+const MIME_TO_EXT = {
+    'application/pdf': 'pdf', 'application/msword': 'doc',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx', 'application/vnd.ms-excel': 'xlsx',
+    'text/plain': 'txt', 'text/csv': 'csv', 'application/zip': 'zip', 'application/x-zip-compressed': 'zip',
+    'image/png': 'png', 'image/jpeg': 'jpg', 'image/jpg': 'jpg'
+};
+const GENERIC_MIME_EXT = { text: 'txt', image: 'png', application: 'pdf' };
+const FILE_KEYWORD_EXT = [[/photo|image|avatar|resim|foto/i, 'png']];
+
+function pickFileType(input) {
+    const tokens = (input.getAttribute('accept') || '').split(',').map(t => t.trim()).filter(Boolean);
+    for (const token of tokens) {
+        if (token.startsWith('.')) {
+            const ext = token.slice(1).toLowerCase().replace('jpeg', 'jpg');
+            if (FILE_TYPES[ext]) return ext;
+            continue;
+        }
+        if (token === '*/*') return 'pdf';
+        if (token.endsWith('/*')) {
+            const generic = GENERIC_MIME_EXT[token.slice(0, -2)];
+            if (generic) return generic;
+            continue;
+        }
+        const ext = MIME_TO_EXT[token.toLowerCase()];
+        if (ext) return ext;
+    }
+    const haystack = `${input.name || ''} ${input.id || ''} ${input.placeholder || ''}`;
+    for (const [pattern, ext] of FILE_KEYWORD_EXT) {
+        if (pattern.test(haystack)) return ext;
+    }
+    return 'pdf';
+}
+
+function slugifyName(value) {
+    return String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+}
+
+function buildFileName(ext, sessionData) {
+    const first = slugifyName(sessionData.firstName);
+    const last = slugifyName(sessionData.lastName);
+    return first && last ? `${first}.${last}.${ext}` : `fake-file.${ext}`;
+}
+
+function base64ToBytes(base64) {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+}
+
+// File inputs cannot take a `value`; the only supported path is a DataTransfer-backed FileList
+function fillFileInput(input, sessionData) {
+    if (input.webkitdirectory === true) return false;
+    try {
+        const ext = pickFileType(input);
+        const spec = FILE_TYPES[ext] || FILE_TYPES.pdf;
+        const bytes = spec.base64 ? base64ToBytes(spec.base64) : new TextEncoder().encode(spec.text);
+        const fileName = buildFileName(ext, sessionData);
+        snapshotField(input);
+        const transfer = new DataTransfer();
+        transfer.items.add(new File([bytes], fileName, { type: spec.mime, lastModified: Date.now() }));
+        input.files = transfer.files;
+        dispatchFieldEvents(input, ['input', 'change']);
+        filledCount++;
+        return true;
+    } catch (e) {
+        console.debug('[Filler Max] alan atlandı:', input, e);
+        return false;
+    }
+}
+
+const PICKER_PROBE_TRIES = 8;        // × 50 ms waiting for the calendar to open
+const PICKER_CLICK_WAIT_TRIES = 5;   // × 50 ms waiting for the click to land in the input
+const PICKER_NAV_LIMIT = 60;         // navigation safety valve (months)
+const PICKER_MIN_YEAR = 1900;
+const PICKER_MAX_YEAR_OFFSET = 10;
+const CAL_ACTIVE_SEL = '.air-datepicker.-active-, .datepicker.active';
+const CAL_ANY_SEL = '.air-datepicker, .datepicker';
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+function parseIsoDate(iso) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+    if (!m) return null;
+    const d = new Date(+m[1], +m[2] - 1, +m[3]);
+    return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function rectDistance(el, box) {
+    const a = el.getBoundingClientRect();
+    const dx = (a.left + a.right) / 2 - (box.left + box.right) / 2;
+    const dy = (a.top + a.bottom) / 2 - (box.top + box.bottom) / 2;
+    return dx * dx + dy * dy;
+}
+
+function nearestEnabledDayCell(cal, y, m0, day) {
+    const cells = [...cal.querySelectorAll(`[data-year="${y}"][data-month="${m0}"][data-date]`)]
+        .filter(c => !c.className.includes('-disabled-'));
+    if (!cells.length) return null;
+    return cells.reduce((best, c) =>
+        Math.abs(+c.getAttribute('data-date') - day) < Math.abs(+best.getAttribute('data-date') - day) ? c : best);
+}
+
+// Walks the calendar to the target month, then clicks the day cell
+async function selectDateInCalendar(cal, target, input) {
+    const iso = `${target.getFullYear()}-${String(target.getMonth() + 1).padStart(2, '0')}-${String(target.getDate()).padStart(2, '0')}`;
+    const y = target.getFullYear(), m0 = target.getMonth(), day = target.getDate();
+    let lastMonthKey = '';
+    for (let i = 0; i < PICKER_NAV_LIMIT; i++) {
+        let cell = cal.querySelector(`[data-iso-date="${iso}"]`)
+            || cal.querySelector(`[data-year="${y}"][data-month="${m0}"][data-date="${day}"]`);
+        if (!cell) {
+            const shown = cal.querySelector('[data-year][data-month]:not(.-other-month-)')
+                || cal.querySelector('[data-year][data-month]');
+            if (!shown) return false;
+            const sy = +shown.getAttribute('data-year'), sm0 = +shown.getAttribute('data-month');
+            const key = `${sy}-${sm0}`;
+            if (key === lastMonthKey) return false; // navigation made no progress
+            lastMonthKey = key;
+            const btn = cal.querySelector(`[data-action="${(sy * 12 + sm0) < (y * 12 + m0) ? 'next' : 'prev'}"]`);
+            if (!btn) return false;
+            btn.click();
+            await sleep(60);
+            continue;
+        }
+        if (cell.className.includes('-disabled-')) {
+            cell = nearestEnabledDayCell(cal, y, m0, day);
+            if (!cell) return false;
+        }
+        const prev = input.value;
+        // Full click sequence: the libraries track mousedown/mouseup to know the interaction
+        // started inside the calendar (keeps their blur handler from leaving the picker open)
+        cell.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
+        cell.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
+        cell.click();
+        for (let w = 0; w < PICKER_CLICK_WAIT_TRIES; w++) {
+            await sleep(50);
+            if (input.value && input.value !== prev) return true;
+        }
+        return false;
+    }
+    return false;
+}
+
+// air-datepicker (v2/v3) writes its own formatted value and internal state on cell click
+async function tryFillViaDatePicker(input, isoDate) {
+    const doc = input.ownerDocument;
+    if (!doc.querySelector(CAL_ANY_SEL)) return false;
+    const target = parseIsoDate(isoDate);
+    if (!target) return false;
+    const year = target.getFullYear();
+    if (year < PICKER_MIN_YEAR || year > new Date().getFullYear() + PICKER_MAX_YEAR_OFFSET) return false;
+    const before = new Set(doc.querySelectorAll(CAL_ACTIVE_SEL));
+    const inputBox = input.getBoundingClientRect();
+    input.focus();
+    // air-datepicker opens on the focus event (showEvent: 'focus'); a real focus() only fires
+    // that event while the window itself is focused, so a synthetic event covers background tabs
+    input.dispatchEvent(new FocusEvent('focus'));
+    let candidates = [];
+    for (let i = 0; i < PICKER_PROBE_TRIES && !candidates.length; i++) {
+        await sleep(50);
+        const all = [...doc.querySelectorAll(CAL_ACTIVE_SEL)];
+        const fresh = all.filter(el => !before.has(el));
+        candidates = (fresh.length ? fresh : all).sort((a, b) => rectDistance(a, inputBox) - rectDistance(b, inputBox));
+    }
+    for (const cal of candidates) {
+        if (await selectDateInCalendar(cal, target, input)) {
+            dispatchFieldEvents(input);
+            input.blur();
+            return true;
+        }
+    }
+    // Nothing selected: still release the calendar we opened
+    input.dispatchEvent(new FocusEvent('blur'));
+    input.blur();
+    return false;
+}
+
+// Date text formats from placeholders/patterns, e.g. "gg.aa.yyyy" (Turkish day/month tokens)
+function detectDateFormat(input) {
+    const hints = [
+        input.placeholder,
+        input.getAttribute('data-format'),
+        input.getAttribute('data-date-format'),
+        input.getAttribute('pattern')
+    ].filter(Boolean).join(' ');
+    if (!hints) return null;
+    const normalized = hints
+        .replace(/\bgg\b/gi, 'dd')
+        .replace(/\baa\b/gi, 'mm')
+        .replace(/\byy\b/gi, 'yyyy')
+        .toLowerCase();
+    const match = /(yyyy|dd|mm)([.\-/\s])(yyyy|dd|mm)\2(yyyy|dd|mm)/.exec(normalized);
+    if (!match) return null;
+    const order = [match[1], match[3], match[4]];
+    if (new Set(order).size !== 3 || !order.includes('yyyy')) return null;
+    return { order, separator: match[2] };
+}
+
+function formatDateValue(iso, format) {
+    if (!format) return iso;
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+    if (!m) return iso;
+    const parts = { yyyy: m[1], mm: m[2], dd: m[3] };
+    return format.order.map(token => parts[token]).join(format.separator);
+}
+
+// Placeholder'lar genelde örnek değer gösterir ("Orn: 2024/123"): aynı şekilde değer üretilir
+function detectValueShape(input) {
+    if ((input.getAttribute('inputmode') || '').toLowerCase() === 'numeric') return '####';
+    const match = /[0-9][0-9\s/,.()\-]*$/.exec(input.placeholder || '');
+    if (!match) return null;
+    const shape = match[0].trim();
+    return shape.length >= 2 && shape.length <= 24 ? shape : null;
+}
+
+// Hidden input paired with a visible display field ("x_date_display" <-> "x")
+const HIDDEN_PAIR_SUFFIXES = ['_date_display', '_display', '_hidden'];
+
+function findPairedHiddenInput(input) {
+    if (!input.id) return null;
+    const doc = input.ownerDocument;
+    for (const suffix of HIDDEN_PAIR_SUFFIXES) {
+        if (!input.id.endsWith(suffix)) continue;
+        const paired = doc.getElementById(input.id.slice(0, -suffix.length));
+        if (paired && paired !== input && paired.tagName === 'INPUT' && paired.type === 'hidden') return paired;
+    }
+    return null;
+}
+
+// The hidden input is what the form submits; the visible field only carries the localized text
+function fillPairedHiddenInput(hidden, value) {
+    try {
+        snapshotField(hidden);
+        setNativeValue(hidden, value);
+        dispatchFieldEvents(hidden, ['input', 'change']);
+        filledCount++;
+        return true;
+    } catch (e) {
+        console.debug('[Filler Max] alan atlandı:', hidden, e);
+        return false;
+    }
+}
+
 function identifyField(input, customRules = []) {
     // 1. Check Custom Rules first
     for (const rule of customRules) {
@@ -40,7 +450,10 @@ function identifyField(input, customRules = []) {
     const id = input.id || "";
     const placeholder = input.placeholder || "";
     const labelText = input.labels?.[0]?.innerText || "";
-    const text = (name + " " + id + " " + placeholder + " " + labelText).toLowerCase();
+    // A "x_date_display" field usually carries the semantics in its paired hidden input instead
+    const pair = findPairedHiddenInput(input);
+    const pairText = pair ? (pair.name || '') + " " + (pair.id || '') : "";
+    const text = (name + " " + id + " " + placeholder + " " + labelText + " " + pairText).toLowerCase();
 
     if (input.type === 'email') return 'email';
     if (input.type === 'tel') return 'phone';
@@ -53,6 +466,9 @@ function identifyField(input, customRules = []) {
     for (const [key, pattern] of Object.entries(fieldPatterns)) {
         if (pattern.test(text)) return key;
     }
+
+    // A date-shaped placeholder (e.g. "gg.aa.yyyy") is itself a reliable date signal
+    if (detectDateFormat(input)) return 'date';
 
     // 3. Smart Fallback for unknown types - analyze input characteristics
     if (input.tagName === 'INPUT') {
@@ -81,74 +497,50 @@ function identifyField(input, customRules = []) {
     return 'text'; // Universal fallback
 }
 
-function fillFieldsInContainer(container, settings) {
-    // Reset session data for this fill operation to ensure fresh synchronization (e.g., name-email linking)
-    sessionData = {
-        firstName: '',
-        lastName: '',
-        password: null // Keep password in session data for potential re-use if matchPasswords is enabled
-    };
+function queryFields(root, selector) {
+    const own = root.nodeType === 1 && root.matches?.(selector) ? [root] : [];
+    return [...own, ...root.querySelectorAll(selector)];
+}
 
-    const inputs = Array.from(container.querySelectorAll('input:not([type="hidden"]):not([type="submit"]):not([type="button"]), textarea, select'));
+function collectFields(container, settings) {
+    const inputs = queryFields(container, FIELD_SELECTOR);
+    const profile = getActiveProfile(settings);
 
     // Pre-scan for names to support Smart Email Linking
+    const handledNames = new Set();
     inputs.forEach(input => {
         const type = identifyField(input, settings.customRules);
-        if (type === 'firstName' || type === 'lastName') {
-            const val = FakeDataGenerator.generate(type, settings.preferredLocale, sessionData);
-            input.value = val;
-            if (type === 'firstName') sessionData.firstName = val;
-            if (type === 'lastName') sessionData.lastName = val;
-            ['input', 'change', 'blur'].forEach(evtName => input.dispatchEvent(new Event(evtName, { bubbles: true })));
-        }
+        if (type !== 'firstName' && type !== 'lastName') return;
+        if (!isElementVisible(input)) return;
+        handledNames.add(input);
+        fillField(input, settings, profile);
+    });
+
+    // Radio groups are resolved as a whole: exactly one enabled radio per group
+    const radioGroups = new Map();
+    queryFields(container, 'input[type="radio"][name]').forEach(r => {
+        if (!radioGroups.has(r.name)) radioGroups.set(r.name, []);
+        radioGroups.get(r.name).push(r);
+    });
+    radioGroups.forEach(list => {
+        const enabled = list.filter(r => !r.disabled && isElementVisible(r));
+        if (!enabled.length) return;
+        const pick = enabled[Math.floor(Math.random() * enabled.length)];
+        list.forEach(r => {
+            if (r.checked !== (r === pick)) {
+                snapshotField(r);
+                setNativeChecked(r, r === pick);
+                dispatchFieldEvents(r);
+            }
+        });
     });
 
     inputs.forEach(input => {
-        // Strict visibility check to handle Tabs and Hidden sections
-        if (!isElementVisible(input)) return;
-
-        const type = identifyField(input, settings.customRules);
-        if (!type) return;
-
-        // Overwrite existing values to ensure re-fills stay in sync (logic requested by user)
-        // Skip radio/checkbox since they are handled separately below
-        // Also skip firstName/lastName here as they were pre-scanned and filled above
-        if (input.type !== 'radio' && input.type !== 'checkbox' && (type === 'firstName' || type === 'lastName')) return;
-
-        // Smart Password Matching
-        if (type === 'password' && settings.matchPasswords && sessionData.password) {
-            input.value = sessionData.password;
-        } else {
-            const val = FakeDataGenerator.generate(type, settings.preferredLocale, {
-                ...sessionData,
-                fieldName: input.name || input.id || '',
-                chaosMode: settings.chaosMode,
-                piiSafe: settings.piiSafe
-            });
-
-            // Cache values for smart linking (password is cached here if not matched)
-            if (type === 'password') sessionData.password = val;
-
-            if (input.tagName === 'SELECT') {
-                const options = input.querySelectorAll('option');
-                if (options.length > 1) {
-                    // Try to select a meaningful option, not just random
-                    const selectedIndex = Math.floor(Math.random() * (options.length - 1)) + 1;
-                    input.selectedIndex = selectedIndex;
-                }
-            } else if (input.type === 'checkbox') {
-                input.checked = true; // User requested all checkboxes to be checked
-            } else if (input.type === 'radio') {
-                input.checked = Math.random() > 0.5;
-            } else {
-                input.value = val;
-            }
-        }
-
-        // Trigger events for reactive frameworks (React, Vue, etc.)
-        ['input', 'change', 'blur'].forEach(evtName => {
-            input.dispatchEvent(new Event(evtName, { bubbles: true }));
-        });
+        // Names were filled by the pre-scan pass so e-mails can link to them
+        if (handledNames.has(input)) return;
+        // Radio groups are resolved as a whole group, not per input
+        if (input.type === 'radio') return;
+        fillField(input, settings, profile);
     });
 
     // Attempt to click Captcha checkboxes (reCAPTCHA, Turnstile)
@@ -158,41 +550,199 @@ function fillFieldsInContainer(container, settings) {
     const allElements = container.querySelectorAll('*');
     allElements.forEach(el => {
         if (el.shadowRoot) {
-            fillFieldsInContainer(el.shadowRoot, settings);
+            collectFields(el.shadowRoot, settings);
         }
     });
+}
 
-    // Handle Iframes (if same-origin)
-    const iframes = container.querySelectorAll('iframe');
-    iframes.forEach(iframe => {
+// Selects valid options only: no disabled, hidden or empty placeholder options
+function fillSelect(input) {
+    try {
+        const candidates = [...input.options].filter(o => !o.disabled && !o.hidden && o.value !== '');
+        if (!candidates.length) return false;
+        snapshotField(input);
+        if (input.multiple) {
+            const count = Math.min(candidates.length, Math.random() > 0.5 ? 2 : 1);
+            const picks = [...candidates].sort(() => Math.random() - 0.5).slice(0, count);
+            for (const option of input.options) option.selected = picks.includes(option);
+        } else {
+            const pick = candidates[Math.floor(Math.random() * candidates.length)];
+            setNativeValue(input, pick.value);
+        }
+        dispatchFieldEvents(input);
+        filledCount++;
+        return true;
+    } catch (e) {
+        console.debug('[Filler Max] alan atlandı:', input, e);
+        return false;
+    }
+}
+
+// Active persona from settings; only used when it actually carries persona data
+function getActiveProfile(settings) {
+    const list = Array.isArray(settings.profiles) ? settings.profiles : [];
+    const p = list.find(x => x.id === settings.activeProfileId);
+    return (p && typeof p.firstName === 'string' && typeof p.lastName === 'string') ? p : null;
+}
+
+function profileValue(profile, type) {
+    if (!profile) return null;
+    if (type === 'fullName') {
+        const name = [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim();
+        return name || null;
+    }
+    const value = profile[type];
+    return typeof value === 'string' && value !== '' ? value : null;
+}
+
+// Fills a single field; returns true when a value was written (async picker work included)
+function fillField(input, settings, profile = null, checkVisibility = true) {
+    if (input.type === 'file') {
+        return fillFileInput(input, sessionData);
+    }
+
+    if (checkVisibility && !isElementVisible(input)) return false;
+
+    if (input.type === 'radio' || input.type === 'checkbox') {
+        // Devre dışı kutular işaretlenmez (radio grubu ve select yollarındaki filtreyle aynı kural)
+        if (input.disabled || input.closest('fieldset[disabled]')) return false;
+        snapshotField(input);
+        setNativeChecked(input, true);
+        dispatchFieldEvents(input);
+        filledCount++;
+        return true;
+    }
+
+    const type = identifyField(input, settings.customRules);
+    if (!type) return false;
+
+    if (input.tagName === 'SELECT') {
+        return fillSelect(input);
+    }
+
+    if (input.tagName === 'INPUT' && NATIVE_TYPED_INPUTS.has(input.type)) {
+        fillNativeTypedInput(input, settings);
+        return true;
+    }
+
+    // Dates bound to a custom picker (air-datepicker) must be selected inside the calendar widget
+    if (input.tagName === 'INPUT' && !NATIVE_TYPED_INPUTS.has(input.type)
+        && (type === 'date' || type === 'datetime' || (input.readOnly && input.ownerDocument.querySelector(CAL_ANY_SEL)))) {
+        const iso = FakeDataGenerator.generate('date', settings.preferredLocale, {
+            chaosMode: settings.chaosMode,
+            piiSafe: settings.piiSafe
+        });
+        const isoDate = String(iso).slice(0, 10);
+        // Masked text fields (e.g. "gg.aa.yyyy") need the localized shape, not ISO
+        const displayValue = formatDateValue(isoDate, detectDateFormat(input));
+        snapshotField(input);
+        pendingTasks.push(async () => {
+            const hidden = findPairedHiddenInput(input);
+            const hiddenBefore = hidden ? hidden.value : null;
+            if (await tryFillViaDatePicker(input, isoDate)) filledCount++;
+            else assignFieldValue(input, displayValue); // safe fallback: write the value directly
+            if (hidden && hidden.value === hiddenBefore) fillPairedHiddenInput(hidden, isoDate);
+        });
+        return true;
+    }
+
+    // Smart Password Matching / persona values take precedence over generated data
+    const profileVal = profileValue(profile, type);
+    let val;
+    if (type === 'password' && settings.matchPasswords && sessionData.password) {
+        val = sessionData.password;
+    } else if (profileVal !== null) {
+        val = profileVal;
+    } else {
+        val = FakeDataGenerator.generate(type, settings.preferredLocale, {
+            ...sessionData,
+            fieldName: input.name || input.id || '',
+            pattern: input.getAttribute('pattern') || '',
+            valueShape: detectValueShape(input),
+            multiline: input.tagName === 'TEXTAREA',
+            chaosMode: settings.chaosMode,
+            piiSafe: settings.piiSafe,
+            smartEmail: settings.smartEmail !== false
+        });
+
+        // Cache values for smart linking (password is cached here if not matched)
+        if (type === 'password') sessionData.password = val;
+    }
+
+    if (type === 'firstName') sessionData.firstName = val;
+    if (type === 'lastName') sessionData.lastName = val;
+
+    assignFieldValue(input, val);
+    return true;
+}
+
+// Fills fields that frameworks render shortly after the initial fill pass
+const DYNAMIC_SCAN_WINDOW_MS = 3000;
+
+function observeDynamicFields(settings) {
+    if (!document.body) return;
+    const observer = new MutationObserver(records => {
+        records.forEach(record => record.addedNodes.forEach(node => {
+            if (node.nodeType === 1) collectFields(node, settings);
+        }));
+        drainTasks();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    setTimeout(() => observer.disconnect(), DYNAMIC_SCAN_WINDOW_MS);
+}
+
+// Fill entry point: resets per-run state, collects fields, then drains async picker work
+async function fillPage(settings) {
+    pendingTasks = [];
+    filledCount = 0;
+    fillSnapshot = new Map();
+    sessionData = { firstName: '', lastName: '', password: null };
+    // Watch for fields rendered while this fill is still running (async picker work included)
+    observeDynamicFields(settings);
+    collectFields(document, settings);
+    await drainTasks();
+}
+
+// Restores every field touched by the last fill; returns the number of restored fields
+function undoFill() {
+    let restored = 0;
+    fillSnapshot.forEach((snap, el) => {
         try {
-            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-            if (iframeDoc) {
-                fillFieldsInContainer(iframeDoc, settings);
+            if (el.tagName === 'INPUT' && el.type === 'file') {
+                const transfer = new DataTransfer();
+                (snap.files || []).forEach(file => transfer.items.add(file));
+                el.files = transfer.files;
+            } else if (el.tagName === 'SELECT') {
+                el.selectedIndex = typeof snap.selectedIndex === 'number' ? snap.selectedIndex : -1;
+            } else if (el.tagName === 'INPUT' && (el.type === 'checkbox' || el.type === 'radio')) {
+                setNativeChecked(el, !!snap.checked);
+            } else {
+                setNativeValue(el, snap.value);
             }
+            dispatchFieldEvents(el);
+            restored++;
         } catch (e) {
-            // Cross-origin iframe restricted by browser
+            console.debug('[Filler Max] alan atlandı:', el, e);
         }
     });
+    fillSnapshot = new Map();
+    return restored;
 }
 
 function isElementVisible(el) {
     if (!el) return false;
 
-    // Check basic style properties
-    const style = window.getComputedStyle(el);
-    if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
-        return false;
-    }
-
-    // Check ancestors for hidden state (like tabs)
-    let parent = el.parentElement;
-    while (parent) {
-        const parentStyle = window.getComputedStyle(parent);
-        if (parentStyle.display === 'none' || parentStyle.visibility === 'hidden') {
+    let node = el;
+    while (node && node.nodeType === 1) {
+        if (node.hasAttribute('hidden') || node.getAttribute('aria-hidden') === 'true' || node.hasAttribute('inert')) {
             return false;
         }
-        parent = parent.parentElement;
+        const style = window.getComputedStyle(node);
+        if (style.display === 'none' || style.visibility === 'hidden' || parseFloat(style.opacity) === 0) {
+            return false;
+        }
+        // Walk across shadow boundaries as well as up the light DOM
+        node = node.parentElement || node.getRootNode()?.host || null;
     }
 
     // Check dimensions
@@ -262,9 +812,22 @@ function tryToClickCaptchas() {
     });
 }
 
+// Otomatik gönderim yalnız gerçek gönderim kontrollerine basar: rol tabanlı sahte butonlar ve
+// yıkıcı/ikincil eylemler (İptal, Sil, Temizle...) dışarıda kalır
+const SUBMIT_BUTTON_SELECTOR = 'button[type="submit"], input[type="submit"], input[type="image"], form button:not([type])';
+const DESTRUCTIVE_BUTTON_TEXT = /cancel|iptal|delete|remove|discard|reset|sil|temizle|vazgeç|vazgec|abort|kapat|geri|close/i;
+
+function autoSubmitLabel(control) {
+    const text = control.tagName === 'INPUT'
+        ? (control.value || '')
+        : (control.innerText || control.textContent || '');
+    return `${text} ${control.getAttribute('aria-label') || ''} ${control.getAttribute('title') || ''}`;
+}
+
 function autoSubmitForm(container) {
-    // Common submit buttons patterns
-    const submitBtn = container.querySelector('button[type="submit"], input[type="submit"], button.submit, button.btn-primary, [role="button"]');
+    const usable = [...container.querySelectorAll(SUBMIT_BUTTON_SELECTOR)]
+        .filter(el => !el.disabled && !DESTRUCTIVE_BUTTON_TEXT.test(autoSubmitLabel(el)));
+    const submitBtn = usable.find(el => (el.getAttribute('type') || 'submit').toLowerCase() === 'submit') || usable[0];
     if (submitBtn) {
         setTimeout(() => {
             submitBtn.click();
@@ -298,47 +861,92 @@ function showToast(message) {
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "fill" || request.action === "fill_chaos") {
-        const isChaos = request.action === "fill_chaos";
+    if (!['fill', 'fill_chaos', 'fill_field', 'undo'].includes(request.action)) return;
 
-        // Reset session data for new fill
-        sessionData = { firstName: null, lastName: null, password: null };
+    let responded = false;
+    const respond = (payload) => {
+        if (responded) return;
+        responded = true;
+        sendResponse(payload);
+    };
 
-        chrome.storage.local.get(null, (settings) => {
-            // Override settings for chaos mode if triggered via hotkey
-            if (isChaos) {
-                settings.chaosMode = true;
-                showToast("🔥 CHAOS MODE ACTIVATED 🔥");
+    (async () => {
+        const settings = await chrome.storage.local.get(null);
+        // Yeni kurulum varsayılanları: gizlilik öncelikli + tarayıcı dili
+        if (settings.piiSafe === undefined) settings.piiSafe = true;
+        if (!settings.preferredLocale) settings.preferredLocale = navigator.language || 'en';
+        if (request.locale) settings.preferredLocale = request.locale;
+
+        if (request.action === 'fill_chaos') settings.chaosMode = true;
+
+        if (request.action === 'undo') {
+            respond({ status: 'success', restored: undoFill() });
+            return;
+        }
+
+        if (request.action === 'fill_field') {
+            const target = document.activeElement;
+            if (!target || !['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) {
+                respond({ status: 'skipped' });
+                return;
             }
+            pendingTasks = [];
+            filledCount = 0;
+            fillSnapshot = new Map();
+            fillField(target, settings, getActiveProfile(settings), false);
+            await drainTasks();
+            respond({ status: 'success', filled: filledCount });
+            return;
+        }
 
-            fillFieldsInContainer(document, settings);
+        await fillPage(settings);
+        if (window.top === window) {
+            showToast(getLocalizedMessage(settings.preferredLocale, request.action === 'fill_chaos' ? 'chaos' : 'filled'));
+        }
+        if (settings.autoSubmit && request.action === 'fill') {
+            autoSubmitForm(document);
+        }
+        respond({ status: 'success', filled: filledCount });
+    })().catch((e) => {
+        console.debug('[Filler Max] doldurma hatası:', e);
+        respond({ status: 'error' });
+    });
 
-            if (!isChaos) {
-                showToast(getLocalizedMessage(settings.preferredLocale));
-            }
-
-            if (settings.autoSubmit && !isChaos) {
-                autoSubmitForm(document);
-            }
-        });
-
-        sendResponse({ status: "success" });
-    }
+    return true; // keep the message channel open until the async fill resolves
 });
 
-function getLocalizedMessage(localeLiteral) {
-    const locale = localeLiteral || 'tr';
+function getLocalizedMessage(localeLiteral, key = 'filled') {
+    const locale = localeLiteral || navigator.language || 'en';
     const messages = {
-        'tr': 'Tüm alanlar hassasiyetle dolduruldu.',
-        'en': 'All fields filled with precision.',
-        'es': 'Todos los campos llenados con precisión.',
-        'fr': 'Tous les champs remplis avec précision.',
-        'de': 'Alle Felder präzise ausgefüllt.',
-        'pt': 'Todos os campos preenchidos com precisão.',
-        'ru': 'Все поля заполнены с точностью.',
-        'zh': '所有字段均已精确填写。',
-        'ja': 'すべてのフィールドが正確に入力されました。',
-        'ar': 'تم ملء جميع الحقول بدقة.'
+        filled: {
+            'tr': 'Tüm alanlar hassasiyetle dolduruldu.',
+            'en': 'All fields filled with precision.',
+            'es': 'Todos los campos llenados con precisión.',
+            'fr': 'Tous les champs remplis avec précision.',
+            'de': 'Alle Felder präzise ausgefüllt.',
+            'pt': 'Todos os campos preenchidos com precisão.',
+            'ru': 'Все поля заполнены с точностью.',
+            'zh': '所有字段均已精确填写。',
+            'ja': 'すべてのフィールドが正確に入力されました。',
+            'ar': 'تم ملء جميع الحقول بدقة.'
+        },
+        chaos: {
+            'tr': 'CHAOS MODE',
+            'en': 'CHAOS MODE'
+        },
+        undo: {
+            'tr': 'Form eski haline getirildi.',
+            'en': 'Form restored.',
+            'es': 'Formulario restaurado.',
+            'fr': 'Formulaire restauré.',
+            'de': 'Formular wiederhergestellt.',
+            'pt': 'Formulário restaurado.',
+            'ru': 'Форма восстановлена.',
+            'zh': '表单已恢复。',
+            'ja': 'フォームを元に戻しました。',
+            'ar': 'تمت استعادة النموذج.'
+        }
     };
-    return messages[locale.split('-')[0]] || messages['en'];
+    const table = messages[key] || messages.filled;
+    return table[locale.split('-')[0]] || table.en;
 }

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Filler Max">
+  <defs>
+    <linearGradient id="fx-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#818cf8"/>
+      <stop offset="0.5" stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#4338ca"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="url(#fx-grad)"/>
+  <path d="M68.35 55.23V24.64L28.99 72.77H59.65V103.36L99.01 55.23H68.35Z" fill="#ffffff"/>
+</svg>

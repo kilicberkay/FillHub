@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentProfileNameText = document.getElementById('currentProfileName');
     const saveProfileBtn = document.getElementById('saveProfileBtn');
     const deleteProfileBtn = document.getElementById('deleteProfileBtn');
+    const profileDataSummary = document.getElementById('profileDataSummary');
 
     const ruleSelectorInput = document.getElementById('ruleSelector');
     const ruleTypeSelect = document.getElementById('ruleType');
@@ -27,13 +28,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const uiLangSelector = document.getElementById('uiLangSelector');
 
+    // Sürüm etiketi manifest'ten okunur; sabit metin sürümle birlikte kaymaz
+    const versionLabel = document.getElementById('versionLabel');
+    if (versionLabel) versionLabel.innerText = 'v' + chrome.runtime.getManifest().version;
+
     let state = {
         theme: 'dark',
         preferredLocale: 'tr',
-        smartEmail: true,
+        uiLang: 'en',
         smartEmail: true,
         matchPasswords: true,
-        piiSafe: false,
+        piiSafe: true,
         autoSubmit: false,
         profiles: [{ id: 'default', name: 'Standard Persona' }],
         activeProfileId: 'default',
@@ -87,11 +92,11 @@ document.addEventListener('DOMContentLoaded', () => {
             addRuleBtn: "Add Mapping",
             activeMappingsTitle: "Active Mappings",
             noRulesText: "No custom rules defined yet. Create one above!",
-            aboutTitle: "About FF PRO",
+            aboutTitle: "About Filler Max",
             aboutSub: "The elite developer tool for rapid form testing.",
-            aboutDescription: "Fake Filler Pro is designed for developers who value their time. Our engine uses advanced heuristics and context-aware generation.",
+            aboutDescription: "Filler Max is designed for developers who value their time. Our engine uses advanced heuristics and context-aware generation.",
             uiLangLabel: "UI Language",
-            onboardingTitle: "Welcome to FF Pro! 🚀",
+            onboardingTitle: "Welcome to Filler Max! 🚀",
             startedBtn: "Get Started",
             darkModeLabel: "Dark Mode",
             navTextGeneral: "General",
@@ -131,11 +136,11 @@ document.addEventListener('DOMContentLoaded', () => {
             addRuleBtn: "Eşleme Ekle",
             activeMappingsTitle: "Aktif Eşlemeler",
             noRulesText: "Henüz özel kural tanımlanmadı. Yukarıdan bir tane oluşturun!",
-            aboutTitle: "FF PRO Hakkında",
+            aboutTitle: "Filler Max Hakkında",
             aboutSub: "Hızlı form testi için elit geliştirici aracı.",
-            aboutDescription: "Fake Filler Pro, zamanına değer veren geliştiriciler için tasarlandı. Motorumuz gelişmiş sezgisel yöntemler kullanır.",
+            aboutDescription: "Filler Max, zamanına değer veren geliştiriciler için tasarlandı. Motorumuz gelişmiş sezgisel yöntemler kullanır.",
             uiLangLabel: "Arayüz Dili",
-            onboardingTitle: "FF Pro'ya Hoş Geldiniz! 🚀",
+            onboardingTitle: "Filler Max'a Hoş Geldiniz! 🚀",
             startedBtn: "Başlayın",
             darkModeLabel: "Karanlık Mod",
             navTextGeneral: "Genel",
@@ -175,11 +180,11 @@ document.addEventListener('DOMContentLoaded', () => {
             addRuleBtn: "Agregar Mapeo",
             activeMappingsTitle: "Mapeos Activos",
             noRulesText: "No hay reglas definidas aún.",
-            aboutTitle: "Sobre FF PRO",
+            aboutTitle: "Sobre Filler Max",
             aboutSub: "Herramienta de élite para pruebas rápidas.",
             aboutDescription: "Diseñado para desarrolladores que valoran su tiempo.",
             uiLangLabel: "Idioma de la Interfaz",
-            onboardingTitle: "¡Bienvenido a FF Pro! 🚀",
+            onboardingTitle: "¡Bienvenido a Filler Max! 🚀",
             startedBtn: "Empezar",
             darkModeLabel: "Modo Oscuro",
             navTextGeneral: "General",
@@ -219,11 +224,11 @@ document.addEventListener('DOMContentLoaded', () => {
             addRuleBtn: "Ajouter",
             activeMappingsTitle: "Mappages Actifs",
             noRulesText: "Aucune règle définie.",
-            aboutTitle: "À Propos de FF PRO",
+            aboutTitle: "À Propos de Filler Max",
             aboutSub: "Outil d'élite pour le test rapide.",
             aboutDescription: "Conçu pour les développeurs pressés.",
             uiLangLabel: "Langue de l'IU",
-            onboardingTitle: "Bienvenue sur FF Pro ! 🚀",
+            onboardingTitle: "Bienvenue sur Filler Max ! 🚀",
             startedBtn: "Commencer",
             darkModeLabel: "Mode Sombre",
             navTextGeneral: "Général",
@@ -263,11 +268,11 @@ document.addEventListener('DOMContentLoaded', () => {
             addRuleBtn: "Hinzufügen",
             activeMappingsTitle: "Aktive Mappings",
             noRulesText: "Keine Regeln definiert.",
-            aboutTitle: "Über FF PRO",
+            aboutTitle: "Über Filler Max",
             aboutSub: "Elite-Entwicklertool für Tests.",
             aboutDescription: "Für Entwickler, die Zeit sparen wollen.",
             uiLangLabel: "Anzeigesprache",
-            onboardingTitle: "Willkommen bei FF Pro! 🚀",
+            onboardingTitle: "Willkommen bei Filler Max! 🚀",
             startedBtn: "Loslegen",
             darkModeLabel: "Dunkelmodus",
             navTextGeneral: "Allgemein",
@@ -304,11 +309,11 @@ document.addEventListener('DOMContentLoaded', () => {
             addRuleBtn: "Добавить Правило",
             activeMappingsTitle: "Активные Правила",
             noRulesText: "Пользовательские правила еще не определены. Создайте одно выше!",
-            aboutTitle: "О FF PRO",
+            aboutTitle: "О Filler Max",
             aboutSub: "Элитный инструмент разработчика.",
-            aboutDescription: "Fake Filler Pro разработан для разработчиков, которые ценят свое время. Наш движок использует передовые эвристики.",
+            aboutDescription: "Filler Max разработан для разработчиков, которые ценят свое время. Наш движок использует передовые эвристики.",
             uiLangLabel: "Язык Интерфейса",
-            onboardingTitle: "Добро пожаловать в FF Pro! 🚀",
+            onboardingTitle: "Добро пожаловать в Filler Max! 🚀",
             startedBtn: "Начать",
             darkModeLabel: "Темная Тема",
             navTextGeneral: "Общие",
@@ -348,11 +353,11 @@ document.addEventListener('DOMContentLoaded', () => {
             addRuleBtn: "Adicionar Mapeamento",
             activeMappingsTitle: "Mapeamentos Ativos",
             noRulesText: "Nenhuma regra personalizada definida ainda. Crie uma acima!",
-            aboutTitle: "Sobre FF PRO",
+            aboutTitle: "Sobre Filler Max",
             aboutSub: "Ferramenta de elite para desenvolvedores.",
-            aboutDescription: "Fake Filler Pro foi projetado para desenvolvedores que valorizam seu tempo. Nosso motor usa heurísticas avançadas.",
+            aboutDescription: "Filler Max foi projetado para desenvolvedores que valorizam seu tempo. Nosso motor usa heurísticas avançadas.",
             uiLangLabel: "Idioma da UI",
-            onboardingTitle: "Bem-vindo ao FF Pro! 🚀",
+            onboardingTitle: "Bem-vindo ao Filler Max! 🚀",
             startedBtn: "Começar",
             darkModeLabel: "Modo Escuro",
             navTextGeneral: "Geral",
@@ -392,11 +397,11 @@ document.addEventListener('DOMContentLoaded', () => {
             addRuleBtn: "添加映射",
             activeMappingsTitle: "活动映射",
             noRulesText: "尚未定义自定义规则。在上方创建一个！",
-            aboutTitle: "关于 FF PRO",
+            aboutTitle: "关于 Filler Max",
             aboutSub: "精英开发人员测试工具。",
-            aboutDescription: "Fake Filler Pro 专为重视时间的开发人员设计。我们的引擎使用高级启发式和上下文感知生成。",
+            aboutDescription: "Filler Max 专为重视时间的开发人员设计。我们的引擎使用高级启发式和上下文感知生成。",
             uiLangLabel: "界面语言",
-            onboardingTitle: "欢迎使用 FF Pro! 🚀",
+            onboardingTitle: "欢迎使用 Filler Max! 🚀",
             startedBtn: "开始使用",
             darkModeLabel: "深色模式",
             navTextGeneral: "常规",
@@ -436,11 +441,11 @@ document.addEventListener('DOMContentLoaded', () => {
             addRuleBtn: "マッピングを追加",
             activeMappingsTitle: "アクティブなマッピング",
             noRulesText: "カスタムルールはまだ定義されていません。上記で作成してください！",
-            aboutTitle: "FF PROについて",
+            aboutTitle: "Filler Maxについて",
             aboutSub: "迅速なテストのためのツール。",
-            aboutDescription: "Fake Filler Proは、時間を大切にする開発者向けに設計されています。当社のエンジンは高度なヒューリスティクスを使用しています。",
+            aboutDescription: "Filler Maxは、時間を大切にする開発者向けに設計されています。当社のエンジンは高度なヒューリスティクスを使用しています。",
             uiLangLabel: "表示言語",
-            onboardingTitle: "FF Proへようこそ! 🚀",
+            onboardingTitle: "Filler Maxへようこそ! 🚀",
             startedBtn: "今すぐ始める",
             darkModeLabel: "ダークモード",
             navTextGeneral: "一般",
@@ -480,11 +485,11 @@ document.addEventListener('DOMContentLoaded', () => {
             addRuleBtn: "إضافة تعيين",
             activeMappingsTitle: "التعيينات النشطة",
             noRulesText: "لم يتم تعريف قواعد مخصصة بعد. أنشئ واحدة أعلاه!",
-            aboutTitle: "حول FF PRO",
+            aboutTitle: "حول Filler Max",
             aboutSub: "أداة النخبة للمطورين.",
-            aboutDescription: "تم تصميم Fake Filler Pro للمطورين الذين يقدرون وقتهم. يستخدم محركنا أساليب استدلالية متقدمة.",
+            aboutDescription: "تم تصميم Filler Max للمطورين الذين يقدرون وقتهم. يستخدم محركنا أساليب استدلالية متقدمة.",
             uiLangLabel: "لغة الواجهة",
-            onboardingTitle: "مرحباً بك في FF Pro! 🚀",
+            onboardingTitle: "مرحباً بك في Filler Max! 🚀",
             startedBtn: "ابدأ الآن",
             darkModeLabel: "الوضع الداكن",
             navTextGeneral: "عام",
@@ -523,6 +528,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 3. Profiles Logic
+    function buildPersona(name) {
+        const firstName = FakeDataGenerator.generate('firstName', state.preferredLocale);
+        const lastName = FakeDataGenerator.generate('lastName', state.preferredLocale);
+        return {
+            name,
+            firstName,
+            lastName,
+            email: FakeDataGenerator.generate('email', state.preferredLocale, { firstName, lastName }),
+            phone: FakeDataGenerator.generate('phone', state.preferredLocale),
+            address: FakeDataGenerator.generate('address', state.preferredLocale),
+            city: FakeDataGenerator.generate('city', state.preferredLocale),
+            zip: FakeDataGenerator.generate('zip', state.preferredLocale),
+            company: FakeDataGenerator.generate('company', state.preferredLocale),
+            position: FakeDataGenerator.generate('position', state.preferredLocale),
+            password: FakeDataGenerator.generate('password', state.preferredLocale)
+        };
+    }
+
     function renderProfiles() {
         profilesList.innerHTML = "";
         state.profiles.forEach(p => {
@@ -543,11 +566,26 @@ document.addEventListener('DOMContentLoaded', () => {
         profileEditor.style.display = "block";
         currentProfileNameText.innerText = p.name;
         editProfileName.value = p.name;
+        profileDataSummary.innerText = Object.entries(p)
+            .filter(([key]) => key !== 'id')
+            .map(([key, value]) => key + ': ' + value)
+            .join('\n');
+    }
+
+    // Presets created by older versions carry no persona data: fill them in once
+    function ensurePersonaData() {
+        let changed = false;
+        state.profiles = state.profiles.map(p => {
+            if (typeof p.firstName === 'string' && typeof p.lastName === 'string') return p;
+            changed = true;
+            return { id: p.id, ...buildPersona(p.name || 'Persona') };
+        });
+        if (changed) chrome.storage.local.set(state);
     }
 
     newProfileBtn.onclick = () => {
         const id = Date.now().toString();
-        const newP = { id, name: "New Persona" };
+        const newP = { id, ...buildPersona('New Persona') };
         state.profiles.push(newP);
         state.activeProfileId = id;
         renderProfiles();
@@ -560,6 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (p) {
             p.name = editProfileName.value;
             renderProfiles();
+            openProfileEditor(p);
             saveState();
         }
     };
@@ -601,6 +640,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const countries = FakeDataGenerator.getCountries();
     const dataTypes = FakeDataGenerator.getDataTypes();
 
+    function detectDefaultCountry() {
+        const tag = (navigator.language || 'en').toLowerCase();
+        const [base, region] = tag.split('-');
+        return FakeDataGenerator.getCountryForLanguage(region) || FakeDataGenerator.getCountryForLanguage(base) || 'us';
+    }
+
+    function detectDefaultUiLang() {
+        const base = (navigator.language || 'en').toLowerCase().split('-')[0];
+        return i18n[base] ? base : 'en';
+    }
+
     function populateCountries(filter = "") {
         defaultLocale.innerHTML = "";
         countries.filter(c => c.name.toLowerCase().includes(filter.toLowerCase())).forEach(c => {
@@ -632,8 +682,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function loadState() {
         chrome.storage.local.get(null, (res) => {
-            if (res.theme) {
-                state = { ...state, ...res };
+            const hasState = Object.keys(res).length > 0;
+            if (hasState) state = { ...state, ...res };
+            if (!Array.isArray(state.profiles)) state.profiles = [{ id: 'default', name: 'Standard Persona' }];
+            if (!hasState) {
+                // İlk kurulum: ülke ve arayüz dili tarayıcıdan gelir
+                state.preferredLocale = detectDefaultCountry();
+                state.uiLang = detectDefaultUiLang();
+            }
+            ensurePersonaData();
+
+            if (hasState) {
                 applyTheme(state.theme);
                 defaultLocale.value = state.preferredLocale;
                 smartEmail.checked = state.smartEmail;
@@ -650,8 +709,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } else {
                 // First run
+                chrome.storage.local.set(state);
+                populateCountries();
+                piiSafe.checked = state.piiSafe;
+                uiLangSelector.value = state.uiLang;
+                updateUILanguage(state.uiLang);
                 renderProfiles();
-                updateUILanguage('en');
                 onboardingModal.style.display = "flex";
             }
         });

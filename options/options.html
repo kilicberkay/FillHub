@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Fake Filler Pro | Settings</title>
+    <title>Filler Max | Settings</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="../icons/logo48.png">
     <link rel="stylesheet" href="options.css">
@@ -14,14 +14,12 @@
         <div class="logo-container">
             <div class="logo-box">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="animate-pulse-slow">
-                    <path d="M9 11l3 3L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round" />
-                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
             </div>
             <div>
-                <div class="logo-text">FAKE FILLER <span style="color: var(--primary);">PRO</span></div>
+                <div class="logo-text">FILLER <span style="color: var(--primary);">MAX</span></div>
                 <div style="font-size: 9px; opacity: 0.6; font-weight: 600; letter-spacing: 2px;">ADVANCED</div>
             </div>
         </div>
@@ -65,8 +63,8 @@
                     <span class="slider"></span>
                 </label>
             </div>
-            <div style="margin-top: 16px; font-size: 10px; color: var(--text-dim); text-transform: uppercase;">v1.2.0
-                Enterprise</div>
+            <div style="margin-top: 16px; font-size: 10px; color: var(--text-dim); text-transform: uppercase;">
+                <span id="versionLabel"></span> Enterprise</div>
         </div>
     </aside>
 
@@ -110,7 +108,7 @@
                                 fields with the same value.</div>
                         </div>
                         <label class="switch">
-                            <input type="checkbox" id="matchPasswords">
+                            <input type="checkbox" id="matchPasswords" checked>
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -122,7 +120,7 @@
                                 (e.g. "User 1") to avoid privacy issues.</div>
                         </div>
                         <label class="switch">
-                            <input type="checkbox" id="piiSafe">
+                            <input type="checkbox" id="piiSafe" checked>
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -166,6 +164,7 @@
                         </div>
                         <button class="btn btn-primary" id="saveProfileBtn">Save Changes</button>
                         <button class="btn btn-danger" id="deleteProfileBtn">Delete Preset</button>
+                        <pre id="profileDataSummary" style="white-space:pre-wrap; font-size:12px; opacity:.8; margin-top:12px;"></pre>
                     </div>
                 </div>
             </section>
@@ -207,7 +206,7 @@
 
             <!-- About Section -->
             <section id="about">
-                <h1 id="aboutTitle">About FF PRO</h1>
+                <h1 id="aboutTitle">About Filler Max</h1>
                 <p class="subtitle" id="aboutSub">The elite developer tool for rapid form testing and quality
                     assurance.</p>
 
@@ -221,14 +220,14 @@
                             </svg>
                         </div>
                         <div>
-                            <div class="logo-text">Fake Filler Pro</div>
+                            <div class="logo-text">Filler Max</div>
                             <div style="font-size: 10px; color: var(--primary); font-weight: 800; letter-spacing: 1px;">
                                 ENTERPRISE
                                 EDITION</div>
                         </div>
                     </div>
                     <p style="font-size: 14px; line-height: 1.6; color: var(--text-dim);" id="aboutDescription">
-                        Fake Filler Pro is designed for developers who value their time. Our engine uses advanced
+                        Filler Max is designed for developers who value their time. Our engine uses advanced
                         heuristics and
                         context-aware generation to provide the most realistic fake data possible.
                     </p>
@@ -259,7 +258,7 @@
     <!-- Modals -->
     <div id="onboardingModal" class="modal-overlay">
         <div class="modal">
-            <h2 style="margin-bottom: 16px;">Welcome to FF Pro! 🚀</h2>
+            <h2 style="margin-bottom: 16px;">Welcome to Filler Max! 🚀</h2>
             <p style="color: var(--text-dim); margin-bottom: 24px; line-height: 1.6;">You've just installed the most
                 powerful form filler. Pin the extension for "One-Click" filling, and use the Options page to create
                 custom personals.</p>

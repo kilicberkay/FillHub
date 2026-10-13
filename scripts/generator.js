@@ -227,7 +227,7 @@ const FakeDataGenerator = (() => {
         'ES': 'es', 'MX': 'es', 'AR': 'es', 'CO': 'es', 'PE': 'es', 'VE': 'es', 'CL': 'es', 'CU': 'es',
         'PT': 'pt', 'BR': 'pt', 'AO': 'pt', 'MZ': 'pt', 'CV': 'pt',
         'RU': 'ru', 'BY': 'ru', 'KZ': 'ru', 'KG': 'ru', 'UA': 'ru',
-        'JP': 'jp', 'ZH': 'zh', 'CN': 'zh', 'TW': 'zh', 'HK': 'zh',
+        'JP': 'ja', 'ZH': 'zh', 'CN': 'zh', 'TW': 'zh', 'HK': 'zh',
         'KR': 'ko', 'KP': 'ko',
         'EG': 'ar', 'SA': 'ar', 'AE': 'ar', 'IQ': 'ar', 'JO': 'ar', 'LB': 'ar', 'MA': 'ar', 'QA': 'ar',
         'IN': 'hi', 'NP': 'hi', 'BD': 'hi',
@@ -238,14 +238,101 @@ const FakeDataGenerator = (() => {
 
     const random = (arr) => arr[Math.floor(Math.random() * arr.length)];
     const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const slug = (value) => String(value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '');
+
+    const PATTERN_CLASSES = { 'd': '0123456789', 'w': 'abcdefghijklmnopqrstuvwxyz0123456789' };
+    const PATTERN_CLASS_BODIES = {
+        '0-9': '0123456789',
+        'a-z': 'abcdefghijklmnopqrstuvwxyz',
+        'A-Z': 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        'a-zA-Z': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        'A-Za-z': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        '0-9a-zA-Z': '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        'a-zA-Z0-9': '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    };
+
+    // `pattern` alt kümesini (sınıflar, {n} niceleyicileri, kaçışlı ayraçlar) karşılayan değer üretir
+    function generateFromPattern(pattern) {
+        const source = String(pattern || '');
+        if (!source || source.length > 120) return null;
+        let out = '';
+        let i = 0;
+        while (i < source.length) {
+            const ch = source[i];
+            if ((ch === '^' && i === 0) || (ch === '$' && i === source.length - 1)) { i++; continue; }
+            let pool = null;
+            if (ch === '\\') {
+                const next = source[i + 1];
+                if (!next) return null;
+                pool = PATTERN_CLASSES[next] || null;
+                if (!pool && !/[a-zA-Z0-9]/.test(next)) { out += next; i += 2; continue; }
+                if (!pool) return null;
+                i += 2;
+            } else if (ch === '[') {
+                const close = source.indexOf(']', i + 1);
+                if (close === -1) return null;
+                pool = PATTERN_CLASS_BODIES[source.slice(i + 1, close)] || null;
+                if (!pool) return null;
+                i = close + 1;
+            } else if ('*+?()|.{}[]'.includes(ch)) {
+                return null;
+            } else {
+                out += ch;
+                i++;
+                continue;
+            }
+            let count = 1;
+            if (source[i] === '{') {
+                const close = source.indexOf('}', i);
+                if (close === -1) return null;
+                const spec = /^(\d{1,3})(?:,\d{0,3})?$/.exec(source.slice(i + 1, close));
+                if (!spec) return null;
+                count = Number(spec[1]);
+                i = close + 1;
+            }
+            if (count < 1 || count > 32) return null;
+            for (let n = 0; n < count; n++) out += pool[Math.floor(Math.random() * pool.length)];
+            if (out.length > 64) return null;
+        }
+        if (!out) return null;
+        try {
+            if (!new RegExp('^(?:' + source + ')$').test(out)) return null;
+        } catch (e) {
+            return null;
+        }
+        return out;
+    }
+
+    // "2024/123" gibi örnek şablonu aynı biçimde doldurur (# ve rakamlar basamak yer tutucu)
+    function fillFromShape(shape) {
+        let out = '';
+        let atRunStart = true;
+        for (const ch of String(shape)) {
+            if (ch === '#' || (ch >= '0' && ch <= '9')) {
+                out += atRunStart ? String(randomInt(1, 9)) : String(randomInt(0, 9));
+                atRunStart = false;
+            } else {
+                out += ch;
+                atRunStart = true;
+            }
+        }
+        return out;
+    }
 
     return {
         getLocales() { return Object.keys(LOCALES); },
         getCountries() { return COUNTRIES; },
-        getDataTypes() {
-            return ["firstName", "lastName", "fullName", "email", "phone", "address", "city", "zip", "company", "text", "date", "password", "number", "url", "meeting", "organizer", "location", "agenda", "position", "website"];
+        getCountryForLanguage(lang) {
+            const code = String(lang || '').toLowerCase();
+            if (!code) return null;
+            if (COUNTRIES.some(c => c.code.toLowerCase() === code)) return code;
+            const entry = Object.entries(LANGUAGE_MAP).find(([country, locale]) => locale === code && COUNTRIES.some(c => c.code === country));
+            return entry ? entry[0].toLowerCase() : null;
         },
-        generate(type, inputLocale = 'tr', context = {}) {
+        getDataTypes() {
+            return ["firstName", "lastName", "fullName", "email", "phone", "address", "city", "zip", "company", "text", "date", "datetime", "select", "password", "number", "url", "meeting", "organizer", "location", "agenda", "position", "website"];
+        },
+        generate(type, inputLocale = 'en', context = {}) {
             // CHAOS MODE / FUZZING LOGIC
             if (context.chaosMode) {
                 const chaosVectors = [
@@ -297,13 +384,14 @@ const FakeDataGenerator = (() => {
 
             // Smart Linking Logic
             if (type === 'email') {
-                const first = (context.firstName || locale.firstNames[Math.floor(Math.random() * locale.firstNames.length)])
-                    .toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '');
-                const last = (context.lastName || locale.lastNames[Math.floor(Math.random() * locale.lastNames.length)])
-                    .toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '');
+                if (context.smartEmail === false) {
+                    return `${slug(random(locale.firstNames))}${randomInt(10, 999)}@${random(['example.com', 'test.com', 'mail.com', 'demo.org'])}`;
+                }
+                const first = slug(context.firstName || random(locale.firstNames));
+                const last = slug(context.lastName || random(locale.lastNames));
                 const domains = ['example.com', 'test.com', 'mail.com', 'demo.org'];
                 const randomNum = Math.floor(Math.random() * 99);
-                return `${first}.${last}${randomNum}@${domains[Math.floor(Math.random() * domains.length)]}`;
+                return `${first}.${last}${randomNum}@${random(domains)}`;
             }
 
             switch (type) {
@@ -343,14 +431,16 @@ const FakeDataGenerator = (() => {
                     return locale.positionTypes ? locale.positionTypes[Math.floor(Math.random() * locale.positionTypes.length)] : "Employee";
                 case 'text':
                     const fname = (context.fieldName || '').toLowerCase();
+                    const shaped = generateFromPattern(context.pattern) || (context.valueShape ? fillFromShape(context.valueShape) : null);
+                    if (shaped) return shaped;
                     if (fname.includes('agenda')) return "Agenda items...";
                     // Specific logic for QR Names based on what might be selected
                     if (fname.includes('qr_name') || fname.includes('kayıt ismi') || fname.includes('qrcode')) {
                         const types = ["Business Card", "Website Link", "Event Pass", "Wifi Access", "Portfolio"];
                         return types[Math.floor(Math.random() * types.length)] + " - " + new Date().getFullYear();
                     }
-                    // For Rich Text Editors often represented as textareas
-                    if (fname.includes('text') || fname.includes('icerik') || fname.includes('content')) {
+                    // Rich text: yalnız çok satırlı alanlarda HTML gövde
+                    if (context.multiline && (fname.includes('text') || fname.includes('icerik') || fname.includes('content'))) {
                         return "<h2>Welcome</h2><p>This is a generated QR content.</p><ul><li>Feature 1</li><li>Feature 2</li></ul>";
                     }
                     return "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
