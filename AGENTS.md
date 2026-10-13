@@ -52,10 +52,11 @@ olarak çalışır.
   select, checkbox/radio, radio grubu seçimi).
 - `readonly` alanlara doğrudan değer yazılmaz; tek istisna takvim etkileşimiyle doldurulan tarih
   alanlarıdır (yerel tipli `date`/`datetime-local`/`time`/`month`/`week` alanları atlanır).
-- Onay kutuları varsayılan olarak %50 olasılıkla işaretlenir; `required` ve
-  `aria-required="true"` kutular her zaman işaretlenir. `checkAllBoxes` ayarı (varsayılan kapalı)
-  rastgeleliği kapatıp tüm kutuları işaretler. Rastgele mod yalnız "işaretle" kararı verir;
-  hâlihazırda işaretli kutuyu boşaltmaz. Radio davranışı değişmez (grup başına tek seçim).
+- Onay kutuları her doldurmada hedef duruma getirilir: `required` ve `aria-required="true"`
+  kutular işaretlenir, diğerleri bağımsız %50 çekilişle işaretlenir ya da temizlenir; üst üste
+  doldurma birikmez. `checkAllBoxes` ayarı (varsayılan kapalı) rastgeleliği kapatıp tüm kutuları
+  işaretler. Hedef durum zaten sağlanıyorsa kutuya hiç yazılmaz. `undo` dolum öncesi durumu geri
+  yükler. Radio'da rastgelelik uygulanmaz (grup başına tek seçim).
 - Captcha bypass'ı yalnız gerçek widget'ları hedefler: `grecaptcha.execute` / `turnstile.execute`
   çağrıları ve reCAPTCHA/Turnstile iframe'lerine odaklanma + `#recaptcha-anchor` tıklaması.
   Etiket metnine ("robot"/"human"/"captcha") bakıp DOM checkbox'ı zorlamak yoktur; sayfadaki her

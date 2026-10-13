@@ -617,12 +617,13 @@ function fillField(input, settings, profile = null, checkVisibility = true) {
     if (checkVisibility && !isElementVisible(input)) return false;
 
     if (input.type === 'radio' || input.type === 'checkbox') {
-        // Varsayılan: %50 rastgele; required/aria-required kutular her zaman işaretlenir
-        const shouldCheck = settings.checkAllBoxes || input.required
+        // Her doldurma temiz sayfa: kutu çekilişe göre işaretlenir ya da temizlenir (birikme yok).
+        // required/aria-required kutular her zaman işaretlenir; radio'da rastgelelik uygulanmaz.
+        const shouldCheck = input.type === 'radio' || settings.checkAllBoxes || input.required
             || input.getAttribute('aria-required') === 'true' || Math.random() >= 0.5;
-        if (input.type === 'checkbox' && !shouldCheck) return false;
+        if (input.checked === shouldCheck) return false;
         snapshotField(input);
-        setNativeChecked(input, true);
+        setNativeChecked(input, shouldCheck);
         dispatchFieldEvents(input);
         filledCount++;
         return true;
