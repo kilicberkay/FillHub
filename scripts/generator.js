@@ -382,6 +382,12 @@ const FakeDataGenerator = (() => {
 
             const locale = LOCALES[lang] || LOCALES[LANGUAGE_MAP[country]] || LOCALES['en'];
 
+            // Alanın HTML `pattern` kuralı desteklenen alt kümedeyse önce o karşılanır
+            if (context.pattern) {
+                const patternValue = generateFromPattern(context.pattern);
+                if (patternValue) return patternValue;
+            }
+
             // Smart Linking Logic
             if (type === 'email') {
                 if (context.smartEmail === false) {
@@ -431,7 +437,7 @@ const FakeDataGenerator = (() => {
                     return locale.positionTypes ? locale.positionTypes[Math.floor(Math.random() * locale.positionTypes.length)] : "Employee";
                 case 'text':
                     const fname = (context.fieldName || '').toLowerCase();
-                    const shaped = generateFromPattern(context.pattern) || (context.valueShape ? fillFromShape(context.valueShape) : null);
+                    const shaped = context.valueShape ? fillFromShape(context.valueShape) : null;
                     if (shaped) return shaped;
                     if (fname.includes('agenda')) return "Agenda items...";
                     // Specific logic for QR Names based on what might be selected

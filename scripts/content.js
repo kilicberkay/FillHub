@@ -86,10 +86,13 @@ function snapshotField(el) {
 }
 
 function clampTextValue(input, value) {
-    const max = input.maxLength;
     const isTextLike = input.tagName === 'TEXTAREA' || (input.tagName === 'INPUT' && TEXT_INPUT_TYPES.has(input.type));
-    if (isTextLike && typeof max === 'number' && max > 0) return String(value).slice(0, max);
-    return value;
+    if (!isTextLike) return value;
+    let out = String(value);
+    const max = input.maxLength;
+    if (typeof max === 'number' && max > 0) out = out.slice(0, max);
+    if (input.minLength > 0 && out.length < input.minLength) out = out.padEnd(input.minLength, 'x');
+    return out;
 }
 
 function clampNumberValue(input, value) {
@@ -129,7 +132,8 @@ function assignFieldValue(input, value) {
         let out = value;
         if (input.tagName === 'INPUT' && (input.type === 'number' || input.type === 'range')) {
             out = clampNumberValue(input, out);
-        } else if (input.tagName === 'INPUT' && (input.type === 'date' || input.type === 'datetime-local')) {
+        } else if (input.tagName === 'INPUT' && (input.type === 'date' || input.type === 'datetime-local'
+            || input.type === 'time' || input.type === 'month' || input.type === 'week')) {
             out = clampIsoValue(input, out);
         } else {
             out = clampTextValue(input, out);
@@ -253,7 +257,11 @@ function fillFileInput(input, sessionData) {
         const fileName = buildFileName(ext, sessionData);
         snapshotField(input);
         const transfer = new DataTransfer();
-        transfer.items.add(new File([bytes], fileName, { type: spec.mime, lastModified: Date.now() }));
+        const count = input.multiple ? 2 : 1;
+        for (let i = 0; i < count; i++) {
+            const name = i === 0 ? fileName : fileName.replace(/(\.[^.]+)$/, `-${i + 1}$1`);
+            transfer.items.add(new File([bytes], name, { type: spec.mime, lastModified: Date.now() }));
+        }
         input.files = transfer.files;
         dispatchFieldEvents(input, ['input', 'change']);
         filledCount++;
@@ -340,11 +348,13 @@ async function selectDateInCalendar(cal, target, input) {
 // air-datepicker (v2/v3) writes its own formatted value and internal state on cell click
 async function tryFillViaDatePicker(input, isoDate) {
     const doc = input.ownerDocument;
-    if (!doc.querySelector(CAL_ANY_SEL)) return false;
     const target = parseIsoDate(isoDate);
     if (!target) return false;
     const year = target.getFullYear();
     if (year < PICKER_MIN_YEAR || year > new Date().getFullYear() + PICKER_MAX_YEAR_OFFSET) return false;
+    // Yazılabilir alanda doğrudan yazım yedeği var: henüz konteyneri oluşmamış picker için
+    // açma denemesi yapılmaz. readonly alanda tek yol takvim olduğu için deneme sürdürülür.
+    if (!input.readOnly && !doc.querySelector(CAL_ANY_SEL)) return false;
     const before = new Set(doc.querySelectorAll(CAL_ACTIVE_SEL));
     const inputBox = input.getBoundingClientRect();
     input.focus();
@@ -523,7 +533,7 @@ function collectFields(container, settings) {
         radioGroups.get(r.name).push(r);
     });
     radioGroups.forEach(list => {
-        const enabled = list.filter(r => !r.disabled && isElementVisible(r));
+        const enabled = list.filter(r => !isControlDisabled(r) && isElementVisible(r));
         if (!enabled.length) return;
         const pick = enabled[Math.floor(Math.random() * enabled.length)];
         list.forEach(r => {
@@ -543,7 +553,8 @@ function collectFields(container, settings) {
         fillField(input, settings, profile);
     });
 
-    // Attempt to click Captcha checkboxes (reCAPTCHA, Turnstile)
+    // Captcha widget'ları tetiklenir (reCAPTCHA/Turnstile); DOM checkbox'larına dokunulmaz,
+    // onay kutuları tek politikaya tabidir (rastgele / required / checkAllBoxes)
     tryToClickCaptchas();
 
     // Handle Shadow DOM Recursively
@@ -597,6 +608,8 @@ function profileValue(profile, type) {
 
 // Fills a single field; returns true when a value was written (async picker work included)
 function fillField(input, settings, profile = null, checkVisibility = true) {
+    if (isControlDisabled(input)) return false;
+
     if (input.type === 'file') {
         return fillFileInput(input, sessionData);
     }
@@ -604,8 +617,10 @@ function fillField(input, settings, profile = null, checkVisibility = true) {
     if (checkVisibility && !isElementVisible(input)) return false;
 
     if (input.type === 'radio' || input.type === 'checkbox') {
-        // Devre dışı kutular işaretlenmez (radio grubu ve select yollarındaki filtreyle aynı kural)
-        if (input.disabled || input.closest('fieldset[disabled]')) return false;
+        // Varsayılan: %50 rastgele; required/aria-required kutular her zaman işaretlenir
+        const shouldCheck = settings.checkAllBoxes || input.required
+            || input.getAttribute('aria-required') === 'true' || Math.random() >= 0.5;
+        if (input.type === 'checkbox' && !shouldCheck) return false;
         snapshotField(input);
         setNativeChecked(input, true);
         dispatchFieldEvents(input);
@@ -621,13 +636,14 @@ function fillField(input, settings, profile = null, checkVisibility = true) {
     }
 
     if (input.tagName === 'INPUT' && NATIVE_TYPED_INPUTS.has(input.type)) {
+        if (input.readOnly) return false; // readonly native tarih/saat/renk alanlarına yazılmaz
         fillNativeTypedInput(input, settings);
         return true;
     }
 
-    // Dates bound to a custom picker (air-datepicker) must be selected inside the calendar widget
+    // Tarih alanları (yerel veya maskeli) takvim etkileşimiyle doldurulur
     if (input.tagName === 'INPUT' && !NATIVE_TYPED_INPUTS.has(input.type)
-        && (type === 'date' || type === 'datetime' || (input.readOnly && input.ownerDocument.querySelector(CAL_ANY_SEL)))) {
+        && (type === 'date' || type === 'datetime')) {
         const iso = FakeDataGenerator.generate('date', settings.preferredLocale, {
             chaosMode: settings.chaosMode,
             piiSafe: settings.piiSafe
@@ -639,12 +655,20 @@ function fillField(input, settings, profile = null, checkVisibility = true) {
         pendingTasks.push(async () => {
             const hidden = findPairedHiddenInput(input);
             const hiddenBefore = hidden ? hidden.value : null;
-            if (await tryFillViaDatePicker(input, isoDate)) filledCount++;
-            else assignFieldValue(input, displayValue); // safe fallback: write the value directly
+            if (await tryFillViaDatePicker(input, isoDate)) {
+                filledCount++;
+            } else if (input.readOnly) {
+                return; // readonly: yalnız takvim etkileşimi kabul edilir
+            } else {
+                assignFieldValue(input, displayValue); // safe fallback: write the value directly
+            }
             if (hidden && hidden.value === hiddenBefore) fillPairedHiddenInput(hidden, isoDate);
         });
         return true;
     }
+
+    // Readonly alanlara doğrudan değer yazılmaz
+    if (input.readOnly) return false;
 
     // Smart Password Matching / persona values take precedence over generated data
     const profileVal = profileValue(profile, type);
@@ -729,6 +753,11 @@ function undoFill() {
     return restored;
 }
 
+// Devre dışı denetim: kendi disabled niteliği ya da disabled fieldset ebeveyni
+function isControlDisabled(el) {
+    return el.disabled === true || !!el.closest('fieldset[disabled]');
+}
+
 function isElementVisible(el) {
     if (!el) return false;
 
@@ -798,16 +827,6 @@ function tryToClickCaptchas() {
             // Try to trigger click on common anchor IDs if we can reach them
             const anchor = el.shadowRoot ? el.shadowRoot.querySelector('#recaptcha-anchor') : null;
             if (anchor) anchor.click();
-        }
-    });
-
-    // 3. Label-based generic bypass (for custom "I am human" boxes)
-    document.querySelectorAll('label').forEach(lb => {
-        const text = lb.innerText.toLowerCase();
-        if (text.includes('robot') || text.includes('human') || text.includes('captcha')) {
-            const cb = lb.querySelector('input[type="checkbox"]');
-            if (cb) cb.checked = true;
-            lb.click();
         }
     });
 }

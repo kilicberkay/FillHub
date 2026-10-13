@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const countrySearch = document.getElementById('countrySearch');
     const smartEmail = document.getElementById('smartEmail');
     const matchPasswords = document.getElementById('matchPasswords');
+    const checkAllBoxes = document.getElementById('checkAllBoxes');
     const piiSafe = document.getElementById('piiSafe');
     const autoSubmit = document.getElementById('autoSubmit');
 
@@ -38,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         uiLang: 'en',
         smartEmail: true,
         matchPasswords: true,
+        checkAllBoxes: false,
         piiSafe: true,
         autoSubmit: false,
         profiles: [{ id: 'default', name: 'Standard Persona' }],
@@ -71,6 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
             smartEmailLabel: "Smart Email Linking",
             smartEmailDesc: "Generate emails based on names (e.g. john.doe@example.com)",
             matchPasswordsLabel: "Match Passwords",
+            checkAllBoxesLabel: "Check All Checkboxes",
+            checkAllBoxesDesc: "Check every checkbox instead of a random selection.",
             matchPasswordsDesc: "Automatically fill 'Confirm Password' fields with the same value.",
             piiSafeLabel: "PII Safe Mode",
             piiSafeDesc: "Generate generic data (e.g. 'User 1') to avoid privacy issues.",
@@ -115,6 +119,8 @@ document.addEventListener('DOMContentLoaded', () => {
             smartEmailLabel: "Akıllı E-posta Bağlantısı",
             smartEmailDesc: "İsimlere göre e-posta oluştur (örn: ahmet.yilmaz@test.com)",
             matchPasswordsLabel: "Şifreleri Eşleştir",
+            checkAllBoxesLabel: "Tüm Onay Kutularını İşaretle",
+            checkAllBoxesDesc: "Rastgele seçim yerine tüm onay kutularını işaretler.",
             matchPasswordsDesc: "'Şifreyi Onayla' alanlarını otomatik olarak aynı değerle doldur.",
             piiSafeLabel: "KVKK/PII Güvenli Mod",
             piiSafeDesc: "Gizlilik için gerçekçi isimler yerine jenerik veriler (örn: 'Kullanıcı 1') üret.",
@@ -159,6 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
             smartEmailLabel: "Vinculación de Email Inteligente",
             smartEmailDesc: "Generar correos basados en nombres.",
             matchPasswordsLabel: "Coincidir Contraseñas",
+            checkAllBoxesLabel: "Marcar Todas las Casillas",
+            checkAllBoxesDesc: "Marca todas las casillas en lugar de una selección aleatoria.",
             matchPasswordsDesc: "Llenar automáticamente 'Confirmar Contraseña'.",
             piiSafeLabel: "Modo Seguro PII",
             piiSafeDesc: "Generar datos genéricos (ej. 'Usuario 1') para privacidad.",
@@ -203,6 +211,8 @@ document.addEventListener('DOMContentLoaded', () => {
             smartEmailLabel: "Liaison Email Intelligente",
             smartEmailDesc: "Emails basés sur les noms.",
             matchPasswordsLabel: "Egaler les mots de passe",
+            checkAllBoxesLabel: "Cocher Toutes les Cases",
+            checkAllBoxesDesc: "Coche toutes les cases au lieu d'une sélection aléatoire.",
             matchPasswordsDesc: "Remplir 'Confirmer le mot de passe'.",
             piiSafeLabel: "Mode PII Sécurisé",
             piiSafeDesc: "Générer des données génériques (ex. 'Utilisateur 1').",
@@ -247,6 +257,8 @@ document.addEventListener('DOMContentLoaded', () => {
             smartEmailLabel: "Intelligente E-Mail-Verknüpfung",
             smartEmailDesc: "E-Mails basierend auf Namen.",
             matchPasswordsLabel: "Passwörter abgleichen",
+            checkAllBoxesLabel: "Alle Kontrollkästchen Aktivieren",
+            checkAllBoxesDesc: "Aktiviert alle Kontrollkästchen statt einer zufälligen Auswahl.",
             matchPasswordsDesc: "'Passwort bestätigen' füllen.",
             piiSafeLabel: "PII Sicherer Modus",
             piiSafeDesc: "Generische Daten (z.B. 'Benutzer 1') verwenden.",
@@ -290,6 +302,8 @@ document.addEventListener('DOMContentLoaded', () => {
             smartDesc: "Продвинутая логика.",
             smartEmailLabel: "Умная Эл. Почта",
             matchPasswordsLabel: "Сверка Паролей",
+            checkAllBoxesLabel: "Отмечать Все Флажки",
+            checkAllBoxesDesc: "Отмечает все флажки вместо случайной выборки.",
             piiSafeLabel: "Безопасный режим PII",
             piiSafeDesc: "Генерировать данные типа 'Пользователь 1'.",
             autoSubmitLabel: "Авто-Отправка",
@@ -332,6 +346,8 @@ document.addEventListener('DOMContentLoaded', () => {
             smartEmailLabel: "Link de E-mail Inteligente",
             smartEmailDesc: "Gerar e-mails com base em nomes.",
             matchPasswordsLabel: "Combinar Senhas",
+            checkAllBoxesLabel: "Marcar Todas as Caixas",
+            checkAllBoxesDesc: "Marca todas as caixas em vez de uma seleção aleatória.",
             matchPasswordsDesc: "Preencher automaticamente 'Confirmar Senha'.",
             piiSafeLabel: "Modo Seguro PII",
             piiSafeDesc: "Gerar dados genéricos (ex. 'Usuário 1').",
@@ -376,6 +392,8 @@ document.addEventListener('DOMContentLoaded', () => {
             smartEmailLabel: "智能电子邮件链接",
             smartEmailDesc: "根据名称生成电子邮件。",
             matchPasswordsLabel: "匹配密码",
+            checkAllBoxesLabel: "勾选所有复选框",
+            checkAllBoxesDesc: "勾选所有复选框，而不是随机选择。",
             matchPasswordsDesc: "自动填充“确认密码”字段。",
             piiSafeLabel: "PII 安全模式",
             piiSafeDesc: "生成通用数据（例如“用户 1”）以保护隐私。",
@@ -420,6 +438,8 @@ document.addEventListener('DOMContentLoaded', () => {
             smartEmailLabel: "スマートメール連携",
             smartEmailDesc: "名前に基づいてメールを生成。",
             matchPasswordsLabel: "パスワード一致",
+            checkAllBoxesLabel: "すべてのチェックボックスを選択",
+            checkAllBoxesDesc: "ランダム選択ではなく、すべてのチェックボックスをオンにします。",
             matchPasswordsDesc: "「パスワードの確認」フィールドを自動入力。",
             piiSafeLabel: "PIIセーフモード",
             piiSafeDesc: "プライバシー保護のため一般的なデータを生成。",
@@ -464,6 +484,8 @@ document.addEventListener('DOMContentLoaded', () => {
             smartEmailLabel: "ربط البريد الذكي",
             smartEmailDesc: "إنشاء رسائل بريد إلكتروني بناءً على الأسماء.",
             matchPasswordsLabel: "طابق كلمات السر",
+            checkAllBoxesLabel: "تحديد كل مربعات الاختيار",
+            checkAllBoxesDesc: "يحدد كل مربعات الاختيار بدلاً من اختيار عشوائي.",
             matchPasswordsDesc: "ملء حقول 'تأكيد كلمة المرور' تلقائيًا.",
             piiSafeLabel: "وضع PII الآمن",
             piiSafeDesc: "استخدام بيانات عامة (مثل 'مستخدم 1') للخصوصية.",
@@ -675,6 +697,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.preferredLocale = defaultLocale.value;
         state.smartEmail = smartEmail.checked;
         state.matchPasswords = matchPasswords.checked;
+        state.checkAllBoxes = checkAllBoxes.checked;
         state.piiSafe = piiSafe.checked;
         state.autoSubmit = autoSubmit.checked;
         chrome.storage.local.set(state);
@@ -697,6 +720,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 defaultLocale.value = state.preferredLocale;
                 smartEmail.checked = state.smartEmail;
                 matchPasswords.checked = state.matchPasswords;
+                checkAllBoxes.checked = !!state.checkAllBoxes;
                 piiSafe.checked = !!state.piiSafe;
                 autoSubmit.checked = state.autoSubmit;
                 uiLangSelector.value = state.uiLang || 'en';
@@ -712,6 +736,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 chrome.storage.local.set(state);
                 populateCountries();
                 piiSafe.checked = state.piiSafe;
+                checkAllBoxes.checked = state.checkAllBoxes;
                 uiLangSelector.value = state.uiLang;
                 updateUILanguage(state.uiLang);
                 renderProfiles();
@@ -725,6 +750,7 @@ document.addEventListener('DOMContentLoaded', () => {
     defaultLocale.onchange = saveState;
     smartEmail.onchange = saveState;
     matchPasswords.onchange = saveState;
+    checkAllBoxes.onchange = saveState;
     piiSafe.onchange = saveState;
     autoSubmit.onchange = saveState;
 

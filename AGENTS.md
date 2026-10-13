@@ -23,9 +23,12 @@ olarak çalışır.
 - Değer yazımı tek noktadan yapılır: `setNativeValue` / `assignFieldValue`. Doğrudan
   `input.value = ...` ataması yapılmaz (React/Vue senkronizasyonu ve dosya alanı hataları).
 - Dosya alanları `DataTransfer` + `File` ile doldurulur; `webkitdirectory` alanları atlanır.
+  `multiple` alanlara iki dosya yazılır (`ad.pdf`, `ad-2.pdf`).
 - Dosya alanlarında görünürlük kontrolü uygulanmaz (gizli dosya alanı standarttır).
 - Tarih alanlarında önce picker etkileşimi denenir (air-datepicker v2/v3 DOM sözleşmesi),
-  başarısız olursa değer doğrudan yazılır.
+  başarısız olursa değer doğrudan yazılır. Picker konteyneri ilk açılışta oluştuğu için, sayfada
+  henüz konteyner yoksa yazılabilir alanda açma denemesi yapılmaz; `readonly` alanda tek yol
+  takvim olduğundan deneme sürdürülür ve takvim açılmazsa alan tümüyle atlanır.
 - Maskeli tarih widget'ları (`x_date_display` görünen alan + `x` gizli alan): görünen alana
   placeholder/pattern'den tespit edilen yerel biçim (ör. `gg.aa.yyyy` → `15.07.2026`), gizli alana
   ISO yazılır. Sayfa betiği kendi olay işleyicisiyle gizli alanı doldurduysa değeri ezilmez.
@@ -36,13 +39,28 @@ olarak çalışır.
   `false` yazılmışsa korunur. Ayar sayfasının ilk kurulumu ülke ve arayüz dilini tarayıcıdan
   tespit edip kaydeder (`detectDefaultCountry` / `detectDefaultUiLang`); `getCountryForLanguage`
   önce ülke kodu, sonra dil eşlemesi arar.
-- Metin alanlarında önce `pattern`/örnek şekil uyumu denenir (`generateFromPattern` /
+- HTML5 kısıtları uygulanır: `pattern` desteklenen alt kümedeyse tip mantığından önce karşılanır
+  (ör. `\d{11}` → `55555555555`), `min`/`max` `date`/`datetime-local`/`time`/`month`/`week`
+  alanlarında sözlüksel olarak kırpılır, `minlength` altındaki metin `x` ile doldurulur.
+- Metin alanlarında önce örnek şekil uyumu denenir (`generateFromPattern` /
   `fillFromShape`, ör. `Orn: 2024/123`, `inputmode="numeric"`); desteklenmeyen kalıpta Lorem'e
   düşülür. HTML gövde yalnızca çok satırlı (`textarea`) alanlara yazılır.
 - Telefon alanı tespiti kelime sınırı kullanır: `tel`, `tel_no`, `tel-no` eşleşir; `hotel`,
   `total` gibi kelimeler eşleşmez.
-- Devre dışı denetimler doldurulmaz: checkbox/radio dalı `disabled` niteliğini ve
-  `fieldset[disabled]` ebeveynini dışlar (radio grubu ve select filtreleriyle aynı kural).
+- Devre dışı denetimler doldurulmaz: `fillField` girişindeki `isControlDisabled` denetimi kendi
+  `disabled` niteliğini ve `fieldset[disabled]` ebeveynini tek noktadan dışlar (input, textarea,
+  select, checkbox/radio, radio grubu seçimi).
+- `readonly` alanlara doğrudan değer yazılmaz; tek istisna takvim etkileşimiyle doldurulan tarih
+  alanlarıdır (yerel tipli `date`/`datetime-local`/`time`/`month`/`week` alanları atlanır).
+- Onay kutuları varsayılan olarak %50 olasılıkla işaretlenir; `required` ve
+  `aria-required="true"` kutular her zaman işaretlenir. `checkAllBoxes` ayarı (varsayılan kapalı)
+  rastgeleliği kapatıp tüm kutuları işaretler. Rastgele mod yalnız "işaretle" kararı verir;
+  hâlihazırda işaretli kutuyu boşaltmaz. Radio davranışı değişmez (grup başına tek seçim).
+- Captcha bypass'ı yalnız gerçek widget'ları hedefler: `grecaptcha.execute` / `turnstile.execute`
+  çağrıları ve reCAPTCHA/Turnstile iframe'lerine odaklanma + `#recaptcha-anchor` tıklaması.
+  Etiket metnine ("robot"/"human"/"captcha") bakıp DOM checkbox'ı zorlamak yoktur; sayfadaki her
+  onay kutusu — captcha kelimesi geçen etiketler dahil — tek politikaya tabidir. Etiket tıklaması
+  (`label.click()`) kutuyu geri aldığı için captcha yolunda da kullanılmaz.
 - Otomatik gönderim yalnız gerçek gönderim kontrollerine basar (`button[type=submit]`,
   `input[type=submit]`, `input[type=image]`, form içi tipsiz `button`); `role="button"` gibi sahte
   butonlar ve yıkıcı/ikincil metinli kontroller (İptal, Sil, Temizle, Reset...) dışarıda kalır.
@@ -63,3 +81,8 @@ olarak çalışır.
 6. Uçtan uca senaryolarda gerçek veri havuzu karşılaştırmaları için depolamaya açıkça
    `piiSafe: false` yazılmalı; aksi hâlde taze kurulum varsayılanı (PII Safe açık) devreye girer.
    Dile bağlı davranışlar tarayıcı dili sabitlenerek doğrulanır (ör. `FFP_LANG=en-US`).
+7. Alan koruma (readonly/disabled), readonly tarih carve-out'u ve rastgele onay kutusu modu
+   `guards` senaryosuyla; HTML5 kısıtları `patterns` senaryosuyla koşulur. Onay kutusu modu
+   ayarının varsayılanı ve kalıcılığı options sayfası üzerinden (`usability`) doğrulanır.
+   Etiket metni robot/human/captcha olan kutuların da rastgele politikadan sapmadığı
+   `captchalabels` senaryosuyla (`%TEMP%\ffp-fixture\captcha.html`) doğrulanır.
