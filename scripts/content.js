@@ -304,10 +304,74 @@ function nearestEnabledDayCell(cal, y, m0, day) {
         Math.abs(+c.getAttribute('data-date') - day) < Math.abs(+best.getAttribute('data-date') - day) ? c : best);
 }
 
+// Aylık tıklama bütçesi geniş yıl aralığına yetmez: takvim yıl görünümüne/kısayollarına atlanır.
+// v3: klavye kısayolları (Shift+Ok ±1 yıl, Alt+Ok ±10 yıl). v2: başlıkla yıl görünümü, on yıl
+// gezinmesi, yıl ve ay hücresi.
+async function jumpCalendarToYear(input, cal, year, month0) {
+    const shownYear = () => {
+        const cell = cal.querySelector('[data-year][data-month]');
+        return cell ? +cell.getAttribute('data-year') : null;
+    };
+
+    if (cal.querySelector('.air-datepicker-nav--title')) {
+        const press = async (modifier, arrow) => {
+            const prevYear = shownYear();
+            const opts = { bubbles: true, cancelable: true };
+            input.dispatchEvent(new KeyboardEvent('keydown', { key: modifier, ...opts }));
+            input.dispatchEvent(new KeyboardEvent('keydown', { key: arrow, altKey: modifier === 'Alt', shiftKey: modifier === 'Shift', ...opts }));
+            input.dispatchEvent(new KeyboardEvent('keyup', { key: modifier, ...opts }));
+            input.dispatchEvent(new KeyboardEvent('keyup', { key: arrow, ...opts }));
+            // Görünüm oturana kadar bekle (kısayol devre dışıysa sayaçlar sınırlar)
+            for (let i = 0; i < 5 && shownYear() === prevYear; i++) await sleep(40);
+        };
+        for (let i = 0; i < 4 && Math.abs(year - (shownYear() ?? year)) >= 10; i++) {
+            await press('Alt', year < shownYear() ? 'ArrowDown' : 'ArrowUp');
+        }
+        for (let i = 0; i < 12 && shownYear() !== year; i++) {
+            await press('Shift', year < shownYear() ? 'ArrowDown' : 'ArrowUp');
+        }
+        return shownYear() === year;
+    }
+
+    // v2: nav her tıklamada yeniden kurulur, elemanlar her adımda yeniden sorgulanır
+    const title = () => cal.querySelector('.datepicker--nav-title');
+    if (!title()) return false;
+    const yearCell = () => [...cal.querySelectorAll('.datepicker--cell-year')].find(c => +c.getAttribute('data-year') === year);
+    title().click();
+    await sleep(100);
+    title().click();
+    await sleep(100);
+    for (let i = 0; i < 6 && !yearCell(); i++) {
+        const years = [...cal.querySelectorAll('.datepicker--cell-year')].map(c => +c.getAttribute('data-year'));
+        if (!years.length) return false;
+        const btn = cal.querySelector(`[data-action="${year < Math.min(...years) ? 'prev' : 'next'}"]`);
+        if (!btn) return false;
+        btn.click();
+        await sleep(100);
+    }
+    const targetYear = yearCell();
+    if (!targetYear) return false;
+    targetYear.click();
+    await sleep(100);
+    const targetMonth = [...cal.querySelectorAll('.datepicker--cell-month')].find(c => +c.getAttribute('data-month') === month0);
+    if (!targetMonth) return false;
+    targetMonth.click();
+    // Ay seçimi sonrası gün hücreleri hedef aya geçene kadar bekle
+    for (let i = 0; i < 10 && !cal.querySelector(`[data-year="${year}"][data-month="${month0}"][data-date]`); i++) {
+        await sleep(60);
+    }
+    return true;
+}
+
 // Walks the calendar to the target month, then clicks the day cell
 async function selectDateInCalendar(cal, target, input) {
     const iso = `${target.getFullYear()}-${String(target.getMonth() + 1).padStart(2, '0')}-${String(target.getDate()).padStart(2, '0')}`;
     const y = target.getFullYear(), m0 = target.getMonth(), day = target.getDate();
+    const firstShown = cal.querySelector('[data-year][data-month]');
+    if (firstShown
+        && Math.abs(+firstShown.getAttribute('data-year') * 12 + +firstShown.getAttribute('data-month') - (y * 12 + m0)) > PICKER_NAV_LIMIT) {
+        await jumpCalendarToYear(input, cal, y, m0);
+    }
     let lastMonthKey = '';
     for (let i = 0; i < PICKER_NAV_LIMIT; i++) {
         let cell = cal.querySelector(`[data-iso-date="${iso}"]`)
@@ -317,6 +381,8 @@ async function selectDateInCalendar(cal, target, input) {
                 || cal.querySelector('[data-year][data-month]');
             if (!shown) return false;
             const sy = +shown.getAttribute('data-year'), sm0 = +shown.getAttribute('data-month');
+            // Ulaşılamayacak hedefte boşa tıklanmaz (fallback yolu devralır)
+            if (Math.abs(sy * 12 + sm0 - (y * 12 + m0)) > PICKER_NAV_LIMIT) return false;
             const key = `${sy}-${sm0}`;
             if (key === lastMonthKey) return false; // navigation made no progress
             lastMonthKey = key;

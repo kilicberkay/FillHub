@@ -25,6 +25,13 @@ olarak çalışır.
 - Dosya alanları `DataTransfer` + `File` ile doldurulur; `webkitdirectory` alanları atlanır.
   `multiple` alanlara iki dosya yazılır (`ad.pdf`, `ad-2.pdf`).
 - Dosya alanlarında görünürlük kontrolü uygulanmaz (gizli dosya alanı standarttır).
+- Üretilen tarihlerde yıl 2000 ile içinde bulunulan yıl arasından rastgele seçilir (`date`,
+  `datetime`; dolayısıyla `month`/`week` alanları da); ay 1-12, gün 1-28 aralığındadır.
+  Sabit "bu yıl" tekrarı yapılmaz.
+- Geniş yıl aralığı aylık tıklama bütçesini aşar: uzak hedeflerde takvim önce yıl görünümüne
+  atlanır (v3 klavye kısayolları `Shift+Ok` ±1 yıl, `Alt+Ok` ±10 yıl; v2'de başlıkla yıl
+  görünümü + on yıl gezinmesi + yıl ve ay hücresi). Atlama başarısızsa ve hedef hâlâ
+  `PICKER_NAV_LIMIT` ayından uzaksa hiç tıklama yapılmaz, doğrudan yazım yedeği devralır.
 - Tarih alanlarında önce picker etkileşimi denenir (air-datepicker v2/v3 DOM sözleşmesi),
   başarısız olursa değer doğrudan yazılır. Picker konteyneri ilk açılışta oluştuğu için, sayfada
   henüz konteyner yoksa yazılabilir alanda açma denemesi yapılmaz; `readonly` alanda tek yol
@@ -82,6 +89,8 @@ olarak çalışır.
 6. Uçtan uca senaryolarda gerçek veri havuzu karşılaştırmaları için depolamaya açıkça
    `piiSafe: false` yazılmalı; aksi hâlde taze kurulum varsayılanı (PII Safe açık) devreye girer.
    Dile bağlı davranışlar tarayıcı dili sabitlenerek doğrulanır (ör. `FFP_LANG=en-US`).
+   Tarih beklentileri sabit yıl yazılarak değil pinlenen çekilişten hesaplanarak kurulur
+   (`scenarios/lib.mjs` → `pinDate`; jsdom testinde aynı formül, `yıl = 2000 + floor(v × 27)`).
 7. Alan koruma (readonly/disabled), readonly tarih carve-out'u ve rastgele onay kutusu modu
    `guards` senaryosuyla; HTML5 kısıtları `patterns` senaryosuyla koşulur. Onay kutusu modu
    ayarının varsayılanı ve kalıcılığı options sayfası üzerinden (`usability`) doğrulanır.

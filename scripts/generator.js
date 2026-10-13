@@ -319,6 +319,17 @@ const FakeDataGenerator = (() => {
         return out;
     }
 
+    // Tarih parçaları: yıl 2000 ile içinde bulunulan yıl arasından rastgele (hep bu yıl olmasın)
+    function randomDateParts() {
+        const minYear = 2000;
+        const maxYear = new Date().getFullYear();
+        return {
+            year: minYear + Math.floor(Math.random() * (maxYear - minYear + 1)),
+            month: Math.floor(Math.random() * 12) + 1,
+            day: Math.floor(Math.random() * 28) + 1
+        };
+    }
+
     return {
         getLocales() { return Object.keys(LOCALES); },
         getCountries() { return COUNTRIES; },
@@ -450,18 +461,16 @@ const FakeDataGenerator = (() => {
                         return "<h2>Welcome</h2><p>This is a generated QR content.</p><ul><li>Feature 1</li><li>Feature 2</li></ul>";
                     }
                     return "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
-                case 'date':
-                    const year = new Date().getFullYear();
-                    const month = Math.floor(Math.random() * 12) + 1;
-                    const day = Math.floor(Math.random() * 28) + 1;
-                    return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-                case 'datetime':
-                    const dtYear = new Date().getFullYear();
-                    const dtMonth = Math.floor(Math.random() * 12) + 1;
-                    const dtDay = Math.floor(Math.random() * 28) + 1;
-                    const dtHour = Math.floor(Math.random() * 14) + 8; // 08:00 - 22:00
-                    const dtMinute = Math.floor(Math.random() * 4) * 15; // 00, 15, 30, 45
-                    return `${dtYear}-${dtMonth.toString().padStart(2, '0')}-${dtDay.toString().padStart(2, '0')}T${dtHour.toString().padStart(2, '0')}:${dtMinute.toString().padStart(2, '0')}`;
+                case 'date': {
+                    const d = randomDateParts();
+                    return `${d.year}-${d.month.toString().padStart(2, '0')}-${d.day.toString().padStart(2, '0')}`;
+                }
+                case 'datetime': {
+                    const d = randomDateParts();
+                    const hour = Math.floor(Math.random() * 14) + 8; // 08:00 - 22:00
+                    const minute = Math.floor(Math.random() * 4) * 15; // 00, 15, 30, 45
+                    return `${d.year}-${d.month.toString().padStart(2, '0')}-${d.day.toString().padStart(2, '0')}T${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                }
                 case 'password': return "P@ssw0rd123!";
                 case 'number': return Math.floor(Math.random() * 100).toString();
                 case 'select': return null; // Handled in content script
