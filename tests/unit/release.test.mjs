@@ -141,8 +141,24 @@ test('README görselleri (HTML img ve Markdown) diskte var', () => {
     for (const doc of ['README.md', 'README.tr.md']) {
         const html = [...read(doc).matchAll(/<img[^>]+src="([^"]+)"/g)].map((m) => m[1]);
         const md = [...read(doc).matchAll(/!\[[^\]]*\]\(([^)\s]+)\)/g)].map((m) => m[1]);
-        const srcs = [...html, ...md].filter((s) => !/^https?:/.test(s));
-        assert.ok(srcs.length >= 6, `${doc}: en az 6 görsel bekleniyor, bulunan ${srcs.length}`);
+        const srcset = [...read(doc).matchAll(/srcset="([^"]+)"/g)].map((m) => m[1]);
+        const srcs = [...html, ...md, ...srcset].filter((s) => !/^https?:/.test(s));
+        assert.ok(srcs.length >= 10, `${doc}: en az 10 görsel bekleniyor, bulunan ${srcs.length}`);
         for (const s of srcs) assert.ok(existsSync(join(ROOT, s)), `${doc}: eksik görsel ${s}`);
     }
+});
+
+test('yayın notu: CHANGELOG bölümü çıkarılır ve sonraki sürüme taşmaz', () => {
+    const { execFileSync } = require('node:child_process');
+    const out = execFileSync(process.execPath, [join(ROOT, 'tools', 'changelog-section.js'), '1.2.0'], { encoding: 'utf8' });
+    assert.match(out, /### Added/);
+    assert.ok(!out.includes('## [1.1.0]'), 'önceki sürüm bölümü taşmamalı');
+});
+
+test('yayın iş akışı: release varsa günceller, yoksa oluşturur; sağlama toplamı üretir', () => {
+    const wf = read('.github/workflows/release.yml');
+    assert.match(wf, /gh release view/);
+    assert.match(wf, /gh release upload[^\n]*--clobber/);
+    assert.match(wf, /gh release create/);
+    assert.match(wf, /sha256sum fillhub-\*\.zip/);
 });
