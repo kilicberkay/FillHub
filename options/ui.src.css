@@ -1,0 +1,336 @@
+/*
+ * FillHub ayar sayfası — tasarım kaynağı.
+ *
+ * Tasarım tokenları (marka skalası, gölgeler), metin/odak/tablo yardımcıları, form taban kuralları,
+ * onay kutusu işareti ve yüzey dokusu. options.css bu dosyadan `npm run build:css` ile üretilir
+ * (Tailwind CSS 4.3.3). options.css elle düzenlenmez; değişiklik buraya yapılıp yeniden üretilir.
+ */
+@import 'tailwindcss' source(none);
+
+@source './options.html';
+@source './options.js';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+    /* Marka skalası — #f74a87 imza rengi; 600/700 beyaz metinle AA (5.87 / 7.20). */
+    --color-brand-50: #fff1f6;
+    --color-brand-100: #ffe4ee;
+    --color-brand-200: #fecdd9;
+    --color-brand-300: #fda4c0;
+    --color-brand-400: #fb7aa8;
+    --color-brand-500: #f74a87;
+    --color-brand-600: #c2185b;
+    --color-brand-700: #a81a4c;
+    --color-brand-800: #8a1740;
+    --color-brand-900: #741338;
+    --color-brand-950: #45061f;
+    --color-canvas-dark: #08080a;
+
+    --ease-smooth: cubic-bezier(0.2, 0.7, 0.2, 1);
+    --shadow-card: 0 1px 0 0 rgb(255 255 255 / 0.7) inset, 0 1px 2px rgb(24 24 27 / 0.04),
+        0 18px 40px -28px rgb(24 24 27 / 0.28);
+    --shadow-card-hover: 0 1px 0 0 rgb(255 255 255 / 0.8) inset, 0 2px 4px rgb(24 24 27 / 0.05),
+        0 30px 60px -30px rgb(24 24 27 / 0.35);
+    --shadow-card-dark: 0 1px 0 0 rgb(255 255 255 / 0.04) inset, 0 24px 48px -32px rgb(0 0 0 / 0.9);
+    --shadow-card-dark-hover: 0 1px 0 0 rgb(255 255 255 / 0.06) inset,
+        0 32px 64px -36px rgb(0 0 0 / 0.95);
+}
+
+/* Geist: yerel kopya (ağ bağımlılığı yok). */
+@font-face {
+    font-family: 'Geist';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('fonts/geist-400-normal-B40WzpMT.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Geist';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('fonts/geist-500-normal-CTWBw9NS.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Geist';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('fonts/geist-600-normal-CSETrqM2.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Geist';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('fonts/geist-700-normal-CFi8mLqe.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Geist Mono';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('fonts/geist-mono-400-normal-DTRLJnHl.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Geist Mono';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('fonts/geist-mono-500-normal-YINYabwD.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Geist Mono';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('fonts/geist-mono-600-normal-V-KvD_pi.woff2') format('woff2');
+}
+
+/* Anlamsal metin tokenları: açık/koyu renk çiftleri tek yerde. */
+@utility text-muted {
+    @apply text-zinc-600 dark:text-zinc-300;
+}
+
+@utility text-soft {
+    @apply text-zinc-600 dark:text-zinc-400;
+}
+
+@utility text-strong {
+    @apply text-zinc-900 dark:text-white;
+}
+
+@utility meta {
+    @apply font-mono text-[11px] text-muted;
+}
+
+@utility meta-xs {
+    @apply font-mono text-[10px] text-muted;
+}
+
+@utility eyebrow {
+    @apply font-mono text-[11px] uppercase tracking-[0.16em] text-muted;
+}
+
+@utility focus-ring {
+    @apply focus-visible:ring-2 focus-visible:ring-brand-600 dark:focus-visible:ring-brand-400;
+}
+
+@utility divide-subtle {
+    @apply divide-y divide-zinc-100 dark:divide-white/[0.06];
+}
+
+@utility chip {
+    @apply inline-flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-1.5 text-xs font-medium transition-colors border-zinc-200/80 bg-white text-zinc-600 hover:border-zinc-300 hover:text-zinc-900 dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-300 dark:hover:border-white/20 dark:hover:text-white;
+}
+
+@utility chip-active {
+    @apply inline-flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-1.5 text-xs font-medium transition-colors border-brand-600/30 bg-brand-50 text-brand-700 dark:border-brand-500/30 dark:bg-brand-500/10 dark:text-brand-400;
+}
+
+@utility table-head {
+    @apply border-b border-zinc-100 font-mono text-[11px] uppercase tracking-[0.12em] text-muted dark:border-white/[0.06];
+}
+
+@layer base {
+    :root {
+        color-scheme: light;
+    }
+
+    .dark {
+        color-scheme: dark;
+    }
+
+    html {
+        -webkit-tap-highlight-color: transparent;
+        text-size-adjust: 100%;
+    }
+
+    body {
+        text-rendering: optimizeLegibility;
+        font-feature-settings: 'cv11', 'ss01';
+    }
+
+    /* İnce, temaya duyarlı kaydırma çubukları */
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: rgb(161 161 170 / 0.45) transparent;
+    }
+
+    *::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    *::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    *::-webkit-scrollbar-thumb {
+        background-color: rgb(161 161 170 / 0.35);
+        border: 3px solid transparent;
+        background-clip: content-box;
+        border-radius: 999px;
+    }
+
+    *::-webkit-scrollbar-thumb:hover {
+        background-color: rgb(161 161 170 / 0.6);
+        background-clip: content-box;
+    }
+
+    /* Klavye odağı her yerde görünür kalsın */
+    :focus-visible {
+        outline: 2px solid rgb(247 74 135 / 0.6);
+        outline-offset: 2px;
+        border-radius: 6px;
+    }
+
+    /* Metin seçimi */
+    ::selection {
+        background-color: rgb(247 74 135 / 0.22);
+    }
+
+    .dark ::selection {
+        background-color: rgb(251 122 168 / 0.3);
+    }
+
+    /* Native form elemanları: koyu temada beklenmedik beyaz alanları önler */
+    input, textarea, select {
+        color-scheme: light dark;
+        background-color: #ffffff;
+        color: #18181b;
+        border-color: #e4e4e7;
+    }
+
+    .dark input,
+    .dark textarea,
+    .dark select {
+        background-color: #18181b;
+        color: #f4f4f5;
+        border-color: #27272a;
+    }
+
+    /* WebKit autofill: koyu modda sarı/beyaz dolguyu engeller */
+    .dark input:-webkit-autofill,
+    .dark input:-webkit-autofill:hover,
+    .dark input:-webkit-autofill:focus,
+    .dark select:-webkit-autofill,
+    .dark select:-webkit-autofill:hover,
+    .dark select:-webkit-autofill:focus {
+        -webkit-box-shadow: 0 0 0px 1000px #18181b inset !important;
+        -webkit-text-fill-color: #f4f4f5 !important;
+        caret-color: #f4f4f5 !important;
+        transition: background-color 5000s ease-in-out 0s;
+    }
+
+    /* Standart placeholder kontrastı */
+    ::placeholder {
+        color: #a1a1aa;
+    }
+
+    .dark ::placeholder {
+        color: #71717a;
+    }
+
+    /* Odaklanma: koyu modda alan zemini değişmez */
+    .dark input:focus,
+    .dark textarea:focus,
+    .dark select:focus {
+        background-color: #18181b;
+        color: #f4f4f5;
+    }
+
+}
+
+@layer components {
+    /* Onay kutusu işareti: seçili kutuda beyaz tik (Ui::checkbox() bu sınıfı ekler) */
+    .ui-checkbox:checked {
+        background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'%3E%3Cpath%20d='M3%208.5l3.2%203.2L13%204.8'%20fill='none'%20stroke='white'%20stroke-width='2.2'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+    }
+
+    /* Mikro ızgara dokusu (açık/koyu tema uyumlu) */
+    .bg-grid {
+        background-image:
+            linear-gradient(to right, rgb(24 24 27 / 0.055) 1px, transparent 1px),
+            linear-gradient(to bottom, rgb(24 24 27 / 0.055) 1px, transparent 1px);
+        background-size: 56px 56px;
+    }
+
+    .dark .bg-grid {
+        background-image:
+            linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
+            linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+    }
+}
+
+/*
+ * Chrome, uzantı seçenek sayfalarına gövde için enjekte bir kural ekler:
+ * body { font-family: "Noto Sans", Arial; font-size: 75% }. Bu kural katmansızdır, bu yüzden
+ * `@layer utilities` içindeki `font-sans` sınıfını geçer. Düz sayfalarda görülmez.
+ * `html body` (özgüllük 0,0,2) yazı tipini ve boyutu enjekte kuralın üstüne sabitler.
+ */
+html body {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+}
+
+/* Destek bölümü: kalp atışı (hareket azaltma tercihinde kapalı) */
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    14% { transform: scale(1.12); }
+    28% { transform: scale(1); }
+    42% { transform: scale(1.08); }
+    70% { transform: scale(1); }
+}
+
+.animate-heartbeat {
+    animation: heartbeat 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .animate-heartbeat {
+        animation: none;
+    }
+}
+
+/* Gezinme: ayar bölümleri (display ile açılıp kapanır) */
+section {
+    display: none;
+}
+
+section.active {
+    display: block;
+    animation: reveal-up 0.5s var(--ease-smooth) backwards;
+}
+
+@keyframes reveal-up {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 18px, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    section.active {
+        animation: none;
+    }
+}
