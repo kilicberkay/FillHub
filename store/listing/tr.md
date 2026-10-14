@@ -42,7 +42,7 @@ Tek bir alanı doldurmak için alana sağ tıklayıp "Bu alanı doldur" seçene�
 Gizlilik
 
 FillHub veri toplamaz. Ayarlar tarayıcınızda kalır; uzantı hiçbir veriyi geliştiriciye ya da üçüncü
-taraflara göndermez. Gizlilik politikası: https://github.com/kilicberkay/FillHub/blob/main/PRIVACY.md
+taraflara göndermez. Gizlilik politikası: https://github.com/kilicberkay/FillHub/blob/release/1.2.0/PRIVACY.md
 
 Açık kaynak
 

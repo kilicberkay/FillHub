@@ -18,4 +18,4 @@ collect, transmit, sell, or share any personal data.
 Permissions: `storage` (local settings), `contextMenus` (right-click menu), `scripting` (injects the fill scripts only when you start a fill), and access to sites
 (`<all_urls>`) so that forms can be filled where you ask.
 
-Full policy with contact information: https://github.com/kilicberkay/FillHub/blob/main/PRIVACY.md
+Full policy with contact information: https://github.com/kilicberkay/FillHub/blob/release/1.2.0/PRIVACY.md

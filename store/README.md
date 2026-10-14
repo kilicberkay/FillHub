@@ -31,7 +31,7 @@ node tools/make-store-assets.mjs   # needs Chromium, rsvg-convert, and ImageMagi
 4. Upload the icon, promotional tiles, and screenshots from `assets/`.
 5. In **Privacy practices**, declare: no data collected, no data sold or transferred, no remote code.
    Give the permission justifications from the listing. Use the privacy policy URL
-   `https://github.com/kilicberkay/FillHub/blob/main/PRIVACY.md`.
+   `https://github.com/kilicberkay/FillHub/blob/release/1.2.0/PRIVACY.md`.
 6. Submit for review. Broad host access (`<all_urls>`) can lengthen the review; keep the justification
    text handy.
 
