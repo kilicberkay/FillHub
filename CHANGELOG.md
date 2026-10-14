@@ -34,6 +34,9 @@ All notable changes to FillHub are documented here. The format follows
 - Removed the automatic interaction with reCAPTCHA and Turnstile widgets that ran on every fill in 1.1.0.
   FillHub never clicks or executes CAPTCHA challenges. When a visible CAPTCHA is on the page, FillHub
   highlights it and asks you to complete it yourself.
+- README rewritten with screenshots for each feature, a supported-identity table, and an architecture diagram.
+- The PII Safe description now matches what the mode does (test values instead of generic "User 1" values).
+- The settings sidebar subtitle is translated in every language.
 - Identity profiles redesigned: a clear active-profile banner, profile cards with Use / Edit actions, and a
   dialog for creating or editing a profile. Nothing is saved until you press Save profile; cancelled profiles
   are not created, and deleting asks for a second click.

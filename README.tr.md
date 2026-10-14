@@ -1,81 +1,260 @@
-# FillHub
+<p align="center">
+  <img src="docs/images/banner.png" alt="FillHub afişi: 15 dilde gerçekçi sahte form verisi" width="100%">
+</p>
 
-[![CI](https://github.com/kilicberkay/FillHub/actions/workflows/ci.yml/badge.svg)](https://github.com/kilicberkay/FillHub/actions/workflows/ci.yml)
-[![Lisans: MIT](https://img.shields.io/badge/lisans-MIT-blue.svg)](LICENSE)
+<h1 align="center">FillHub</h1>
 
-FillHub, web formlarını **15 dilde** gerçekçi ve tutarlı sahte verilerle doldurur. Geliştiriciler ve
-test uzmanları için tasarlandı: gerçek insanların bilgilerini kopyalamadan inandırıcı test verisi
-gerekenler için.
+<p align="center">
+  <b>Web formları için 15 dilde gerçekçi ve tutarlı sahte veri.</b><br>
+  Geliştiriciler ve test uzmanları için bir Chrome eklentisi. Varsayılan olarak gizlilik odaklı. Veri toplamaz.
+</p>
 
-- **15 dil, 15 ülke** (ABD, Çin, Hindistan, Meksika, Mısır, Fransa, Bangladeş, Brezilya, Rusya,
-  Pakistan, Endonezya, Almanya, Japonya, Türkiye, Vietnam): ad, adres, telefon, şirket ve kimlik
-  numaraları her ülkenin biçimini izler.
-- **Tutarlı kişi:** her doldurma tek bir kişi üretir; ad, soyad, e-posta, e-posta tekrarı, kullanıcı
-  adı ve telefon birbiriyle uyumludur.
-- **Akıllı alan tespiti:** etiket, `name`/`id`, `autocomplete` ve giriş türü birlikte değerlendirilir.
-  `Soyadınız`, `Cep telefonu` gibi etiketler doğru alana yazılır.
-- **Güvenli mod (PII Safe)** varsayılan olarak açıktır: kişisel tanımlayıcılar belli belirsiz test
-  değerleridir (`example.com` e-postaları, `5320000000` telefonları, geçerli test kimlik numaraları).
-- **Sağlaması geçerli kimlik numaraları:** TC Kimlik, CPF/CNPJ, Çin, Rusya, Japonya, Hindistan,
-  Meksika ve diğer biçimler (aşağıdaki güvenlik notuna bakın).
-- **Geri al:** son doldurmayı, doldurmadan önceki haline döndürür.
-- **Gizlilik:** veri toplanmaz, hiçbir yere gönderilmez, hesap yoktur. Bkz. [PRIVACY.md](PRIVACY.md).
+<p align="center">
+  <a href="https://github.com/kilicberkay/FillHub/actions/workflows/ci.yml"><img src="https://github.com/kilicberkay/FillHub/actions/workflows/ci.yml/badge.svg" alt="CI durumu"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/lisans-MIT-blue.svg" alt="MIT lisansı"></a>
+  <img src="https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4?logo=googlechrome&logoColor=white" alt="Chrome Manifest V3">
+  <a href="https://github.com/sponsors/kilicberkay"><img src="https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ea4aaa?logo=githubsponsors&logoColor=white" alt="GitHub Sponsors"></a>
+</p>
+
+<p align="center">
+  <a href="README.md">English</a> · Türkçe
+</p>
+
+---
+
+## İçindekiler
+
+- [Ne yapar](#ne-yapar)
+- [Özellikler](#özellikler)
+- [Kurulum](#kurulum)
+- [Kullanım](#kullanım)
+- [Veri nasıl üretilir](#veri-nasıl-üretilir)
+- [Gizlilik ve güvenlik](#gizlilik-ve-güvenlik)
+- [Nasıl çalışır](#nasıl-çalışır)
+- [Geliştirme](#geliştirme)
+- [Katkı ve güvenlik](#katkı-ve-güvenlik)
+- [Destek](#destek)
+- [Lisans](#lisans)
+
+## Ne yapar
+
+FillHub, bir web formunun alanlarını tek işlemle doldurur. Her alanın etiketini, adını ve türünü okur, ona uygun bir değer yazar: ad alanına bir ad, telefon alanına seçilen ülkenin biçimine uygun bir telefon numarası, kimlik alanına sağlaması geçerli bir test numarası.
+
+Her doldurma **tutarlı tek bir kişi** üretir. Ad, soyad, e-posta, "e-postayı tekrar yazın" alanı, kullanıcı adı ve telefon aynı kişiye aittir. Değerleri karşılaştıran akışlar (örneğin e-postayı iki kez isteyen bir kayıt) gerçek bir kullanıcıyla olduğu gibi davranır.
+
+<p align="center">
+  <img src="docs/images/tr/fill-form.png" alt="FillHub'ın doldurduğu bir kayıt formu" width="90%">
+</p>
+
+## Özellikler
+
+### Tek işlemle form doldurma
+
+`Ctrl+Shift+F` (macOS'ta `Command+Shift+F`) tuşlarına basın, araç çubuğundaki simgeye tıklayın ya da sağ tık menüsünden **Formu sahte verilerle doldur** seçeneğini kullanın. Tek bir alan için **Bu alanı doldur** seçeneği vardır. **Geri al**, son doldurmadan önceki hâli geri yükler.
+
+### 15 dil, 15 ülke
+
+Ad, şehir, posta kodu, telefon, şirket ve kimlik numaraları seçilen ülke profilinin biçimini izler.
+
+| Dil | Ülke profili | Dil | Ülke profili |
+|---|---|---|---|
+| İngilizce | Amerika Birleşik Devletleri | Hintçe | Hindistan |
+| Türkçe | Türkiye | Bengalce | Bangladeş |
+| İspanyolca | Meksika | Urduca | Pakistan |
+| Fransızca | Fransa | Endonezyaca | Endonezya |
+| Almanca | Almanya | Vietnamca | Vietnam |
+| Portekizce | Brezilya | Arapça | Mısır |
+| Rusça | Rusya | Çince | Çin |
+| Japonca | Japonya | | |
+
+Rusça soyadları cinsiyete göre çekimlenir. Latin alfabesi dışındaki adlar, e-posta adreslerinde kullanılan Latin karşılıklarıyla birlikte gelir.
+
+### Güvenli mod (PII Safe)
+
+Güvenli mod **varsayılan olarak açıktır**. Kişisel tanımlayıcıları belli belirsiz test verisiyle değiştirir. Aşağıdaki örnekler Türkiye (`tr-TR`) içindir:
+
+| Alan | Güvenli mod açık | Güvenli mod kapalı |
+|---|---|---|
+| Ad | Dil havuzlarından karışık adlar | Aynı havuzlar |
+| E-posta | `ayse.demir47@example.com` (yalnızca test alan adları) | Gerçekçi bir adres, örneğin `ayse.demir47@mail.com` |
+| Telefon | `5320000000` (operatör öneki ve sıfırlar) | `5320478545` (gerçekçi) |
+| TC Kimlik No | `11111111110` (sağlaması geçerli test numarası) | Rastgele, sağlaması geçerli bir numara |
+| Şirket ve web sitesi | `Test Şirketi 4821`, `https://www.example.org` | Ülkenin şirket listesinden adlar |
+
+### Akıllı alan tanıma
+
+Her alan; `autocomplete` değeri, `type`, etiket, `name` ve `id`, placeholder ve çevredeki metinden sınıflandırılır. Tanıma korpusu 15 dildeki 107 etiketi kapsar; bunların arasında `Soyadınız` (soyad) gibi, ad olarak okunmaması gereken zor etiketler de vardır. Açılır listeler, içerdikleri ülke, il ve telefon kodu seçenekleriyle eşleştirilir.
+
+### Kimlik profilleri
+
+Bir profil, doldurmada kimin kullanılacağını belirler:
+
+- **Her doldurmada rastgele** (varsayılan): her seferinde yeni ve tutarlı bir kişi.
+- **Sabit kişi**: her seferinde aynı kişi; isterseniz "başka kişi üret" ile yenisini oluşturabilirsiniz.
+
+Profilleri **Profiller** sayfasında oluşturun, düzenleyin ve değiştirin. Aktif profil her zaman en üstte gösterilir.
+
+<p align="center">
+  <img src="docs/images/tr/settings-profiles.png" alt="Aktif profil şeridi ve profil kartlarıyla kimlik profilleri sayfası" width="90%">
+</p>
+
+### Özel kurallar
+
+Yerleşik tanıma bir alanı kaçırırsa, **Özel Kurallar** sayfasında bir CSS seçicisini bir veri türüne eşleyebilirsiniz.
+
+<p align="center">
+  <img src="docs/images/tr/settings-rules.png" alt="Özel kurallar sayfası" width="90%">
+</p>
+
+### Akıllı form davranışı
+
+- **Akıllı e-posta bağlantısı**: e-posta alanları üretilen ada uyar.
+- **Şifreleri eşleştir**: "şifreyi tekrar yazın" alanları aynı değeri alır.
+- **Onay kutuları**: zorunlu olanlar işaretlenir; diğerleri rastgele ayarlanır, **Tüm onay kutularını işaretle** açıksa hepsi işaretlenir.
+- **Radyo grupları** yalnızca bir seçenek alır.
+- **HTML kısıtları** uygulanır: `pattern`, `minlength`, tarih ve saat alanlarının `min` ve `max` sınırları.
+- **Tarih alanları** 2000 ile bugün arasında tarihler alır.
+- **Dosya alanları** üretilmiş bir dosya alır.
+- **Otomatik gönderim** (varsayılan olarak kapalı) doldurmadan sonra gerçek gönderim düğmesine basar. İptal, Sil gibi sahte veya yıkıcı düğmelere hiçbir zaman basılmaz.
+- **iframe içinde çalışır**, devre dışı ve salt okunur alanları atlar, yazdığı değerleri React ve Vue gibi çerçevelerin durumuyla senkron tutar.
+
+### Captcha'lara asla tıklanmaz
+
+FillHub captcha'ya tıklamaz, çözmez ve captcha API'lerini çağırmaz. Sayfada görünür bir reCAPTCHA, hCaptcha veya Turnstile varsa FillHub onu kaydırıp vurgular ve doğrulamayı sizin tamamlamanızı ister.
+
+### Ayarlar
+
+<p align="center">
+  <img src="docs/images/tr/settings-general.png" alt="Varsayılan ülke ve akıllı özelliklerin bulunduğu genel ayarlar" width="90%">
+</p>
+
+- **Genel**: varsayılan ülke, akıllı özellikler ve güvenli mod.
+- **Profiller**: kimlik profilleri (yukarıya bakın).
+- **Özel Kurallar**: seçici-tür kuralları.
+- **Hakkında**: sürüm ve proje bilgileri.
+- **Destek ol**: projeyi nasıl destekleyebileceğiniz.
+
+<p align="center">
+  <img src="docs/images/tr/settings-support.png" alt="GitHub Sponsors bağlantısının bulunduğu destek sayfası" width="90%">
+</p>
 
 ## Kurulum
 
-**Chrome Web Store:** yakında (mağaza materyalleri için `store/` klasörüne bakın).
+### Kaynaktan (geliştirici modu)
 
-**Kaynaktan (geliştirici modu):**
-
-1. Depoyu klonlayın ya da en son sürüm zip dosyasını indirip açın.
-2. `chrome://extensions` sayfasında **Geliştirici modu**nu açın.
+1. Depoyu klonlayın; bir sürüm yayımlandığında Sürümler sayfasından zip dosyasını da indirebilirsiniz.
+2. `chrome://extensions` adresini açın ve **Geliştirici modu**nu etkinleştirin.
 3. **Paketlenmemiş öğe yükle** düğmesine tıklayın ve `manifest.json` dosyasının bulunduğu klasörü seçin.
+4. Herhangi bir form içeren sayfayı açın ve `Ctrl+Shift+F` tuşlarına basın.
+
+### Chrome Web Store
+
+Yakında. İlan materyali [`store/`](store/) klasöründedir.
+
+Manifest V3 destekleyen Chrome veya Chromium tabanlı bir tarayıcı gerekir.
 
 ## Kullanım
 
-| İşlem | Kısayol / menü |
-|---|---|
-| Sayfadaki formu doldur | `Ctrl+Shift+F` (macOS: `Command+Shift+F`) ya da araç çubuğu simgesi |
-| Kaos modu (rastgele değerler) | `Ctrl+Shift+D` |
-| Son doldurmayı geri al | `Ctrl+Shift+U` |
-| Tek alanı doldur | Alana sağ tıklayın, **Bu alanı doldur** |
+| İşlem | Kısayol | Menü veya araç çubuğu |
+|---|---|---|
+| Tüm formu doldur | `Ctrl+Shift+F` (macOS: `Command+Shift+F`) | Araç çubuğu simgesi veya sağ tık → *Formu sahte verilerle doldur* |
+| Odaklanılan alanı doldur | yok | Alana sağ tık → *Bu alanı doldur* |
+| Kaos modu (fuzz testleri için olağandışı değerler) | `Ctrl+Shift+D` | yok |
+| Son doldurmayı geri al | `Ctrl+Shift+U` | Sağ tık → *Sahte doldurmayı geri al* |
 
-Ülke, dil, güvenli mod ve özel kurallar ayar sayfasında düzenlenir (`chrome://extensions` → FillHub →
-**Uzantı seçenekleri**).
+Kısayollar `chrome://extensions/shortcuts` adresinden değiştirilebilir.
 
-## Güvenlik ve sorumlu kullanım
+## Veri nasıl üretilir
 
-FillHub test ve geliştirme içindir. Üretilen kimlik numaraları genel sağlama algoritmalarından
-geçebilir; yani bir numara gerçek bir kişiye denk gelebilir. **Üretilen verileri gerçek bir
-başvuruda, satın almada ya da kimlik beyanında kullanmayın.** Doldurmanın site koşullarını ihlal
-ettiği yerlerde FillHub'ı kullanmayın.
+Her doldurma dört adımdan geçer:
+
+1. **Yerel ayar.** Varsayılan ülke ve dil; ad, şehir, şirket ve sokak havuzlarını seçer.
+2. **Kişi.** Doldurma için bir kişi üretilir ya da sabit profilden alınır. Ad, şehir, posta kodu, telefon, kimlik numaraları, şirket ve e-posta yerel kısmını içerir.
+3. **Alan.** Her alan sınıflandırılır ve doğru türde bir değer alır. `pattern` ve `minlength` gibi biçim kuralları önce uygulanır.
+4. **Tutarlılık.** Aynı şeyi ifade eden değerler, örneğin e-posta ve onu doğrulayan alan, aynı kişiden üretilir.
+
+### Kimlik numaraları ve doğrulama düzeyi
+
+FillHub, ülkesinin genel sağlama algoritmasını geçen kimlik numaraları üretebilir. Sağlamanın geçmesi, numaranın kimseye ait olduğu anlamına gelmez.
+
+| Kimlik | Ülke | Doğrulama düzeyi |
+|---|---|---|
+| TC Kimlik No (TCKN) | Türkiye | Sağlama; bilinen test vektörleriyle doğrulanmış |
+| CPF | Brezilya | Sağlama |
+| CNPJ | Brezilya | Sağlama |
+| Çin kimlik numarası | Çin | Sağlama |
+| SNILS | Rusya | Sağlama |
+| INN (10 hane) | Rusya | Sağlama |
+| My Number | Japonya | Sağlama |
+| NIR | Fransa | Sağlama |
+| CURP | Meksika | Sağlama |
+| Aadhaar | Hindistan | Sağlama (Verhoeff) |
+| IBAN | Birçok ülke | Sağlama (mod 97) |
+| INN (12 hane) | Rusya | Yalnızca algoritma; bilinen bir vektörle doğrulanmadı |
+| VKN, SSN, EIN ve diğer resmî numaralar | Çeşitli | Yalnızca biçim; geçerlilik iddia edilmez |
+
+## Gizlilik ve güvenlik
+
+- **Veri toplanmaz.** FillHub'da analitik, telemetri, hesap veya sunucu yoktur. Hiçbir şey tarayıcınızdan çıkmaz.
+- **Ayarlar yerel kalır**, `chrome.storage.local` içinde saklanır.
+- **İzinler minimumda tutulur**: `storage` ve `contextMenus`; ayrıca formların yalnızca sizin istediğiniz yerde doldurulabilmesi için sayfa erişimi.
+- **Üretilen veriler test içindir.** Güvenli mod varsayılan olarak açıktır. Üretilen verileri gerçek uygulamalarda, satın almalarda veya kimlik beyanlarında kullanmayın.
+
+Tam politika: [PRIVACY.md](PRIVACY.md).
+
+## Nasıl çalışır
+
+```mermaid
+flowchart LR
+    A["Kısayol, araç çubuğu simgesi<br/>veya sağ tık menüsü"] --> B["Servis çalışanı<br/>scripts/background.js"]
+    B -->|"fill · fill_field · undo"| C["Her çerçevede içerik betiği<br/>scripts/content.js"]
+    S[("chrome.storage.local<br/>ayarlar ve profiller")] --> C
+    C --> D["Alan tanıma<br/>scripts/field-detect.js"]
+    D --> E["Üreteç<br/>generator.js · locale-data.js · id-rules.js"]
+    E --> F["setNativeValue<br/>değeri yazar, olayları tetikler"]
+```
+
+Tasarım ayrıntıları [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) dosyasında.
 
 ## Geliştirme
 
+**Gereksinimler:** Node.js 20 veya üzeri. Eklentinin kendisinde derleme adımı ve çalışma zamanı bağımlılığı yoktur. npm yalnızca geliştirme araçları için kullanılır: ayar sayfası CSS'ini üreten Tailwind CLI ve test çalıştırıcısı.
+
 ```bash
 npm ci
-npm test            # tüm denetimler, tarayıcı testleri dahil (Chromium gerekir)
-npm run test:quick  # tarayıcısız denetimler
-npm run build       # dist/fillhub-<sürüm>.zip
+npm test              # tüm denetimler, tarayıcı testleri dahil (Chromium gerekir)
+npm run test:quick    # tarayıcı testleri hariç tüm denetimler
+npm run build         # Chrome Web Store için dist/fillhub-<sürüm>.zip
+npm run build:css     # arayüz değişince options/options.css dosyasını yeniden üretir
 ```
 
-- `scripts/`: uzantının mantığı (derleme adımı yok, çalışma zamanı bağımlılığı yok).
-- `options/`: ayar sayfası. CSS, `npm run build:css` ile üretilir (Tailwind CSS).
-- `tests/`: birim testleri (`tests/unit`) ve uçtan uca testler (`tests/e2e`).
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) parçaların nasıl çalıştığını anlatır.
+Tarayıcı testleri `CHROME_BIN` ile verilen ya da Playwright önbelleğindeki Chromium'u kullanır. Tarayıcı yoksa atlanırlar.
 
-Katkılar memnuniyetle karşılanır. [CONTRIBUTING.md](CONTRIBUTING.md) ve
-[Davranış Kuralları](CODE_OF_CONDUCT.md) dosyalarını okuyun. Güvenlik sorunlarını
-[SECURITY.md](SECURITY.md) içinde anlatıldığı gibi özel olarak bildirin.
+### Proje yapısı
 
-English documentation: [README.md](README.md).
+```
+FillHub/
+├── manifest.json        Manifest V3: ad, izinler, içerik betikleri, kısayollar
+├── _locales/            Yerelleştirilmiş ad, açıklama, kısayol ve menü metinleri (15 dil)
+├── scripts/             Eklenti mantığı: servis çalışanı, içerik betiği, üreteç, tanıma, veri
+├── options/             Ayar sayfası: HTML, JavaScript, çeviriler, Tailwind kaynağı ve çıktısı
+├── icons/               Araç çubuğu ve mağaza simgeleri (vektör kaynak: logo.svg)
+├── docs/                Mimari notları ve README görselleri
+├── store/               Chrome Web Store ilan metinleri, gizlilik metni ve mağaza görselleri
+├── tests/               Birim testleri (tests/unit) ve tarayıcı testleri (tests/e2e)
+├── tools/               Sözdizimi denetimi, veri doğrulama, zip derleme, mağaza görseli üreteci
+└── .github/             CI ve yayın iş akışları, sorun ve çekme isteği şablonları
+```
 
-## Projeyi destekleyin
+## Katkı ve güvenlik
 
-FillHub ücretsiz ve açık kaynaktır. Zamanınızı kazandırdıysa geliştirmeyi
-[GitHub Sponsors](https://github.com/sponsors/kilicberkay) üzerinden destekleyebilirsiniz. Destek hiçbir
-zaman zorunlu değildir.
+- Katkılar memnuniyetle karşılanır. Önce [CONTRIBUTING.md](CONTRIBUTING.md) dosyasını okuyun ve [Davranış Kuralları](CODE_OF_CONDUCT.md)'na uyun.
+- Güvenlik sorunlarını **Security** sekmesinden (*Report a vulnerability*) özel olarak bildirin. Bkz. [SECURITY.md](SECURITY.md).
+
+## Destek
+
+FillHub ücretsiz ve açık kaynaktır. Zamanınızı kazandırdıysa geliştirmeyi [GitHub Sponsors](https://github.com/sponsors/kilicberkay) üzerinden destekleyebilirsiniz. Destek hiçbir zaman zorunlu değildir.
 
 ## Lisans
 
-[MIT](LICENSE) © 2025-2026 Berkay Kılıç. Üçüncü taraf bildirimleri: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+[MIT](LICENSE) © 2025-2026 Berkay Kılıç. Geist yazı tipi (SIL OFL 1.1) dahil üçüncü taraf bildirimleri [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) dosyasındadır.

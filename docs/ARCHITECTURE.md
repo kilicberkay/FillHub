@@ -1,65 +1,83 @@
 # Architecture
 
-FillHub is a Manifest V3 Chrome extension. It has no runtime dependencies and no build step for
-the extension code: the files in the repository are loaded as they are.
+FillHub is a Manifest V3 Chrome extension. Its runtime has no dependencies and no build step: the
+files in the repository are loaded as they are. npm is used only for development tools.
 
-## Parts
+## Components
 
-```
-manifest.json            MV3 manifest, content script order, commands
-scripts/
-  locale-data.js         Data: languages, name pools, country profiles (FillHubLocaleData)
-  id-rules.js            Identity algorithms and format rules (FillHubIdRules)
-  field-detect.js        Field classification from labels, names, autocomplete (FillHubDetect)
-  generator.js           Persons, locales, values per field type (FakeDataGenerator)
-  content.js             Fill engine running in each frame of the page
-  background.js          Service worker: context menus, shortcuts, toolbar click
-options/
-  options.html / .js     Settings page (profiles, rules, countries, sponsor section)
-  i18n.js                Settings page strings, 15 languages
-  ui.src.css             Design tokens and component classes (Tailwind input)
-  options.css            Generated from ui.src.css + options.html (do not edit by hand)
-  fonts/                 Geist and Geist Mono (SIL OFL 1.1)
-icons/                   Toolbar and store icons
-_locales/                Localized extension name, description, shortcut and menu titles
-```
+| Part | Files | Responsibility |
+|---|---|---|
+| Manifest | `manifest.json` | Name and description via `__MSG_…__`, permissions (`storage`, `contextMenus`), content script order, shortcuts |
+| Service worker | `scripts/background.js` | Context menus (localized with `chrome.i18n`), shortcut commands, toolbar click; forwards `fill`, `fill_field`, `undo` to the active tab |
+| Locale data | `scripts/locale-data.js` (`FillHubLocaleData`) | 15 language pools with Latin counterparts, 15 country profiles (cities, postal formats, phone rules, address templates, identity and IBAN specs) |
+| Identity rules | `scripts/id-rules.js` (`FillHubIdRules`) | Generators and validators for identity numbers; test vectors; PII sentinel values |
+| Field detection | `scripts/field-detect.js` (`FillHubDetect`) | Classifies a field from `autocomplete`, `type`, label, `name`/`id`, placeholder; priority-ordered rules; Turkish, Latin and non-Latin token matching |
+| Generator | `scripts/generator.js` (`FakeDataGenerator`) | Locale resolution, `createPerson`, value per field type, PII Safe values, persona migration |
+| Content script | `scripts/content.js` | Walks each frame and shadow root, fills fields, handles checkboxes, radios, selects, dates, files, undo, toast, captcha notice |
+| Settings page | `options/options.html`, `options/options.js`, `options/i18n.js` | Profiles, custom rules, general settings, about, support; 15 interface languages |
+| Styles | `options/ui.src.css` → `options/options.css` | Tailwind CSS 4 build (`npm run build:css`); generated file is not edited by hand |
 
-Content script load order (see `manifest.json`): locale data → identity rules → field detection →
-generator → content script. Each file exports to `module.exports` as well, so the unit tests can
-load them in Node.
+Load order in the page (see `manifest.json`): locale data → identity rules → field detection →
+generator → content script. Every file also exports to `module.exports`, so the unit tests load the
+same code in Node.
 
 ## Fill flow
 
-1. The user presses a shortcut, clicks the toolbar icon, or uses the context menu. The service worker
-   sends a message to the active tab (`fill`, `fill_chaos`, `fill_field`, or `undo`).
-2. The content script reads the settings from `chrome.storage.local`. Legacy persona presets are
-   migrated in memory (`FakeDataGenerator.migrateProfiles`).
-3. For each fill a new person is created (`createPerson`) unless a fixed identity is active. The person
-   is a plain JSON record: names, city, phone, identity numbers, company, and e-mail local part.
-4. Each field is classified (`FillHubDetect.classify`) and the generator returns a value for its type.
-   The value is written with `setNativeValue`, the single write path that also notifies frameworks.
-5. Fields are skipped when disabled, read-only (except date pickers), or hidden in ways that a user
-   would not fill. Checkboxes are set to a target state (required ones checked). Undo restores the
-   state captured before the fill.
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant SW as Service worker
+    participant CS as Content script (per frame)
+    participant G as Generator
+    participant P as Page
+    U->>SW: shortcut, toolbar click or menu
+    SW->>CS: fill / fill_field / undo (tabs.sendMessage)
+    CS->>CS: read settings, migrate legacy profiles
+    CS->>G: createPerson (or fixed profile identity)
+    loop each field
+        CS->>CS: classify field (field-detect)
+        CS->>G: generate value for the type
+        CS->>P: setNativeValue + input/change events
+    end
+    CS->>P: show toast; highlight a visible captcha if present
+```
+
+1. The service worker forwards the action to the active tab; `fill_field` targets the focused field.
+2. The content script reads settings from `chrome.storage.local`. Legacy persona presets are migrated
+   in memory, so the first fill after an update already behaves correctly.
+3. For a full fill, one person is created per fill unless a fixed profile is active. The person is a
+   plain JSON record, so it can be stored in a profile and reused.
+4. Each field is classified and given a value. Writes go through one function, `setNativeValue`,
+   which also notifies framework listeners.
+5. Undo restores the values captured before the fill.
 
 ## Persons and PII Safe
 
-- Realistic mode: random persons. The phone, identity numbers, and address follow the country profile.
-- PII Safe mode (default): the same person model, but the personal identifiers use test values:
-  example domains, a phone with an operator prefix and zeros, sentinel identity numbers with a valid
-  checksum, and test street and company names.
-- Fixed identity presets store one person as JSON; PII Safe still applies to the identifiers.
+- **Realistic mode**: names, city, postal code, phone and identity numbers follow the country profile.
+- **PII Safe mode** (default): the same person model, but personal identifiers use test values: example
+  domains (`example.com`, `example.org`, `test.example.com`), phones with an operator prefix and zeros,
+  sentinel identity numbers with a valid checksum, and test street and company names.
+- **Fixed profiles** store one person as JSON. PII Safe still applies to the identifiers when filling.
 
-## Settings page
+## Captchas
 
-The page is a set of sections switched by the sidebar. Its CSS is compiled with Tailwind CSS 4 from
-`options/ui.src.css`; the design tokens and component classes follow the same conventions as the
-FillHub brand. Text is never written with `innerHTML` from user input.
+The content script never clicks, solves, or calls reCAPTCHA, hCaptcha, or Turnstile APIs. It only looks
+for visible captcha elements after a fill, scrolls to the first one, outlines it, and shows a notice.
+
+## Settings and storage
+
+- Settings and profiles live in `chrome.storage.local`. Nothing is synced or sent anywhere.
+- Profile edits are saved only when the user presses **Save profile**.
+- Interface strings: `options/i18n.js` (identical key sets in all 15 languages; checked by tests).
+  Element ids in `options.html` must match the keys, or the text is not applied.
 
 ## Tests
 
-- `tests/unit`: pure logic (Node test runner): field corpus, identity vectors, generator behavior,
-  persona migration, static checks (manifest, translations, network-free code, element ids).
-- `tests/e2e`: real Chromium with the extension loaded. The harness serves a local form page and
-  drives the extension through the service worker.
-- `tools/verify-data.js`: known vectors, map integrity, and 300 persons per country.
+| Layer | Location | What it checks |
+|---|---|---|
+| Data verification | `tools/verify-data.js` | Known identity vectors, map integrity, 300 persons per country, translation parity |
+| Unit | `tests/unit` | Field-detection corpus, generator diversity and PII values, persona migration, manifest, locales, privacy and captcha rules, release integrity |
+| Browser | `tests/e2e` | Real Chromium with the extension loaded: fills, undo, PII modes, persona migration, profile dialog, captcha notice, settings page |
+
+The browser tests also run against the unpacked store archive (`FILLHUB_EXT_DIR=…`), so the package
+that gets published is the one that is tested.

@@ -136,3 +136,13 @@ test('dosya boyutları: içerik betikleri ve ayar sayfası makul sınırda', () 
         assert.ok(statSync(join(ROOT, f)).size < 400000, `${f} çok büyük`);
     }
 });
+
+test('README görselleri (HTML img ve Markdown) diskte var', () => {
+    for (const doc of ['README.md', 'README.tr.md']) {
+        const html = [...read(doc).matchAll(/<img[^>]+src="([^"]+)"/g)].map((m) => m[1]);
+        const md = [...read(doc).matchAll(/!\[[^\]]*\]\(([^)\s]+)\)/g)].map((m) => m[1]);
+        const srcs = [...html, ...md].filter((s) => !/^https?:/.test(s));
+        assert.ok(srcs.length >= 6, `${doc}: en az 6 görsel bekleniyor, bulunan ${srcs.length}`);
+        for (const s of srcs) assert.ok(existsSync(join(ROOT, s)), `${doc}: eksik görsel ${s}`);
+    }
+});

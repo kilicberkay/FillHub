@@ -1,79 +1,260 @@
-# FillHub
+<p align="center">
+  <img src="docs/images/banner.png" alt="FillHub banner: realistic fake form data in 15 languages" width="100%">
+</p>
 
-[![CI](https://github.com/kilicberkay/FillHub/actions/workflows/ci.yml/badge.svg)](https://github.com/kilicberkay/FillHub/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+<h1 align="center">FillHub</h1>
 
-FillHub fills web forms with realistic, consistent fake data in **15 languages**. It is built for
-developers and testers who need believable test data without copying real people's details.
+<p align="center">
+  <b>Realistic, consistent fake data for web forms, in 15 languages.</b><br>
+  A Chrome extension for developers and testers. Privacy-safe by default. No data collection.
+</p>
 
-- **15 languages, 15 countries** (US, CN, IN, MX, EG, FR, BD, BR, RU, PK, ID, DE, JP, TR, VN): names,
-  addresses, phone numbers, company names, and identity numbers follow each country's format.
-- **Consistent persons:** one fill creates one person, so the first name, last name, e-mail,
-  "e-mail repeat" field, username, and phone agree with each other.
-- **Smart field detection:** labels, `name`/`id`, `autocomplete`, and input types are combined to
-  pick the right value, including labels like `Soyadınız` (surname) or `Cep telefonu` (mobile).
-- **PII Safe mode** (on by default): personal identifiers are obvious test values such as
-  `example.com` e-mails, `5320000000` phone numbers, and valid test identity numbers.
-- **Checksum-valid identity numbers** for Turkish TCKN, Brazilian CPF and CNPJ, Chinese, Russian,
-  Japanese, Indian, Mexican, and other formats (see the security note below).
-- **Undo** restores the form to its state before the last fill.
-- **Privacy:** no data is collected, nothing is sent anywhere, and there are no accounts. See
-  [PRIVACY.md](PRIVACY.md).
+<p align="center">
+  <a href="https://github.com/kilicberkay/FillHub/actions/workflows/ci.yml"><img src="https://github.com/kilicberkay/FillHub/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT license"></a>
+  <img src="https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4?logo=googlechrome&logoColor=white" alt="Chrome Manifest V3">
+  <a href="https://github.com/sponsors/kilicberkay"><img src="https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ea4aaa?logo=githubsponsors&logoColor=white" alt="GitHub Sponsors"></a>
+</p>
+
+<p align="center">
+  English · <a href="README.tr.md">Türkçe</a>
+</p>
+
+---
+
+## Contents
+
+- [What it does](#what-it-does)
+- [Features](#features)
+- [Install](#install)
+- [Use](#use)
+- [How the data is made](#how-the-data-is-made)
+- [Privacy and safety](#privacy-and-safety)
+- [How it works](#how-it-works)
+- [Development](#development)
+- [Contributing and security](#contributing-and-security)
+- [Support](#support)
+- [License](#license)
+
+## What it does
+
+FillHub fills the fields of a web form in one action. It reads each field's label, name, and type, then writes a value that fits: a name for a name field, a phone number in the right country format for a phone field, a checksum-valid test number for an ID field.
+
+Every fill creates **one consistent person**. The first name, last name, e-mail, the "confirm e-mail" field, the username, and the phone number all belong to the same person, so flows that compare values (a sign-up that checks the e-mail twice, for example) behave the way they would with a real user.
+
+<p align="center">
+  <img src="docs/images/fill-form.png" alt="A sign-up form filled by FillHub" width="90%">
+</p>
+
+## Features
+
+### One-action form filling
+
+Press `Ctrl+Shift+F` (`Command+Shift+F` on macOS), click the toolbar icon, or choose **Fill Form with Fake Data** from the right-click menu. A single field can be filled with **Fill This Field**, and **Undo** restores the form to the state it had before the last fill.
+
+### Fifteen languages, fifteen countries
+
+Names, cities, postal codes, phone numbers, companies, and identity numbers follow the format of the country profile you choose.
+
+| Language | Country profile | Language | Country profile |
+|---|---|---|---|
+| English | United States | Hindi | India |
+| Turkish | Türkiye | Bengali | Bangladesh |
+| Spanish | Mexico | Urdu | Pakistan |
+| French | France | Indonesian | Indonesia |
+| German | Germany | Vietnamese | Vietnam |
+| Portuguese | Brazil | Arabic | Egypt |
+| Russian | Russia | Chinese | China |
+| Japanese | Japan | | |
+
+Russian surnames are declined by gender. Names in non-Latin scripts come with Latin spellings that are used for e-mail addresses.
+
+### PII Safe mode
+
+PII Safe is **on by default**. It replaces personal identifiers with values that are obviously test data. The examples below are for Turkey (`tr-TR`):
+
+| Field | PII Safe on | PII Safe off |
+|---|---|---|
+| Name | Mixed names from the language pools | Same pools |
+| E-mail | `ayse.demir47@example.com` (test domains only) | A realistic address, e.g. `ayse.demir47@mail.com` |
+| Phone | `5320000000` (operator prefix followed by zeros) | `5320478545` (realistic) |
+| National ID | `11111111110` (checksum-valid test number) | A random checksum-valid number |
+| Company and website | `Test Şirketi 4821`, `https://www.example.org` | Names from the country's company list |
+
+### Smart field detection
+
+Each field is classified from its `autocomplete` value, `type`, label, `name` and `id`, placeholder, and nearby text. The detection corpus covers 107 labels across the 15 languages, including tricky ones such as `Soyadınız` (surname), which must not be read as a first name. Select boxes are matched to the country, state, and phone-code options they contain.
+
+### Identity profiles
+
+A profile decides who is used for a fill:
+
+- **Random on every fill** (the default): a new, consistent person each time.
+- **Fixed person**: the same person every time, with a button to generate another one.
+
+Create, edit, and switch profiles on the **Profiles** page. The active profile is always shown at the top.
+
+<p align="center">
+  <img src="docs/images/settings-profiles.png" alt="Identity profiles page with the active profile banner and profile cards" width="90%">
+</p>
+
+### Custom rules
+
+When built-in detection misses a field, map a CSS selector to a data type on the **Custom Rules** page.
+
+<p align="center">
+  <img src="docs/images/settings-rules.png" alt="Custom rules page" width="90%">
+</p>
+
+### Smart form behavior
+
+- **Smart e-mail linking**: e-mail fields follow the generated name.
+- **Match passwords**: "confirm password" fields receive the same value.
+- **Checkboxes**: required ones are checked; the others are set at random, unless **Check all checkboxes** is on.
+- **Radio groups** receive exactly one choice.
+- **HTML constraints** are respected: `pattern`, `minlength`, and the `min` and `max` limits of date and time fields.
+- **Date fields** receive dates between 2000 and today.
+- **File inputs** receive a generated file.
+- **Auto-submit** (off by default) clicks the real submit button after filling. Fake buttons and destructive controls such as Cancel or Delete are never clicked.
+- **Works inside iframes**, skips disabled and read-only fields, and keeps framework state (React, Vue) in sync with the values it writes.
+
+### Captchas are never clicked
+
+FillHub does not click, solve, or call captcha APIs. When a visible reCAPTCHA, hCaptcha, or Turnstile widget is on the page, FillHub scrolls to it, highlights it, and asks you to complete it yourself.
+
+### Settings
+
+<p align="center">
+  <img src="docs/images/settings-general.png" alt="General settings page with default country and smart features" width="90%">
+</p>
+
+- **General**: default country, smart features, and PII Safe mode.
+- **Profiles**: identity profiles (see above).
+- **Custom Rules**: selector-to-type rules.
+- **About**: version and project information.
+- **Support**: how to support the project.
+
+<p align="center">
+  <img src="docs/images/settings-support.png" alt="Support page with the GitHub Sponsors link" width="90%">
+</p>
 
 ## Install
 
-**Chrome Web Store:** coming soon (see `store/` for listing material).
+### From source (developer mode)
 
-**From source (developer mode):**
-
-1. Clone the repository, or download the latest release zip and unpack it.
-2. Open `chrome://extensions`, turn on **Developer mode**.
+1. Clone the repository, or download the zip from the Releases page once a release is published.
+2. Open `chrome://extensions` and turn on **Developer mode**.
 3. Click **Load unpacked** and select the folder that contains `manifest.json`.
+4. Open any page with a form and press `Ctrl+Shift+F`.
+
+### Chrome Web Store
+
+Coming soon. The listing material is in [`store/`](store/).
+
+Requires Chrome or another Chromium-based browser with Manifest V3 support.
 
 ## Use
 
-| Action | Shortcut / menu |
-|---|---|
-| Fill the form on the page | `Ctrl+Shift+F` (`Command+Shift+F` on macOS), or the toolbar icon |
-| Chaos mode (fuzz values) | `Ctrl+Shift+D` |
-| Undo the last fill | `Ctrl+Shift+U` |
-| Fill one field | Right-click a field, then **Fill This Field** |
+| Action | Shortcut | Menu or toolbar |
+|---|---|---|
+| Fill the whole form | `Ctrl+Shift+F` (macOS: `Command+Shift+F`) | Toolbar icon, or right-click → *Fill Form with Fake Data* |
+| Fill the focused field | none | Right-click a field → *Fill This Field* |
+| Chaos mode (unusual values for fuzz tests) | `Ctrl+Shift+D` | none |
+| Undo the last fill | `Ctrl+Shift+U` | Right-click → *Undo Fake Fill* |
 
-Change the country, language, PII Safe mode, and custom rules on the settings page (open it from
-`chrome://extensions` → FillHub → **Extension options**).
+Shortcuts can be changed at `chrome://extensions/shortcuts`.
 
-## Security and responsible use
+## How the data is made
 
-FillHub is for testing and development. Generated identity numbers can pass public checksum
-algorithms, which means a number may match a real person. **Do not use generated data for any real
-application, purchase, or identity claim.** Do not use FillHub on sites where filling in fake data
-violates the site's terms.
+Each fill goes through four steps:
+
+1. **Locale.** The default country and language select the pools for names, cities, companies, and street names.
+2. **Person.** One person is created for the fill, or taken from the fixed profile. It holds the names, city, postal code, phone, identity numbers, company, and e-mail local part.
+3. **Field.** Each field is classified and receives a value of the right type. Format rules such as `pattern` and `minlength` are applied first.
+4. **Consistency.** Values that refer to the same thing, such as the e-mail and its confirmation field, come from the same person.
+
+### Identity numbers and how they are verified
+
+FillHub can produce identity numbers that pass the public checksum of their country. A passing checksum does not mean the number belongs to anyone.
+
+| Identity | Country | Verification |
+|---|---|---|
+| TC Kimlik No (TCKN) | Türkiye | Checksum, checked against known test vectors |
+| CPF | Brazil | Checksum |
+| CNPJ | Brazil | Checksum |
+| Resident identity number | China | Checksum |
+| SNILS | Russia | Checksum |
+| INN (10 digits) | Russia | Checksum |
+| My Number | Japan | Checksum |
+| NIR | France | Checksum |
+| CURP | Mexico | Checksum |
+| Aadhaar | India | Checksum (Verhoeff) |
+| IBAN | Many countries | Checksum (mod 97) |
+| INN (12 digits) | Russia | Algorithm only; not checked against a known vector |
+| VKN, SSN, EIN, and other official numbers | Various | Format only; validity is not claimed |
+
+## Privacy and safety
+
+- **No data collection.** FillHub has no analytics, telemetry, accounts, or servers. Nothing leaves your browser.
+- **Settings stay local**, in `chrome.storage.local`.
+- **Minimal permissions**: `storage` and `contextMenus`, plus access to pages so that forms can be filled where you ask.
+- **Generated data is for testing.** PII Safe mode is on by default. Do not use generated data for real applications, purchases, or identity claims.
+
+Full policy: [PRIVACY.md](PRIVACY.md).
+
+## How it works
+
+```mermaid
+flowchart LR
+    A["Shortcut, toolbar icon<br/>or context menu"] --> B["Service worker<br/>scripts/background.js"]
+    B -->|"fill · fill_field · undo"| C["Content script in each frame<br/>scripts/content.js"]
+    S[("chrome.storage.local<br/>settings and profiles")] --> C
+    C --> D["Field detection<br/>scripts/field-detect.js"]
+    D --> E["Generator<br/>generator.js · locale-data.js · id-rules.js"]
+    E --> F["setNativeValue<br/>writes the value and fires events"]
+```
+
+The design is described in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Development
 
+**Requirements:** Node.js 20 or newer. The extension itself has no build step and no runtime dependencies. npm is used only for development tools: the Tailwind CLI that builds the settings page CSS, and the test runner.
+
 ```bash
 npm ci
-npm test            # all checks, including browser tests (needs Chromium)
-npm run test:quick  # checks without the browser
-npm run build       # dist/fillhub-<version>.zip
+npm test              # every check, including the browser tests (needs Chromium)
+npm run test:quick    # every check except the browser tests
+npm run build         # dist/fillhub-<version>.zip for the Chrome Web Store
+npm run build:css     # regenerate options/options.css after UI changes
 ```
 
-- `scripts/` holds the extension logic (no build step, no runtime dependencies).
-- `options/` holds the settings page. CSS is generated by `npm run build:css` (Tailwind CSS).
-- `tests/` holds unit tests (`tests/unit`) and end-to-end tests (`tests/e2e`).
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) explains how the pieces fit together.
+The browser tests use Chromium from `CHROME_BIN` or from the Playwright cache. Without a browser they are skipped.
 
-Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) and the
-[Code of Conduct](CODE_OF_CONDUCT.md). Report security issues privately as described in
-[SECURITY.md](SECURITY.md).
+### Project layout
 
-Türkçe belge: [README.tr.md](README.tr.md).
+```
+FillHub/
+├── manifest.json        Manifest V3: name, permissions, content scripts, shortcuts
+├── _locales/            Localized name, description, shortcut and menu texts (15 languages)
+├── scripts/             Extension logic: service worker, content script, generator, detection, data
+├── options/             Settings page: HTML, JavaScript, translations, Tailwind source and output
+├── icons/               Toolbar and store icons (vector source: logo.svg)
+├── docs/                Architecture notes and README images
+├── store/               Chrome Web Store listing text, privacy text, and store images
+├── tests/               Unit tests (tests/unit) and browser tests (tests/e2e)
+├── tools/               Syntax check, data verification, zip build, store image generator
+└── .github/             CI and release workflows, issue and pull request templates
+```
 
-## Support the project
+## Contributing and security
 
-FillHub is free and open source. If it saves you time, you can support its development through
-[GitHub Sponsors](https://github.com/sponsors/kilicberkay). Sponsorship is never required.
+- Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md) and follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+- Report security problems privately, through the **Security** tab (*Report a vulnerability*). See [SECURITY.md](SECURITY.md).
+
+## Support
+
+FillHub is free and open source. If it saves you time, you can support its development on [GitHub Sponsors](https://github.com/sponsors/kilicberkay). Support is never required.
 
 ## License
 
-[MIT](LICENSE) © 2025-2026 Berkay Kılıç. Third-party notices: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+[MIT](LICENSE) © 2025-2026 Berkay Kılıç. Third-party notices, including the Geist font (SIL OFL 1.1), are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
