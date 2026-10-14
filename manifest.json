@@ -8,7 +8,8 @@
     "homepage_url": "https://github.com/kilicberkay/FillHub",
     "permissions": [
         "storage",
-        "contextMenus"
+        "contextMenus",
+        "scripting"
     ],
     "host_permissions": [
         "<all_urls>"
@@ -29,22 +30,6 @@
     "background": {
         "service_worker": "scripts/background.js"
     },
-    "content_scripts": [
-        {
-            "matches": [
-                "<all_urls>"
-            ],
-            "js": [
-                "scripts/locale-data.js",
-                "scripts/id-rules.js",
-                "scripts/field-detect.js",
-                "scripts/generator.js",
-                "scripts/content.js"
-            ],
-            "run_at": "document_idle",
-            "all_frames": true
-        }
-    ],
     "options_page": "options/options.html",
     "commands": {
         "fill_form": {

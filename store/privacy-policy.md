@@ -15,7 +15,7 @@ collect, transmit, sell, or share any personal data.
   obvious test values. Generated identity numbers may pass public checksum rules; do not use them for
   any real purpose.
 
-Permissions: `storage` (local settings), `contextMenus` (right-click menu), and access to sites
+Permissions: `storage` (local settings), `contextMenus` (right-click menu), `scripting` (injects the fill scripts only when you start a fill), and access to sites
 (`<all_urls>`) so that forms can be filled where you ask.
 
 Full policy with contact information: https://github.com/kilicberkay/FillHub/blob/main/PRIVACY.md

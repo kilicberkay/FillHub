@@ -75,7 +75,7 @@ Russian surnames are declined by gender. Names in non-Latin scripts come with La
 
 ### PII Safe mode
 
-PII Safe is **on by default**. It replaces personal identifiers with values that are obviously test data. The examples below are for Turkey (`tr-TR`):
+PII Safe is **on by default**. It replaces personal identifiers with values that are obviously test data. The examples below are for Türkiye (`tr-TR`):
 
 | Field | PII Safe on | PII Safe off |
 |---|---|---|
@@ -169,7 +169,7 @@ FillHub does not click, solve, or call captcha APIs. When a visible reCAPTCHA, h
 
 Coming soon. The listing material is in [`store/`](store/).
 
-Requires Chrome or another Chromium-based browser with Manifest V3 support.
+Requires Chrome 116 or newer, or another Chromium-based browser that supports Manifest V3.
 
 ## Use
 
@@ -215,7 +215,7 @@ FillHub can produce identity numbers that pass the public checksum of their coun
 
 - **No data collection.** FillHub has no analytics, telemetry, accounts, or servers. Nothing leaves your browser.
 - **Settings stay local**, in `chrome.storage.local`.
-- **Minimal permissions**: `storage` and `contextMenus`, plus access to pages so that forms can be filled where you ask.
+- **Minimal permissions**: `storage` (settings), `contextMenus` (right-click items), and `scripting`, which injects the fill scripts only when you start a fill. Nothing runs on pages you do not fill.
 - **Generated data is for testing.** PII Safe mode is on by default. Do not use generated data for real applications, purchases, or identity claims.
 
 Full policy: [PRIVACY.md](PRIVACY.md).
@@ -225,7 +225,7 @@ Full policy: [PRIVACY.md](PRIVACY.md).
 ```mermaid
 flowchart LR
     A["Shortcut, toolbar icon<br/>or context menu"] --> B["Service worker<br/>scripts/background.js"]
-    B -->|"fill · fill_field · undo"| C["Content script in each frame<br/>scripts/content.js"]
+    B -->|"fill · fill_field · undo"| C["Content script, injected on demand<br/>scripts/content.js"]
     S[("chrome.storage.local<br/>settings and profiles")] --> C
     C --> D["Field detection<br/>scripts/field-detect.js"]
     D --> E["Generator<br/>generator.js · locale-data.js · id-rules.js"]

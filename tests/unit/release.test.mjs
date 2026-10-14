@@ -10,6 +10,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 const require = createRequire(import.meta.url);
 const manifest = JSON.parse(read('manifest.json'));
+const { contentFiles } = require('../../tools/lib/content-files.js');
 const LOCALE_KEYS = ['extName', 'extDescription', 'actionTitle', 'cmdFill', 'cmdChaos', 'cmdUndo', 'menuFillForm', 'menuFillField', 'menuUndo'];
 
 test('_locales: 15 dil, her birinde aynı anahtarlar, açıklama ≤132 karakter', () => {
@@ -108,7 +109,7 @@ test('paket içeriği: çalışma zamanı dosyaları var, geliştirme dosyaları
     assert.ok(files.includes('manifest.json'));
     assert.ok(files.includes(manifest.options_page));
     assert.ok(files.includes(manifest.background.service_worker));
-    for (const cs of manifest.content_scripts) for (const f of cs.js) assert.ok(files.includes(f), `pakette betik yok: ${f}`);
+    for (const f of contentFiles()) assert.ok(files.includes(f), `pakette betik yok: ${f}`);
     for (const f of files) {
         assert.ok(!/^(tools|tests|store|docs|\.github|node_modules|dist)\//.test(f), `geliştirme dosyası pakette: ${f}`);
         assert.ok(!/^(AGENTS\.md|package|README|CHANGELOG|CONTRIBUTING)/.test(f), `belge pakette: ${f}`);

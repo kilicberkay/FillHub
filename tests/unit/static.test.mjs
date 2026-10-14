@@ -10,10 +10,12 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 const require = createRequire(import.meta.url);
 const manifest = JSON.parse(read('manifest.json'));
+const { contentFiles } = require('../../tools/lib/content-files.js');
 
-test('manifest: MV3, izinler yalnızca storage ve contextMenus, host <all_urls>', () => {
+test('manifest: MV3, izinler storage, contextMenus ve scripting; host <all_urls>', () => {
     assert.equal(manifest.manifest_version, 3);
-    assert.deepEqual(manifest.permissions.slice().sort(), ['contextMenus', 'storage']);
+    assert.deepEqual(manifest.permissions.slice().sort(), ['contextMenus', 'scripting', 'storage']);
+    assert.equal(manifest.content_scripts, undefined, 'içerik betikleri otomatik enjekte edilmemeli');
     assert.deepEqual(manifest.host_permissions, ['<all_urls>']);
 });
 
@@ -25,14 +27,14 @@ test('manifest: sürüm biçimi ve ad yerelleştirmesi (varsayılan dilde FillHu
 });
 
 test('manifest: içerik betiklerinin tümü, ikonlar ve ayar sayfası diskte var', () => {
-    for (const cs of manifest.content_scripts) for (const f of cs.js) assert.ok(existsSync(join(ROOT, f)), `eksik: ${f}`);
+    for (const f of contentFiles()) assert.ok(existsSync(join(ROOT, f)), `eksik: ${f}`);
     for (const size of Object.values(manifest.icons)) assert.ok(existsSync(join(ROOT, size)), `eksik ikon: ${size}`);
     assert.ok(existsSync(join(ROOT, manifest.options_page)), 'ayar sayfası yok');
     assert.ok(existsSync(join(ROOT, manifest.background.service_worker)), 'servis çalışanı yok');
 });
 
 test('manifest: içerik betiği yükleme sırası (veri → kimlik → tespit → üreteç → içerik)', () => {
-    const js = manifest.content_scripts[0].js;
+    const js = contentFiles();
     const order = ['locale-data', 'id-rules', 'field-detect', 'generator', 'content'];
     const idx = order.map((n) => js.findIndex((f) => f.includes(n)));
     assert.ok(idx.every((i) => i >= 0), 'her betik listede olmalı');

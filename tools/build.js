@@ -4,6 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
+const { contentFiles } = require('./lib/content-files.js');
 
 const ROOT = path.join(__dirname, '..');
 const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'manifest.json'), 'utf8'));
@@ -119,7 +120,7 @@ function main() {
         ...Object.values(manifest.icons),
         manifest.options_page,
         manifest.background.service_worker,
-        ...manifest.content_scripts.flatMap((c) => c.js),
+        ...contentFiles(),
     ];
     const missing = referenced.filter((f) => !names.has(f));
     if (missing.length) throw new Error(`manifest'in referans verdiği dosyalar pakette yok: ${missing.join(', ')}`);

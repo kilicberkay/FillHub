@@ -22,7 +22,8 @@ that your data stays on your device.
 | Permission | Why |
 |---|---|
 | `storage` | Saves your settings locally. |
-| `contextMenus` | Adds the "Fill form" and "Undo" items to the right-click menu. |
+| `contextMenus` | Adds the "Fill form with fake data", "Fill this field" and "Undo fake fill" items to the right-click menu. |
+| `scripting` | Injects the fill scripts into a page only after you start a fill. Pages you do not fill run no FillHub code. |
 | `<all_urls>` (host access) and content scripts in all frames | Fill forms on any website, including forms inside iframes. Content scripts run only on the page you act on. |
 
 ## Fake data

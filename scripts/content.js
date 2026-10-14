@@ -1,3 +1,4 @@
+window.__fillhubInjected = true;
 // Etiketin yalnızca kendi metni: içindeki select/option metinleri (ör. ülke listesi) alan adına karışmaz
 function labelOwnText(label) {
     const clone = label.cloneNode(true);

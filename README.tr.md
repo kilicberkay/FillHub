@@ -169,7 +169,7 @@ FillHub captcha'ya tıklamaz, çözmez ve captcha API'lerini çağırmaz. Sayfad
 
 Yakında. İlan materyali [`store/`](store/) klasöründedir.
 
-Manifest V3 destekleyen Chrome veya Chromium tabanlı bir tarayıcı gerekir.
+Chrome 116 veya üzeri, ya da Manifest V3 destekleyen Chromium tabanlı bir tarayıcı gerekir.
 
 ## Kullanım
 
@@ -215,7 +215,7 @@ FillHub, ülkesinin genel sağlama algoritmasını geçen kimlik numaraları ür
 
 - **Veri toplanmaz.** FillHub'da analitik, telemetri, hesap veya sunucu yoktur. Hiçbir şey tarayıcınızdan çıkmaz.
 - **Ayarlar yerel kalır**, `chrome.storage.local` içinde saklanır.
-- **İzinler minimumda tutulur**: `storage` ve `contextMenus`; ayrıca formların yalnızca sizin istediğiniz yerde doldurulabilmesi için sayfa erişimi.
+- **İzinler minimumda tutulur**: `storage` (ayarlar), `contextMenus` (sağ tık öğeleri) ve `scripting`; `scripting` doldurma betiklerini yalnızca siz doldurmayı başlattığınızda enjekte eder. Kullanmadığınız sayfalarda hiçbir betik çalışmaz.
 - **Üretilen veriler test içindir.** Güvenli mod varsayılan olarak açıktır. Üretilen verileri gerçek uygulamalarda, satın almalarda veya kimlik beyanlarında kullanmayın.
 
 Tam politika: [PRIVACY.md](PRIVACY.md).
@@ -225,7 +225,7 @@ Tam politika: [PRIVACY.md](PRIVACY.md).
 ```mermaid
 flowchart LR
     A["Kısayol, araç çubuğu simgesi<br/>veya sağ tık menüsü"] --> B["Servis çalışanı<br/>scripts/background.js"]
-    B -->|"fill · fill_field · undo"| C["Her çerçevede içerik betiği<br/>scripts/content.js"]
+    B -->|"fill · fill_field · undo"| C["Kullanıldığında enjekte edilen içerik betiği<br/>scripts/content.js"]
     S[("chrome.storage.local<br/>ayarlar ve profiller")] --> C
     C --> D["Alan tanıma<br/>scripts/field-detect.js"]
     D --> E["Üreteç<br/>generator.js · locale-data.js · id-rules.js"]

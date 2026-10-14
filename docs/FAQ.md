@@ -4,7 +4,7 @@
 
 FillHub skips fields that are disabled, read-only (except date fields it can set through the picker),
 hidden, or that it could not classify. To fill one field by hand, click into it and choose
-**Fill This Field** from the right-click menu. If a site uses unusual labels, add a
+**Fill this field** from the right-click menu. If a site uses unusual labels, add a
 [custom rule](../README.md#custom-rules) that maps the field's CSS selector to a data type.
 If a field is classified wrongly, please open a **Field not detected** issue with the label text and the
 field's `name`, `id`, and `autocomplete` (no personal data).

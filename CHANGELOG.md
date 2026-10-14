@@ -3,6 +3,13 @@
 All notable changes to FillHub are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Changed
+- Lower memory use: content scripts are no longer injected into every page. FillHub injects its scripts
+  only when you start a fill (shortcut, toolbar icon, or menu), into the frames that need them.
+- Added the `scripting` permission for that injection. No new host access was added.
+
 ## [1.2.0] - 2026-10-14
 
 ### Fixed

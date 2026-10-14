@@ -63,7 +63,7 @@ bu nedenle üretilen verileri gerçek başvurularda, satın almalarda ya da kiml
 
 - **storage:** kullanıcının ayarlarını (ülke, dil, güvenli mod, özel kurallar, kimlik şablonları) tarayıcıda
   yerel olarak saklar. Hiçbir şey eşitlenmez ya da dışarı gönderilmez.
-- **contextMenus:** sağ tık menüsüne "Formu doldur", "Bu alanı doldur" ve "Sahte doldurmayı geri al"
+- **contextMenus:** sağ tık menüsüne "Formu sahte verilerle doldur", "Bu alanı doldur" ve "Sahte doldurmayı geri al"
   öğelerini ekler.
 - **Tüm sitelere erişim (`<all_urls>`) ve tüm çerçevelerde içerik betikleri:** FillHub, kullanıcının
   doldurmayı seçtiği her sitede (iframe içindeki formlar dahil) çalışır. Yalnızca kullanıcı bir kısayola

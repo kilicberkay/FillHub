@@ -7,7 +7,7 @@ files in the repository are loaded as they are. npm is used only for development
 
 | Part | Files | Responsibility |
 |---|---|---|
-| Manifest | `manifest.json` | Name and description via `__MSG_…__`, permissions (`storage`, `contextMenus`), content script order, shortcuts |
+| Manifest | `manifest.json` | Name and description via `__MSG_…__`, permissions (`storage`, `contextMenus`, `scripting`), shortcuts; no content scripts are declared |
 | Service worker | `scripts/background.js` | Context menus (localized with `chrome.i18n`), shortcut commands, toolbar click; forwards `fill`, `fill_field`, `undo` to the active tab |
 | Locale data | `scripts/locale-data.js` (`FillHubLocaleData`) | 15 language pools with Latin counterparts, 15 country profiles (cities, postal formats, phone rules, address templates, identity and IBAN specs) |
 | Identity rules | `scripts/id-rules.js` (`FillHubIdRules`) | Generators and validators for identity numbers; test vectors; PII sentinel values |
@@ -17,7 +17,7 @@ files in the repository are loaded as they are. npm is used only for development
 | Settings page | `options/options.html`, `options/options.js`, `options/i18n.js` | Profiles, custom rules, general settings, about, support; 15 interface languages |
 | Styles | `options/ui.src.css` → `options/options.css` | Tailwind CSS 4 build (`npm run build:css`); generated file is not edited by hand |
 
-Load order in the page (see `manifest.json`): locale data → identity rules → field detection →
+Load order (`CONTENT_FILES` in `scripts/background.js`; the service worker injects them on demand): locale data → identity rules → field detection →
 generator → content script. Every file also exports to `module.exports`, so the unit tests load the
 same code in Node.
 

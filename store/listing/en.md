@@ -39,7 +39,7 @@ How to use
 1. Open a page with a form.
 2. Press Ctrl+Shift+F (Command+Shift+F on macOS), or click the FillHub icon.
 3. Press Ctrl+Shift+U to undo.
-Right-click a single field and choose "Fill This Field" to fill only that field.
+Right-click a single field and choose "Fill this field" to fill only that field.
 
 Privacy
 
@@ -65,7 +65,8 @@ do not use generated data for real applications, purchases, or identity claims.
 
 - **storage:** saves the user's settings (country, language, PII Safe mode, custom rules, identity
   presets) locally in the browser. Nothing is synced or sent out.
-- **contextMenus:** adds "Fill form", "Fill this field", and "Undo fake fill" to the right-click menu.
+- **contextMenus:** adds "Fill form with fake data", "Fill this field", and "Undo fake fill" to the right-click menu.
+- **scripting:** injects the fill scripts into the page you are filling, only after you start a fill (shortcut, toolbar icon, or menu). No FillHub code runs on pages you do not fill.
 - **Host access to all sites (`<all_urls>`) and content scripts in all frames:** FillHub fills forms on
   any website the user chooses to fill, including forms inside iframes. It only acts after the user
   presses a shortcut, clicks the icon, or uses the context menu. It does not read pages in the

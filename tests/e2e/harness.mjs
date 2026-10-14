@@ -87,6 +87,8 @@ export async function openForm(env, { lang = 'tr', fixture = null } = {}) {
 
 // Content script'e mesaj gönderir; içerik betiği hazır olana kadar yeniden dener
 export async function send(env, tabId, message) {
+    // Betikler artık isteğe bağlı enjekte edilir; mesajdan önce servis çalışanı enjeksiyonu sağlar
+    await env.swEval(`ensureContentScripts(${tabId})`);
     let lastErr = null;
     for (let i = 0; i < 30; i++) {
         const result = await env.swEval(

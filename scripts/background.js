@@ -1,3 +1,29 @@
+// Doldurma betikleri sayfalara otomatik enjekte edilmez. FillHub kullanıldığında (kısayol, simge, menü)
+// her çerçeveye bir kez enjekte edilir; böylece kullanılmayan sayfalar bellek harcamaz.
+const CONTENT_FILES = ["scripts/locale-data.js", "scripts/id-rules.js", "scripts/field-detect.js", "scripts/generator.js", "scripts/content.js"];
+
+// Her çerçevede içerik betiği yoksa enjekte eder; zaten yüklü olanlara dokunmaz
+async function ensureContentScripts(tabId) {
+    try {
+        const frames = await chrome.scripting.executeScript({
+            target: { tabId, allFrames: true },
+            func: () => window.__fillhubInjected === true
+        });
+        const frameIds = frames.filter((f) => f.result !== true).map((f) => f.frameId);
+        if (frameIds.length === 0) return;
+        await chrome.scripting.executeScript({ target: { tabId, frameIds }, files: CONTENT_FILES });
+    } catch (e) {
+        // Enjeksiyona izin verilmeyen sayfalar (chrome://, Web Mağazası) sessizce atlanır
+    }
+}
+
+async function sendToTab(tabId, message) {
+    await ensureContentScripts(tabId);
+    return chrome.tabs.sendMessage(tabId, message).catch(() => {
+        // Sayfa kısıtlıysa ya da içerik betiği yanıt vermiyorsa yoksay
+    });
+}
+
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
         id: "fillForm",
@@ -17,13 +43,9 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 // Click on the extension icon
-chrome.action.onClicked.addListener((tab) => {
-    chrome.storage.local.get(['preferredLocale'], (result) => {
-        chrome.tabs.sendMessage(tab.id, {
-            action: "fill",
-            locale: result.preferredLocale
-        });
-    });
+chrome.action.onClicked.addListener(async (tab) => {
+    const { preferredLocale } = await chrome.storage.local.get(['preferredLocale']);
+    sendToTab(tab.id, { action: "fill", locale: preferredLocale });
 });
 
 const MENU_ACTIONS = {
@@ -32,17 +54,11 @@ const MENU_ACTIONS = {
     undoFill: 'undo'
 };
 
-chrome.contextMenus.onClicked.addListener((info, tab) => {
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     const action = MENU_ACTIONS[info.menuItemId];
     if (!action) return;
-    chrome.storage.local.get(['preferredLocale'], (result) => {
-        chrome.tabs.sendMessage(tab.id, {
-            action: action,
-            locale: result.preferredLocale
-        }).catch(() => {
-            // Ignore error if content script is not ready or page is restricted
-        });
-    });
+    const { preferredLocale } = await chrome.storage.local.get(['preferredLocale']);
+    sendToTab(tab.id, { action, locale: preferredLocale });
 });
 
 const COMMAND_ACTIONS = {
@@ -50,20 +66,10 @@ const COMMAND_ACTIONS = {
     undo_fill: 'undo'
 };
 
-chrome.commands.onCommand.addListener((command) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        if (!tabs[0]) return;
-
-        const action = COMMAND_ACTIONS[command] || 'fill';
-
-        chrome.storage.local.get(['preferredLocale'], (result) => {
-            chrome.tabs.sendMessage(tabs[0].id, {
-                action: action,
-                locale: result.preferredLocale
-            }).catch(() => {
-                // Ignore error if content script is not ready or page is restricted
-                // This prevents "Recieving end does not exist" noise
-            });
-        });
-    });
+chrome.commands.onCommand.addListener(async (command) => {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab) return;
+    const action = COMMAND_ACTIONS[command] || 'fill';
+    const { preferredLocale } = await chrome.storage.local.get(['preferredLocale']);
+    sendToTab(tab.id, { action, locale: preferredLocale });
 });

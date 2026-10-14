@@ -7,8 +7,9 @@ testler (`npm test`, `npm run test:quick`) ve mağaza paketi (`npm run build` �
 Doldurma mantığı sayfa bağlamında içerik betiği olarak çalışır.
 
 ## Dosya Yapısı
-- `manifest.json` — MV3 tanımı. İçerik betiği `all_frames: true` ile her çerçevede çalışır;
-  izinler `storage` ve `contextMenus` ile sınırlıdır.
+- `manifest.json` — MV3 tanımı. İçerik betikleri manifestte tanımlı değildir; `background.js` içindeki `CONTENT_FILES` listesi,
+  kullanıcı doldurmayı başlattığında `chrome.scripting` ile her çerçeveye (eksik olanlara) enjekte edilir.
+  İzinler `storage`, `contextMenus` ve `scripting` ile sınırlıdır.
 - `scripts/locale-data.js` — `FillHubLocaleData`: 15 dilin havuzları (ad, soyad, Latin karşılıklar,
   UI havuzları) ve 15 ülkenin profilleri (şehir+posta öneki, telefon, adres şablonu, kimlik/IBAN belirtimi).
 - `scripts/id-rules.js` — `FillHubIdRules`: kimlik/vergi algoritmaları (sağlama vs. biçim ayrımıyla).
