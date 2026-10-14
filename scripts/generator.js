@@ -146,7 +146,7 @@ const FakeDataGenerator = (() => {
 
     // Ad seçimi: her kayıt {n: yerel, l: Latin}. Ad ile soyad aynı olamaz (R8).
     function pickName(pools, male) {
-        for (let attempt = 0; attempt < 8; attempt++) {
+        for (let attempt = 0; attempt < 50; attempt++) {
             let first;
             let middle = null;
             let idx;
@@ -174,7 +174,8 @@ const FakeDataGenerator = (() => {
             const latinLast = pools.lastNamesLatin || pools.lastNames;
             let last = { n: pools.lastNames[lIdx], l: latinLast[lIdx] };
             if (pools.firstNamesM && !male) last = { n: feminizeRu(last.n), l: last.l + 'a' };
-            if (first.n !== last.n && first.l !== last.l) return { first, last, middle };
+            // Karşılaştırma ASCII karşılıklarla da yapılır: "Tú" ve "Từ" ikisi de "Tu" olur (ad=soyad sayılır)
+            if (first.n !== last.n && slug(first.l) !== slug(last.l)) return { first, last, middle };
         }
         return null;
     }

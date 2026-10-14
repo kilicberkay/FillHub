@@ -8,7 +8,7 @@ const G = require('../../scripts/generator.js');
 const R = require('../../scripts/id-rules.js');
 
 const LANGS = ['en-US', 'tr-TR', 'es-MX', 'fr-FR', 'de-DE', 'pt-BR', 'ru-RU', 'zh-CN', 'ja-JP', 'ar-EG', 'hi-IN', 'bn-BD', 'ur-PK', 'id-ID', 'vi-VN'];
-const fold = (s) => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '');
+const fold = (s) => String(s).toLowerCase().replace(/[ıđßøł]/g, (c) => ({ 'ı': 'i', 'đ': 'd', 'ß': 'ss', 'ø': 'o', 'ł': 'l' })[c]).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
 const digitsOnly = (s) => String(s).replace(/\D/g, '');
 
 test('15 dilin her biri için ad ve soyad üretilir ve ad≠soyad', () => {
