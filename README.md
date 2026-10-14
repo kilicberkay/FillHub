@@ -54,7 +54,7 @@ Every fill creates **one consistent person**. The first name, last name, e-mail,
 
 ### One-action form filling
 
-Press `Ctrl+Shift+F` (`Command+Shift+F` on macOS), click the toolbar icon, or choose **Fill Form with Fake Data** from the right-click menu. A single field can be filled with **Fill This Field**, and **Undo** restores the form to the state it had before the last fill.
+Press `Ctrl+Shift+F` (`Command+Shift+F` on macOS), click the toolbar icon, or choose **Fill form with fake data** from the right-click menu. A single field can be filled with **Fill this field**, and **Undo** restores the form to the state it had before the last fill.
 
 ### Fifteen languages, fifteen countries
 
@@ -160,7 +160,7 @@ FillHub does not click, solve, or call captcha APIs. When a visible reCAPTCHA, h
 
 ### From source (developer mode)
 
-1. Clone the repository, or download the zip from the Releases page once a release is published.
+1. Clone the repository, or download [`fillhub-1.2.0.zip`](https://github.com/kilicberkay/FillHub/releases/tag/v1.2.0) from the Releases page and unpack it.
 2. Open `chrome://extensions` and turn on **Developer mode**.
 3. Click **Load unpacked** and select the folder that contains `manifest.json`.
 4. Open any page with a form and press `Ctrl+Shift+F`.
@@ -175,10 +175,10 @@ Requires Chrome or another Chromium-based browser with Manifest V3 support.
 
 | Action | Shortcut | Menu or toolbar |
 |---|---|---|
-| Fill the whole form | `Ctrl+Shift+F` (macOS: `Command+Shift+F`) | Toolbar icon, or right-click → *Fill Form with Fake Data* |
-| Fill the focused field | none | Right-click a field → *Fill This Field* |
+| Fill the whole form | `Ctrl+Shift+F` (macOS: `Command+Shift+F`) | Toolbar icon, or right-click → *Fill form with fake data* |
+| Fill the focused field | none | Right-click a field → *Fill this field* |
 | Chaos mode (unusual values for fuzz tests) | `Ctrl+Shift+D` | none |
-| Undo the last fill | `Ctrl+Shift+U` | Right-click → *Undo Fake Fill* |
+| Undo the last fill | `Ctrl+Shift+U` | Right-click → *Undo fake fill* |
 
 Shortcuts can be changed at `chrome://extensions/shortcuts`.
 

@@ -75,7 +75,7 @@ Rusça soyadları cinsiyete göre çekimlenir. Latin alfabesi dışındaki adlar
 
 ### Güvenli mod (PII Safe)
 
-Güvenli mod **varsayılan olarak açıktır**. Kişisel tanımlayıcıları belli belirsiz test verisiyle değiştirir. Aşağıdaki örnekler Türkiye (`tr-TR`) içindir:
+Güvenli mod **varsayılan olarak açıktır**. Kişisel tanımlayıcıları, test verisi olduğu açıkça belli olan değerlerle değiştirir. Aşağıdaki örnekler Türkiye (`tr-TR`) içindir:
 
 | Alan | Güvenli mod açık | Güvenli mod kapalı |
 |---|---|---|
@@ -160,7 +160,7 @@ FillHub captcha'ya tıklamaz, çözmez ve captcha API'lerini çağırmaz. Sayfad
 
 ### Kaynaktan (geliştirici modu)
 
-1. Depoyu klonlayın; bir sürüm yayımlandığında Sürümler sayfasından zip dosyasını da indirebilirsiniz.
+1. Depoyu klonlayın ya da [Sürümler sayfası](https://github.com/kilicberkay/FillHub/releases/tag/v1.2.0) üzerinden `fillhub-1.2.0.zip` dosyasını indirip açın.
 2. `chrome://extensions` adresini açın ve **Geliştirici modu**nu etkinleştirin.
 3. **Paketlenmemiş öğe yükle** düğmesine tıklayın ve `manifest.json` dosyasının bulunduğu klasörü seçin.
 4. Herhangi bir form içeren sayfayı açın ve `Ctrl+Shift+F` tuşlarına basın.
