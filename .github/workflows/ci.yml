@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      e2e:
+        description: "Run the browser end-to-end tests"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: node tools/verify-data.js
+      - run: node --test tests/unit
+      - run: npm run build
+      - name: Store archive contents
+        run: python3 -m zipfile -t dist/fillhub-*.zip
+      - uses: actions/upload-artifact@v4
+        if: matrix.node == 22
+        with:
+          name: fillhub-zip
+          path: dist/fillhub-*.zip
+
+  e2e:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.e2e == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium for Playwright
+        run: npx --yes playwright install --with-deps chromium
+      - name: Browser tests
+        run: node --test --test-timeout=400000 tests/e2e

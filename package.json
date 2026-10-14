@@ -1,0 +1,23 @@
+{
+  "name": "fillhub",
+  "version": "1.2.0",
+  "private": true,
+  "description": "Advanced multi-language form filler for developers and testers.",
+  "license": "MIT",
+  "scripts": {
+    "test": "node tools/run-tests.js",
+    "test:quick": "node tools/run-tests.js --no-e2e",
+    "test:e2e": "node --test --test-timeout=400000 tests/e2e",
+    "check": "node tools/check-syntax.js",
+    "verify": "node tools/verify-data.js",
+    "build:css": "tailwindcss -i options/ui.src.css -o options/options.css --minify",
+    "build": "node tools/build.js"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
