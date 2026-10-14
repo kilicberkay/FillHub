@@ -31,6 +31,8 @@ All notable changes to FillHub are documented here. The format follows
   policy, architecture notes.
 
 ### Changed
+- Removed the automatic interaction with reCAPTCHA and Turnstile widgets that ran on every fill in 1.1.0.
+  FillHub no longer clicks or executes CAPTCHA challenges; fill runs leave them to you.
 - Renamed from "Filler Max" to FillHub.
 - Settings page rebuilt with a new visual design and a Tailwind CSS build step (`npm run build:css`).
 

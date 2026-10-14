@@ -93,11 +93,11 @@ Doldurma mantığı sayfa bağlamında içerik betiği olarak çalışır.
   doldurma birikmez. `checkAllBoxes` ayarı (varsayılan kapalı) rastgeleliği kapatıp tüm kutuları
   işaretler. Hedef durum zaten sağlanıyorsa kutuya hiç yazılmaz. `undo` dolum öncesi durumu geri
   yükler. Radio'da rastgelelik uygulanmaz (grup başına tek seçim).
-- Captcha bypass'ı yalnız gerçek widget'ları hedefler: `grecaptcha.execute` / `turnstile.execute`
-  çağrıları ve reCAPTCHA/Turnstile iframe'lerine odaklanma + `#recaptcha-anchor` tıklaması.
-  Etiket metnine ("robot"/"human"/"captcha") bakıp DOM checkbox'ı zorlamak yoktur; sayfadaki her
-  onay kutusu — captcha kelimesi geçen etiketler dahil — tek politikaya tabidir. Etiket tıklaması
-  (`label.click()`) kutuyu geri aldığı için captcha yolunda da kullanılmaz.
+- Captcha'lara hiçbir zaman otomatik müdahale edilmez: içerik betiği `grecaptcha` / `turnstile` API'lerini
+  çağırmaz, reCAPTCHA/Turnstile/hCaptcha iframe'lerine odaklanmaz, `#recaptcha-anchor` veya başka bir captcha
+  öğesine tıklamaz. Captcha'lar insan doğrulamasıdır; otomatik geçiş kötüye kullanımı kolaylaştırır. Captcha
+  kelimesi geçen etiketler dahil her onay kutusu genel onay kutusu politikasına tabidir; etiket tıklaması
+  (`label.click()`) kutuyu geri aldığı için kullanılmaz.
 - Otomatik gönderim yalnız gerçek gönderim kontrollerine basar (`button[type=submit]`,
   `input[type=submit]`, `input[type=image]`, form içi tipsiz `button`); `role="button"` gibi sahte
   butonlar ve yıkıcı/ikincil metinli kontroller (İptal, Sil, Temizle, Reset...) dışarıda kalır.

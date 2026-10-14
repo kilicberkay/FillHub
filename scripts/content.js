@@ -618,10 +618,6 @@ function collectFields(container, settings) {
         fillField(input, settings);
     });
 
-    // Captcha widget'ları tetiklenir (reCAPTCHA/Turnstile); DOM checkbox'larına dokunulmaz,
-    // onay kutuları tek politikaya tabidir (rastgele / required / checkAllBoxes)
-    tryToClickCaptchas();
-
     // Handle Shadow DOM Recursively
     const allElements = container.querySelectorAll('*');
     allElements.forEach(el => {
@@ -856,58 +852,6 @@ function isElementVisible(el) {
     // Check dimensions
     const rect = el.getBoundingClientRect();
     return rect.width > 0 && rect.height > 0;
-}
-
-function tryToClickCaptchas() {
-    // 1. Aggressive Script Injection to bypass isolated world restrictions
-    const script = document.createElement('script');
-    script.textContent = `
-        (function() {
-            try {
-                // Handle reCAPTCHA v2/v3
-                if (window.grecaptcha) {
-                    const widgets = document.querySelectorAll('[data-sitekey]');
-                    widgets.forEach((w, i) => {
-                        try {
-                            // Try to execute or get response to trigger the check
-                            if (window.grecaptcha.execute) window.grecaptcha.execute(i);
-                        } catch (e) {}
-                    });
-                }
-                // Handle Turnstile
-                if (window.turnstile) {
-                    const tsElements = document.querySelectorAll('.cf-turnstile');
-                    tsElements.forEach(el => {
-                        try {
-                            window.turnstile.execute(el);
-                        } catch (e) {}
-                    });
-                }
-            } catch (e) {}
-        })();
-    `;
-    (document.head || document.documentElement).appendChild(script);
-    script.remove();
-
-    // 2. DOM-based clicking for same-origin or visible elements
-    const captchaSelectors = [
-        'iframe[title*="reCAPTCHA"]',
-        'iframe[src*="recaptcha"]',
-        'iframe[src*="challenges.cloudflare.com"]',
-        '.g-recaptcha',
-        '#recaptcha-anchor',
-        '.cf-turnstile'
-    ];
-
-    captchaSelectors.forEach(selector => {
-        const el = document.querySelector(selector);
-        if (el) {
-            el.focus();
-            // Try to trigger click on common anchor IDs if we can reach them
-            const anchor = el.shadowRoot ? el.shadowRoot.querySelector('#recaptcha-anchor') : null;
-            if (anchor) anchor.click();
-        }
-    });
 }
 
 // Otomatik gönderim yalnız gerçek gönderim kontrollerine basar: rol tabanlı sahte butonlar ve
