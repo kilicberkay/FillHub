@@ -169,6 +169,53 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
         });
     });
 
+    describe('onay kutuları ve yerel metin', () => {
+        // Her doldurma taze bir onay formunda yapılır; değerler DOM'dan okunur
+        async function fillConsentForm(n) {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true });
+            const out = [];
+            for (let i = 0; i < n; i++) {
+                const form = await openForm(env, { fixture: 'consent' });
+                try {
+                    const r = await send(env, form.tabId, { action: 'fill' });
+                    assert.equal(r.status, 'success');
+                    out.push(await form.page.eval(`JSON.stringify({
+                        kvkk: document.getElementById('kvkk').checked,
+                        sartlar: document.getElementById('sartlar').checked,
+                        bulten: document.getElementById('bulten').checked,
+                        aciklama: document.getElementById('aciklama').value,
+                        faaliyet: document.getElementById('faaliyet').value,
+                        bitis: document.getElementById('bitis').value,
+                    })`).then(JSON.parse));
+                } finally {
+                    await closeForm(form);
+                }
+            }
+            return out;
+        }
+
+        it('gizlilik ve şart kutuları her doldurmada işaretli, bülten kutusu hiç işaretlenmez', async () => {
+            const v = await fillConsentForm(6);
+            assert.ok(v.every((x) => x.kvkk === true), `KVKK kutusu: ${v.map((x) => x.kvkk)}`);
+            assert.ok(v.every((x) => x.sartlar === true), 'şart kutusu işaretli olmalı');
+            assert.ok(v.every((x) => x.bulten === false), 'bülten kutusu işaretlenmemeli');
+        });
+
+        it('metin alanları yerel dilde ve Lorem içermeden dolar; maxlength aşılmaz', async () => {
+            const v = await fillConsentForm(4);
+            for (const x of v) {
+                assert.ok(x.aciklama.length > 0, 'açıklama dolmalı');
+                assert.ok(!/lorem/i.test(x.aciklama + x.faaliyet), `Lorem kalmamalı: ${x.aciklama}`);
+                assert.ok(x.faaliyet.length > 0 && x.faaliyet.length <= 30, `maxlength 30: ${x.faaliyet.length}`);
+            }
+        });
+
+        it('devre dışı tarih alanına dokunulmaz', async () => {
+            const v = await fillConsentForm(3);
+            assert.ok(v.every((x) => x.bitis === ''), `devre dışı alan dolmamalı: ${v.map((x) => x.bitis)}`);
+        });
+    });
+
     describe('captcha ve profil yönetimi', () => {
         it('görünür captcha bildirilir ve vurgulanır, otomatik tıklanmaz', async () => {
             await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true });

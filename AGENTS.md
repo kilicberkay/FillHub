@@ -80,7 +80,9 @@ Doldurma mantığı sayfa bağlamında içerik betiği olarak çalışır.
   alanlarında sözlüksel olarak kırpılır, `minlength` altındaki metin `x` ile doldurulur.
 - Metin alanlarında önce örnek şekil uyumu denenir (`generateFromPattern` /
   `fillFromShape`, ör. `Orn: 2024/123`, `inputmode="numeric"`); desteklenmeyen kalıpta Lorem'e
-  düşülür. HTML gövde yalnızca çok satırlı (`textarea`) alanlara yazılır.
+  düşülür. HTML gövde yalnızca çok satırlı (`textarea`) alanlara yazılır. Metin üretimi yerel dilin
+  örnek cümlelerinden yapılır (`sampleShort` tek satır, `sampleLong` çok satır); `maxlength` kelime
+  sınırında kırpılır (`trimToLength`). Lorem yerine İngilizce yedek yalnızca dil havuzu yoksa kullanılır.
 - Telefon alanı tespiti kelime sınırı kullanır: `tel`, `tel_no`, `tel-no` eşleşir; `hotel`,
   `total` gibi kelimeler eşleşmez.
 - Devre dışı denetimler doldurulmaz: `fillField` girişindeki `isControlDisabled` denetimi kendi
@@ -88,11 +90,13 @@ Doldurma mantığı sayfa bağlamında içerik betiği olarak çalışır.
   select, checkbox/radio, radio grubu seçimi).
 - `readonly` alanlara doğrudan değer yazılmaz; tek istisna takvim etkileşimiyle doldurulan tarih
   alanlarıdır (yerel tipli `date`/`datetime-local`/`time`/`month`/`week` alanları atlanır).
-- Onay kutuları her doldurmada hedef duruma getirilir: `required` ve `aria-required="true"`
-  kutular işaretlenir, diğerleri bağımsız %50 çekilişle işaretlenir ya da temizlenir; üst üste
-  doldurma birikmez. `checkAllBoxes` ayarı (varsayılan kapalı) rastgeleliği kapatıp tüm kutuları
-  işaretler. Hedef durum zaten sağlanıyorsa kutuya hiç yazılmaz. `undo` dolum öncesi durumu geri
-  yükler. Radio'da rastgelelik uygulanmaz (grup başına tek seçim).
+- Onay kutuları her doldurmada hedef duruma getirilir (üst üste doldurma birikmez). Karar sırası:
+  `required` / `aria-required="true"` ve radio → işaretli; `checkAllBoxes` (varsayılan kapalı) → işaretli;
+  pazarlama (`classifyCheckbox`: bülten, kampanya, newsletter, marketing…) → işaretsiz; gizlilik/şart/KVKK/
+  açık rıza → işaretli, yalnız `consentBoxes` ayarı açıksa (varsayılan açık); diğerleri %50 çekilişle.
+  Hedef durum zaten sağlanıyorsa kutuya hiç yazılmaz. `undo` dolum öncesi durumu geri yükler. Radio'da
+  rastgelelik uygulanmaz (grup başına tek seçim). Sınıflandırıcı etiket metnine bakar; "robot/human/captcha"
+  etiketleri bu politikanın dışında tutulmaz, genel kurala tabidir.
 - Captcha'lara otomatik müdahale edilmez: içerik betiği captcha'ya tıklamaz, çözmez ve `grecaptcha` /
   `turnstile` / `hcaptcha` API'lerini çağırmaz. Yalnızca görünür bir captcha (`CAPTCHA_SELECTORS`) varsa öğe
   vurgulanır ve "captcha'yı kendiniz tamamlayın" bildirimi gösterilir; doğrulamayı kullanıcı tamamlar.

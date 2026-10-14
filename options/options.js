@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const smartEmail = document.getElementById('smartEmail');
     const matchPasswords = document.getElementById('matchPasswords');
     const checkAllBoxes = document.getElementById('checkAllBoxes');
+    const consentBoxes = document.getElementById('consentBoxes');
     const piiSafe = document.getElementById('piiSafe');
     const autoSubmit = document.getElementById('autoSubmit');
 
@@ -38,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         smartEmail: true,
         matchPasswords: true,
         checkAllBoxes: false,
+        consentBoxes: true,
         piiSafe: true,
         autoSubmit: false,
         profiles: [{ id: 'default', name: 'Standard Persona', mode: 'random' }],
@@ -370,7 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const removeBtn = document.createElement('button');
             removeBtn.type = 'button';
             removeBtn.className = 'inline-flex h-7 shrink-0 cursor-pointer select-none items-center justify-center rounded-lg px-2 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-50 focus-ring dark:text-rose-400 dark:hover:bg-rose-500/10';
-            removeBtn.textContent = 'Remove';
+            removeBtn.textContent = currentText.removeRuleBtn;
 
             row.append(desc, removeBtn);
             removeBtn.onclick = () => {
@@ -421,6 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.smartEmail = smartEmail.checked;
         state.matchPasswords = matchPasswords.checked;
         state.checkAllBoxes = checkAllBoxes.checked;
+        state.consentBoxes = consentBoxes.checked;
         state.piiSafe = piiSafe.checked;
         state.autoSubmit = autoSubmit.checked;
         chrome.storage.local.set(state);
@@ -446,6 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 smartEmail.checked = state.smartEmail;
                 matchPasswords.checked = state.matchPasswords;
                 checkAllBoxes.checked = !!state.checkAllBoxes;
+                consentBoxes.checked = state.consentBoxes !== false;
                 piiSafe.checked = !!state.piiSafe;
                 autoSubmit.checked = state.autoSubmit;
                 uiLangSelector.value = state.uiLang || 'en';
@@ -462,6 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 populateCountries();
                 piiSafe.checked = state.piiSafe;
                 checkAllBoxes.checked = state.checkAllBoxes;
+                consentBoxes.checked = state.consentBoxes !== false;
                 uiLangSelector.value = state.uiLang;
                 updateUILanguage(state.uiLang);
                 renderProfiles();
@@ -476,6 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
     smartEmail.onchange = saveState;
     matchPasswords.onchange = saveState;
     checkAllBoxes.onchange = saveState;
+    consentBoxes.onchange = saveState;
     piiSafe.onchange = saveState;
     autoSubmit.onchange = saveState;
 

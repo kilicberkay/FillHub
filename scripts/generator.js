@@ -467,6 +467,14 @@ const FakeDataGenerator = (() => {
     }
 
     // Tarih parçaları: yıl 2000 ile içinde bulunulan yıl arasından rastgele (hep bu yıl olmasın)
+    // Metni en fazla max karakter olacak şekilde kırpar; mümkünse kelime sınırında keser (CJK için sert kesim)
+    function trimToLength(text, max) {
+        if (!(max > 0) || text.length <= max) return text;
+        const cut = text.slice(0, max);
+        const space = cut.lastIndexOf(' ');
+        return (space > max / 2 ? cut.slice(0, space) : cut).trimEnd();
+    }
+
     function randomDateParts() {
         const minYear = 2000;
         const maxYear = new Date().getFullYear();
@@ -569,8 +577,9 @@ const FakeDataGenerator = (() => {
                 case 'taxId': return pii ? person.piiIds.tax : person.ids.tax;
                 case 'iban': return (pii ? person.piiIds.iban : person.ids.iban) || '';
                 case 'url': {
-                    const domains = ['example.com', 'test-site.org', 'demo.net', 'sample.co'];
-                    return `https://www.${pick(domains)}`;
+                    // Yalnızca RFC 2606 ayrılmış alan adları: gerçek bir siteye yönlenmez
+                    const domains = ['example.com', 'example.org', 'example.net'];
+                    return `https://www.${pick(domains)}${pick(['', '/', '/test', '/demo', '/sample-page'])}`;
                 }
                 case 'meeting': return pools.meetingTypes ? pick(pools.meetingTypes) : "Project Sync";
                 case 'organizer': return pools.organizerTypes ? pick(pools.organizerTypes) : "Admin";
@@ -589,9 +598,11 @@ const FakeDataGenerator = (() => {
                     }
                     // Rich text: yalnız çok satırlı alanlarda HTML gövde
                     if (context.multiline && (fname.includes('text') || fname.includes('icerik') || fname.includes('content'))) {
-                        return "<h2>Welcome</h2><p>This is a generated QR content.</p><ul><li>Feature 1</li><li>Feature 2</li></ul>";
+                        return `<h2>${pick(pools.sampleShort)}</h2><p>${pick(pools.sampleLong)}</p><ul><li>${pick(pools.sampleShort)}</li><li>${pick(pools.sampleShort)}</li></ul>`;
                     }
-                    return "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+                    // Yerel dilde örnek metin: çok satırlı alanlarda uzun, diğerlerinde kısa; maxlength'e uyar
+                    const bank = context.multiline ? pools.sampleLong : pools.sampleShort;
+                    return trimToLength(bank ? pick(bank) : 'Sample text.', context.maxLength);
                 }
                 case 'date': {
                     const d = randomDateParts();

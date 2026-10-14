@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FillHub | Settings</title>
+    <title id="pageTitle">FillHub | Settings</title>
     <link rel="icon" type="image/png" href="../icons/logo48.png">
     <link rel="stylesheet" href="options.css">
 </head>
@@ -163,6 +163,14 @@
                                         <div class="min-w-0">
                                             <label for="checkAllBoxes" id="checkAllBoxesLabel" class="block cursor-pointer text-xs font-medium leading-5 text-zinc-700 select-none dark:text-zinc-300">Check All Checkboxes</label>
                                             <p id="checkAllBoxesDesc" class="text-[11px] text-soft">Check every checkbox instead of a random selection.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-start gap-2.5 py-2.5">
+                                        <input type="checkbox" id="consentBoxes" class="ui-checkbox mt-0.5 shrink-0 cursor-pointer appearance-none border border-zinc-500 bg-white h-4 w-4 rounded transition-colors checked:border-brand-600 checked:bg-brand-600 focus:outline-none focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-500 dark:bg-white/[0.06] dark:checked:border-brand-500 dark:checked:bg-brand-500 dark:focus-visible:ring-offset-canvas-dark">
+                                        <div class="min-w-0">
+                                            <label for="consentBoxes" id="consentBoxesLabel" class="block cursor-pointer text-xs font-medium leading-5 text-zinc-700 select-none dark:text-zinc-300">Check consent boxes</label>
+                                            <p id="consentBoxesDesc" class="text-[11px] text-soft">Terms, privacy and consent boxes are checked; marketing boxes stay unchecked.</p>
                                         </div>
                                     </div>
 
@@ -413,7 +421,7 @@
     <div id="onboardingModal" class="fixed inset-0 z-50 items-center justify-center bg-zinc-950/60 p-4 backdrop-blur-xs" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="onboardingHeading">
         <div class="w-full max-w-sm rounded-2xl border border-zinc-200/80 bg-white p-6 shadow-[0_30px_80px_-40px_rgb(0_0_0/0.55)] dark:border-white/10 dark:bg-zinc-900/95">
             <h2 id="onboardingHeading" class="text-base font-semibold leading-6 text-zinc-900 dark:text-zinc-100"><span id="onboardingTitle">Welcome to FillHub! 🚀</span></h2>
-            <p class="mt-2 text-sm leading-relaxed text-soft">You've just installed the most powerful form filler. Pin the extension for "One-Click" filling, and use the Options page to create custom personas.</p>
+            <p id="onboardingText" class="mt-2 text-sm leading-relaxed text-soft">Get started in three steps: pin FillHub to the toolbar, open any page with a form, and press Ctrl+Shift+F. PII Safe is on by default, so the generated data uses obvious test values.</p>
             <div class="mt-5">
                 <button type="button" id="closeOnboarding" class="inline-flex h-8 w-full cursor-pointer select-none items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3 text-[13px] font-medium transition-[background-color,border-color,color,box-shadow,transform] duration-150 active:translate-y-px focus:outline-none focus-ring focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-100 dark:focus-visible:ring-offset-canvas-dark disabled:pointer-events-none disabled:opacity-50 bg-brand-600 text-white shadow-[0_1px_2px_rgb(194_24_91/0.35)] hover:bg-brand-700 hover:shadow-[0_10px_26px_-10px_rgb(194_24_91/0.55)] focus-visible:ring-brand-600 dark:focus-visible:ring-brand-400 dark:hover:bg-brand-700"><span id="startedBtn">Get Started</span></button>
             </div>

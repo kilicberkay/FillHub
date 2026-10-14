@@ -9,6 +9,7 @@ export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const FIXTURES = {
     tr: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form.html')),
     en: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-en.html')),
+    consent: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'consent.html')),
 };
 
 export const chromeAvailable = () => Boolean(findChrome());
@@ -17,9 +18,10 @@ export const chromeAvailable = () => Boolean(findChrome());
 export async function startEnv() {
     const srv = createServer((req, res) => {
         // ?lang=en → İngilizce etiketli form; varsayılan Türkçe
-        const lang = req.url.includes('lang=en') ? 'en' : 'tr';
+        // ?page=consent → onay kutuları ve metin alanları formu; ?lang=en → İngilizce etiketli form
+        const key = req.url.includes('page=consent') ? 'consent' : req.url.includes('lang=en') ? 'en' : 'tr';
         res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
-        res.end(FIXTURES[lang]);
+        res.end(FIXTURES[key]);
     });
     await new Promise((resolve) => srv.listen(0, '127.0.0.1', resolve));
     const base = `http://127.0.0.1:${srv.address().port}/form.html`;
@@ -70,9 +72,9 @@ export async function setStorage(env, data) {
 }
 
 // Her çağrı benzersiz bir sorgu parametresiyle yeni bir form sekmesi açar
-export async function openForm(env, { lang = 'tr' } = {}) {
+export async function openForm(env, { lang = 'tr', fixture = null } = {}) {
     env.runCounter += 1;
-    const url = `${env.base}?${lang === 'en' ? 'lang=en&' : ''}run=${env.runCounter}_${Date.now()}`;
+    const url = `${env.base}?${fixture ? `page=${fixture}&` : ''}${lang === 'en' ? 'lang=en&' : ''}run=${env.runCounter}_${Date.now()}`;
     const page = await PageSession.open(env.cdp, url);
     await page.waitFor('document.readyState === "complete" && !!document.getElementById("kayit")', 10000);
     await wait(300);

@@ -111,7 +111,31 @@ const FillHubDetect = (() => {
         return null;
     }
 
-    return { fold, tokenize, classify, RULES, AUTOCOMPLETE_TYPES };
+    // Onay kutusu sınıfı: 'marketing' (bülten, tanıtım), 'consent' (şartlar, gizlilik, KVKK, açık rıza) ya da 'other'.
+    // Pazarlama önce denetlenir: bir kutu hem gizlilik hem bülten diyorsa işaretlenmez.
+    const MARKETING_WORDS = ['newsletter', 'bülten', 'kampanya', 'promosyon', 'pazarlama', 'reklam', 'marketing', 'promo',
+        'boletín', 'publicidad', 'promoción', 'lettre d\'information', 'prospection', 'werbung', 'boletim', 'рассылк',
+        'реклам', '营销', '广告', 'マーケティング', 'ニュースレター', 'النشرة', 'تسويق', 'विपणन', 'প্রচার', 'মার্কেটিং',
+        'خبرنامہ', 'مارکیٹنگ', 'pemasaran', 'buletin', 'tiếp thị', 'quảng cáo', 'bản tin'];
+    const CONSENT_WORDS = ['kabul', 'onay', 'beyan', 'açık rıza', 'aydınlatma', 'kvkk', 'şart', 'koşul', 'okudum',
+        'accept', 'agree', 'terms', 'privacy', 'consent', 'gdpr', 'acepto', 'términos', 'condiciones', 'accepte',
+        'conditions', 'vie privée', 'akzeptiere', 'datenschutz', 'einwilligung', 'aceito', 'termos', 'privacidade',
+        'согласен', 'принимаю', 'условия', 'конфиденциальн', '同意', '利用規約', 'プライバシー', 'أوافق', 'الشروط',
+        'الخصوصية', 'सहमत', 'शर्त', 'गोपनीयता', 'সম্মত', 'শর্ত', 'গোপনীয়তা', 'متفق', 'رضامند', 'شرائط', 'setuju',
+        'syarat', 'privasi', 'đồng ý', 'điều khoản', 'quyền riêng tư'];
+    function containsWord(text, word) {
+        // ASCII anahtarlar kelime başında eşleşir ("promo" ↔ "promotional", "agree" ↔ "disagree" değil)
+        if (/^[\x00-\x7f]+$/.test(word)) return new RegExp('(^|[^a-z])' + word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(text);
+        return text.includes(word);
+    }
+    function classifyCheckbox(sources) {
+        const text = (sources || []).join(' ').toLocaleLowerCase('tr').replace(/i̇/g, 'i');
+        if (MARKETING_WORDS.some(w => containsWord(text, w))) return 'marketing';
+        if (CONSENT_WORDS.some(w => containsWord(text, w))) return 'consent';
+        return 'other';
+    }
+
+    return { fold, tokenize, classify, classifyCheckbox, RULES, AUTOCOMPLETE_TYPES };
 })();
 
 if (typeof module !== 'undefined') {

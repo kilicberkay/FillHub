@@ -17,7 +17,9 @@ const FillHubLocaleData = {
             firstNames: ["James", "Mary", "John", "Patricia", "Robert", "Jennifer", "Michael", "Linda", "William", "Elizabeth", "David", "Barbara", "Richard", "Susan", "Joseph", "Jessica", "Charles", "Sarah", "Christopher", "Karen", "Daniel", "Nancy", "Matthew", "Lisa", "Anthony", "Betty", "Mark", "Margaret", "Donald", "Sandra", "Steven", "Ashley", "Paul", "Kimberly", "Andrew", "Emily", "Joshua", "Donna", "Kenneth", "Michelle", "Kevin", "Carol", "Brian", "Amanda", "George", "Melissa", "Timothy", "Deborah", "Ronald", "Stephanie"],
             lastNames: ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker", "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores", "Green", "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts", "Evans"],
             testStreet: "Test Street",
-            testCompany: "Test Company"
+            testCompany: "Test Company",
+            sampleShort: ["Quarterly report draft", "Meeting notes for the team", "Updated project timeline", "Customer feedback summary", "Follow-up on last week's tasks", "Notes about the new feature"],
+            sampleLong: ["This entry summarizes the main results of the last review and lists the next steps for the team.", "Please review the attached information and confirm that everything is accurate before submitting.", "The project continues on schedule, with minor delays in testing that are expected to be resolved next week.", "Additional details will be provided once the pending documents have been received and checked."]
         },
         tr: {
             name: "Türkçe",
@@ -33,7 +35,9 @@ const FillHubLocaleData = {
             firstNames: ["Ahmet", "Mehmet", "Can", "Burak", "Zeynep", "Elif", "Ayşe", "Merve", "Bora", "Efe", "Derya", "Emre", "Selin", "Murat", "Hakan", "Ali", "Fatma", "Mustafa", "Hatice", "Ömer", "Emine", "Kemal", "Gül", "Yusuf", "Esra", "Oğuz", "Büşra", "Tolga", "Seda", "Serkan", "Pınar", "Okan", "Cansu", "Burcu", "Volkan", "Gizem", "Onur", "Ebru", "Tuncay", "Sibel", "Kerem", "Nazlı", "Yiğit", "Dilek", "Cem", "Aylin", "Berk", "Ceren", "Kaan", "Melek", "Fatih"],
             lastNames: ["Yılmaz", "Demir", "Kaya", "Şahin", "Çelik", "Yıldız", "Öztürk", "Aydın", "Arslan", "Doğan", "Kılıç", "Aslan", "Çetin", "Kara", "Acar", "Polat", "Koç", "Güneş", "Erdoğan", "Kurt", "Özdemir", "Şen", "Taş", "Bulut", "Korkmaz", "Kaplan", "Aktaş", "Yavuz", "Işık", "Tekin", "Avcı", "Uçar", "Ateş", "Erol", "Güler", "Keskin", "Bozkurt", "Toprak", "Sarı", "Coşkun", "Göktaş", "Balcı", "Duman", "Yalçın", "Akın", "Şimşek", "Eren", "Varol", "Çakır", "Biçer"],
             testStreet: "Test Sokak",
-            testCompany: "Test Şirketi"
+            testCompany: "Test Şirketi",
+            sampleShort: ["Üç aylık faaliyet raporu taslağı", "Ekip toplantısı notları", "Güncellenmiş proje takvimi", "Müşteri geri bildirimlerinin özeti", "Geçen haftaki görevlerin takibi", "Yeni özellik hakkında notlar"],
+            sampleLong: ["Bu kayıt son değerlendirmenin ana sonuçlarını özetler ve ekip için sonraki adımları listeler.", "Lütfen ekli bilgileri inceleyin ve göndermeden önce her şeyin doğru olduğunu onaylayın.", "Proje planlanan takvimde ilerliyor; test aşamasında beklenen küçük gecikmelerin önümüzdeki hafta giderilmesi bekleniyor.", "Bekleyen belgeler alınıp kontrol edildikten sonra ek ayrıntılar paylaşılacaktır."]
         },
         es: {
             name: "Español",
@@ -49,7 +53,9 @@ const FillHubLocaleData = {
             firstNames: ["Carlos", "María", "José", "Juan", "Ana", "Luis", "Guadalupe", "Jorge", "Fernanda", "Miguel", "Sofía", "Pedro", "Lucía", "Alejandro", "Valentina", "Diego", "Daniela", "Ricardo", "Mariana", "Roberto", "Paola", "Andrés", "Camila", "Jesús", "Gabriela", "Javier", "Alejandra", "Francisco", "Verónica", "Sergio", "Rosa", "Arturo", "Patricia", "Eduardo", "Claudia", "Hugo", "Karla", "Raúl", "Adriana", "Enrique", "Irene", "Óscar", "Silvia", "Mauricio", "Leticia", "Ángel", "Beatriz", "Gerardo", "Lourdes", "Salvador", "Teresa"],
             lastNames: ["Hernández", "García", "Martínez", "López", "González", "Pérez", "Rodríguez", "Sánchez", "Ramírez", "Cruz", "Flores", "Gómez", "Morales", "Vázquez", "Jiménez", "Reyes", "Díaz", "Torres", "Gutiérrez", "Ruiz", "Mendoza", "Aguilar", "Ortiz", "Castillo", "Romero", "Herrera", "Medina", "Castro", "Vargas", "Ramos", "Chávez", "Rojas", "Juárez", "Domínguez", "Delgado", "Moreno", "Navarro", "Salazar", "Ríos", "Campos", "Estrada", "Márquez", "Soto", "Valdez", "Cabrera", "Fuentes", "Vega", "Núñez", "Ibarra", "Lara"],
             testStreet: "Calle de Prueba",
-            testCompany: "Empresa de Prueba"
+            testCompany: "Empresa de Prueba",
+            sampleShort: ["Borrador del informe trimestral", "Notas de la reunión del equipo", "Calendario actualizado del proyecto", "Resumen de comentarios de clientes", "Seguimiento de las tareas de la semana pasada", "Notas sobre la nueva función"],
+            sampleLong: ["Este registro resume los resultados principales de la última revisión y enumera los próximos pasos.", "Revise la información adjunta y confirme que todo es correcto antes de enviarla.", "El proyecto avanza según lo previsto; los pequeños retrasos en las pruebas se resolverán la próxima semana.", "Se ofrecerán más detalles cuando se reciban y revisen los documentos pendientes."]
         },
         fr: {
             name: "Français",
@@ -65,7 +71,9 @@ const FillHubLocaleData = {
             firstNames: ["Jean", "Marie", "Pierre", "Anne", "Luc", "Sophie", "Julie", "Nicolas", "Emma", "Louis", "Chloé", "Antoine", "Camille", "Hugo", "Léa", "Julien", "Manon", "Mathieu", "Claire", "Lucas", "Inès", "Maxime", "Élodie", "Romain", "Charlotte", "Étienne", "Margot", "Baptiste", "Océane", "Adrien", "Nathalie", "Thierry", "Isabelle", "Yves", "Sylvie", "Gaspard", "Mélanie", "Arnaud", "Céline", "Bruno", "Lucie", "Olivier", "Pauline", "Florian", "Justine", "Quentin", "Valérie", "Alain", "Solène", "Dominique"],
             lastNames: ["Martin", "Bernard", "Thomas", "Petit", "Robert", "Richard", "Durand", "Dubois", "Moreau", "Laurent", "Simon", "Michel", "Lefebvre", "Leroy", "Roux", "David", "Bertrand", "Morel", "Fournier", "Girard", "Bonnet", "Dupont", "Lambert", "Fontaine", "Rousseau", "Vincent", "Muller", "Lefèvre", "Faure", "André", "Mercier", "Blanc", "Guérin", "Boyer", "Garnier", "Chevalier", "François", "Legrand", "Gauthier", "García", "Perrin", "Robin", "Clément", "Morin", "Henry", "Roussel", "Masson", "Denis", "Lemaire", "Marchand"],
             testStreet: "Rue de Test",
-            testCompany: "Société Test"
+            testCompany: "Société Test",
+            sampleShort: ["Projet de rapport trimestriel", "Notes de la réunion d'équipe", "Calendrier mis à jour du projet", "Synthèse des retours clients", "Suivi des tâches de la semaine dernière", "Notes sur la nouvelle fonctionnalité"],
+            sampleLong: ["Cette fiche résume les principaux résultats de la dernière revue et liste les prochaines étapes.", "Veuillez examiner les informations jointes et confirmer leur exactitude avant l'envoi.", "Le projet avance comme prévu ; les petits retards des tests devraient être résolus la semaine prochaine.", "Des précisions seront communiquées dès réception et vérification des documents en attente."]
         },
         de: {
             name: "Deutsch",
@@ -81,7 +89,9 @@ const FillHubLocaleData = {
             firstNames: ["Hans", "Anna", "Karl", "Maria", "Stefan", "Julia", "Thomas", "Laura", "Andreas", "Sarah", "Michael", "Lisa", "Jan", "Lena", "Felix", "Sophie", "Tim", "Leonie", "Lukas", "Hannah", "Paul", "Mia", "Jonas", "Emma", "Niklas", "Lea", "Florian", "Katharina", "Markus", "Sabine", "Christian", "Petra", "Dieter", "Ursula", "Matthias", "Birgit", "Jürgen", "Monika", "Klaus", "Renate", "Tobias", "Nadine", "Sebastian", "Simone", "Oliver", "Bernd", "Heike", "Frank", "Gisela", "Hannes"],
             lastNames: ["Müller", "Schmidt", "Schneider", "Fischer", "Meyer", "Weber", "Schulz", "Wagner", "Becker", "Hoffmann", "Schäfer", "Koch", "Bauer", "Richter", "Klein", "Wolf", "Schröder", "Neumann", "Schwarz", "Zimmermann", "Braun", "Krüger", "Hofmann", "Hartmann", "Lange", "Schmitt", "Werner", "Schmitz", "Krause", "Meier", "Lehmann", "Schmid", "Schulze", "Maier", "Köhler", "Herrmann", "König", "Walter", "Mayer", "Huber", "Kaiser", "Fuchs", "Peters", "Lang", "Scholz", "Möller", "Weiß", "Jung", "Hahn", "Ernst"],
             testStreet: "Teststraße",
-            testCompany: "Test GmbH"
+            testCompany: "Test GmbH",
+            sampleShort: ["Entwurf des Quartalsberichts", "Notizen zur Teambesprechung", "Aktualisierter Projektzeitplan", "Zusammenfassung des Kundenfeedbacks", "Nachverfolgung der Aufgaben der Vorwoche", "Notizen zur neuen Funktion"],
+            sampleLong: ["Dieser Eintrag fasst die wichtigsten Ergebnisse der letzten Prüfung zusammen und nennt die nächsten Schritte.", "Bitte prüfen Sie die beigefügten Informationen und bestätigen Sie vor dem Absenden, dass alles stimmt.", "Das Projekt liegt im Zeitplan; kleine Verzögerungen bei den Tests sollen in der nächsten Woche behoben werden.", "Weitere Details folgen, sobald die ausstehenden Unterlagen eingegangen und geprüft sind."]
         },
         pt: {
             name: "Português",
@@ -97,7 +107,9 @@ const FillHubLocaleData = {
             firstNames: ["João", "Maria", "Pedro", "Ana", "Miguel", "Sofia", "Tiago", "Bárbara", "Ricardo", "Inês", "Lucas", "Beatriz", "Gabriel", "Júlia", "Rafael", "Larissa", "Mateus", "Isabela", "Gustavo", "Camila", "Felipe", "Letícia", "Bruno", "Fernanda", "Rodrigo", "Amanda", "Vitor", "Juliana", "Diego", "Patrícia", "Carlos", "Aline", "Leandro", "Renata", "Thiago", "Vanessa", "Marcos", "Priscila", "André", "Débora", "Eduardo", "Cláudia", "Henrique", "Simone", "Caio", "Daniele", "Igor", "Luana", "Roberto", "Tatiane"],
             lastNames: ["Silva", "Santos", "Ferreira", "Pereira", "Oliveira", "Costa", "Rodrigues", "Martins", "Jesus", "Sousa", "Almeida", "Nascimento", "Lima", "Araújo", "Carvalho", "Gomes", "Ribeiro", "Barbosa", "Rocha", "Dias", "Monteiro", "Cardoso", "Reis", "Teixeira", "Moreira", "Machado", "Nunes", "Campos", "Freitas", "Mendes", "Batista", "Moura", "Cavalcante", "Correia", "Cunha", "Fonseca", "Pinto", "Azevedo", "Melo", "Nogueira", "Pimentel", "Vieira", "Xavier", "Lopes", "Moraes", "Duarte", "Borges", "Castro", "Brito", "Ramalho"],
             testStreet: "Rua de Teste",
-            testCompany: "Empresa Teste"
+            testCompany: "Empresa Teste",
+            sampleShort: ["Rascunho do relatório trimestral", "Notas da reunião da equipe", "Cronograma atualizado do projeto", "Resumo do feedback dos clientes", "Acompanhamento das tarefas da semana passada", "Notas sobre o novo recurso"],
+            sampleLong: ["Este registro resume os principais resultados da última revisão e lista os próximos passos.", "Revise as informações anexadas e confirme que tudo está correto antes de enviar.", "O projeto segue o cronograma; pequenos atrasos nos testes devem ser resolvidos na próxima semana.", "Mais detalhes serão enviados assim que os documentos pendentes forem recebidos e verificados."]
         },
         ru: {
             name: "Русский",
@@ -118,7 +130,9 @@ const FillHubLocaleData = {
             lastNames: ["Иванов", "Смирнов", "Кузнецов", "Попов", "Васильев", "Петров", "Соколов", "Михайлов", "Новиков", "Фёдоров", "Морозов", "Волков", "Алексеев", "Лебедев", "Семёнов", "Егоров", "Павлов", "Козлов", "Степанов", "Николаев", "Орлов", "Андреев", "Макаров", "Никитин", "Захаров", "Зайцев", "Соловьёв", "Борисов", "Яковлев", "Григорьев", "Романов", "Воробьёв", "Сергеев", "Кузьмин", "Фролов", "Александров", "Дмитриев", "Королёв", "Гусев", "Киселёв", "Ильин", "Максимов", "Поляков", "Сорокин", "Виноградов", "Ковалёв", "Белов", "Медведев", "Антонов", "Тарасов"],
             lastNamesLatin: ["Ivanov", "Smirnov", "Kuznetsov", "Popov", "Vasilyev", "Petrov", "Sokolov", "Mikhaylov", "Novikov", "Fedorov", "Morozov", "Volkov", "Alekseev", "Lebedev", "Semyonov", "Egorov", "Pavlov", "Kozlov", "Stepanov", "Nikolaev", "Orlov", "Andreev", "Makarov", "Nikitin", "Zakharov", "Zaytsev", "Solovyov", "Borisov", "Yakovlev", "Grigoryev", "Romanov", "Vorobyov", "Sergeev", "Kuzmin", "Frolov", "Aleksandrov", "Dmitriev", "Korolev", "Gusev", "Kiselev", "Ilyin", "Maksimov", "Polyakov", "Sorokin", "Vinogradov", "Kovalev", "Belov", "Medvedev", "Antonov", "Tarasov"],
             testStreet: "Тестовая улица",
-            testCompany: "Тестовая компания"
+            testCompany: "Тестовая компания",
+            sampleShort: ["Черновик квартального отчёта", "Заметки с совещания команды", "Обновлённый график проекта", "Сводка отзывов клиентов", "Задачи прошлой недели", "Заметки о новой функции"],
+            sampleLong: ["В этой записи кратко описаны основные итоги последней проверки и перечислены следующие шаги.", "Пожалуйста, проверьте приложенные сведения и подтвердите их точность перед отправкой.", "Проект идёт по графику; небольшие задержки при тестировании должны быть устранены на следующей неделе.", "Подробности будут предоставлены после получения и проверки ожидаемых документов."]
         },
         zh: {
             name: "中文",
@@ -136,7 +150,9 @@ const FillHubLocaleData = {
             firstNamesLatin: ["Wei", "Fang", "Lei", "Xiuying", "Ming", "Jing", "Qiang", "Lili", "Jun", "Yan", "Min", "Jie", "Juan", "Yong", "Yanling", "Tao", "Xia", "Feng", "Yang", "Xue", "Fei", "Xin", "Qian", "Hao", "Yu", "Mei", "Luyao", "Rui", "Zhen", "Jian", "Hui", "Jiayi", "Ling", "Si", "Lina", "Ping", "Kai", "Bo", "Hua", "Wen", "Yao", "Hong", "Jianguo", "Ting", "Yi", "Fan", "Chao", "Lele", "Guang", "Bin", "Fen", "Haoran"],
             lastNamesLatin: ["Wang", "Li", "Zhang", "Liu", "Chen", "Zhao", "Huang", "Zhou", "Wu", "Xu", "Sun", "Hu", "Zhu", "Gao", "Lin", "He", "Guo", "Ma", "Luo", "Liang", "Song", "Zheng", "Xie", "Han", "Tang", "Dong", "Xiao", "Cheng", "Cao", "Yuan", "Deng", "Fu", "Shen", "Zeng", "Peng", "Lv", "Su", "Shi", "Jiang", "Cai", "Jia", "Ding", "Ye", "Pan", "Du", "Dai", "Kong", "Qi", "Ren", "Bai", "Tan"],
             testStreet: "测试路",
-            testCompany: "测试公司"
+            testCompany: "测试公司",
+            sampleShort: ["季度报告草稿", "团队会议纪要", "更新后的项目时间表", "客户反馈摘要", "上周任务跟进", "新功能说明"],
+            sampleLong: ["本记录总结了上次评审的主要结果，并列出了团队的下一步工作。", "请查看附件信息，并在提交前确认所有内容准确无误。", "项目按计划推进，测试阶段的小幅延迟预计将在下周解决。", "待收到并核对相关文件后，我们将提供更多细节。"]
         },
         ja: {
             name: "日本語",
@@ -154,7 +170,9 @@ const FillHubLocaleData = {
             firstNamesLatin: ["Hiroshi", "Yuki", "Kenji", "Ai", "Takashi", "Mami", "Satoshi", "Rina", "Akira", "Yoko", "Taro", "Hanako", "Shota", "Misaki", "Daisuke", "Megumi", "Takuya", "Yui", "Naoki", "Aya", "Makoto", "Hiroko", "Tatsuya", "Mai", "Tsuyoshi", "Kumiko", "Shinichi", "Chihiro", "Kazuya", "Yuko", "Koji", "Aiko", "Osamu", "Naoko", "Ichiro", "Kyoko", "Kenta", "Miho", "Ryo", "Mayu", "Tsubasa", "Chinatsu", "Hiroto", "Ryoko", "Hikaru", "Shizuka", "Yuuki", "Mariko", "Yuto", "Nanami"],
             lastNamesLatin: ["Sato", "Suzuki", "Takahashi", "Tanaka", "Watanabe", "Ito", "Yamamoto", "Nakamura", "Kobayashi", "Kato", "Yoshida", "Yamada", "Sasaki", "Yamaguchi", "Matsumoto", "Inoue", "Kimura", "Hayashi", "Saito", "Shimizu", "Yamazaki", "Mori", "Ikeda", "Hashimoto", "Abe", "Ishikawa", "Yamashita", "Nakajima", "Ishii", "Ogawa", "Maeda", "Okada", "Hasegawa", "Murakami", "Kondo", "Ishida", "Endo", "Aoki", "Sakai", "Fujii", "Nishimura", "Fukuda", "Ota", "Miura", "Okamoto", "Matsuda", "Nakagawa", "Kono", "Ono", "Iwasaki"],
             testStreet: "テスト通り",
-            testCompany: "テスト株式会社"
+            testCompany: "テスト株式会社",
+            sampleShort: ["四半期報告書の草稿", "チーム会議の議事メモ", "更新されたプロジェクト計画", "顧客フィードバックの要約", "先週のタスクのフォローアップ", "新機能についてのメモ"],
+            sampleLong: ["この記録は前回のレビューの主な結果をまとめ、チームの次のステップを示しています。", "添付の情報をご確認のうえ、送信前に内容に誤りがないかご確認ください。", "プロジェクトは予定どおり進んでおり、テスト段階の小さな遅れは来週中に解消される見込みです。", "保留中の書類を受領・確認次第、詳細をお知らせします。"]
         },
         ar: {
             name: "العربية",
@@ -172,7 +190,9 @@ const FillHubLocaleData = {
             firstNamesLatin: ["Mohammed", "Fatima", "Ahmed", "Layla", "Ali", "Sara", "Omar", "Mariam", "Youssef", "Noor", "Ibrahim", "Aisha", "Khaled", "Hoda", "Hassan", "Mona", "Karim", "Yasmin", "Mostafa", "Dina", "Tarek", "Rana", "Sami", "Iman", "Hala", "Wael", "Salma", "Ayman", "Nadia", "Tamer", "Shaimaa", "Mahmoud", "Rehab", "Basem", "Reham", "Majed", "Heba", "Karima", "Adel", "Sahar", "Yasser", "Noha", "Hazem", "Ghada", "Gamila", "Subhi", "Zeinab", "Seif", "Lobna", "Fady"],
             lastNamesLatin: ["Al-Farsi", "Haddad", "Mansour", "Saleh", "Bakir", "Zaid", "Khalil", "Nasser", "Al-Sayed", "Abdullah", "Al-Banna", "Abdelrahman", "Soliman", "Fahmy", "Ramadan", "Othman", "Kamel", "Gamal", "Sherif", "Abbas", "Al-Saeed", "Farid", "Al-Naggar", "Hussein", "Saad", "Awad", "Makawi", "Sabry", "Al-Sharqawi", "Arafa", "Al-Badawi", "Al-Masry", "Al-Husseini", "Al-Adawy", "Younes", "Moussa", "Barakat", "Fouad", "Al-Nashar", "Qassem", "Rashed", "Al-Hakim", "Al-Desouky", "Eissa", "Morsy", "Hashim", "Mabrouk", "Al-Ghazali", "Al-Kholy", "Zaki"],
             testStreet: "شارع الاختبار",
-            testCompany: "شركة الاختبار"
+            testCompany: "شركة الاختبار",
+            sampleShort: ["مسودة التقرير الفصلي", "ملاحظات اجتماع الفريق", "الجدول الزمني المحدّث للمشروع", "ملخص ملاحظات العملاء", "متابعة مهام الأسبوع الماضي", "ملاحظات حول الميزة الجديدة"],
+            sampleLong: ["يلخص هذا السجل النتائج الرئيسية للمراجعة الأخيرة ويسرد الخطوات التالية للفريق.", "يرجى مراجعة المعلومات المرفقة والتأكد من صحتها قبل الإرسال.", "يسير المشروع وفق الجدول، ومن المتوقع حل التأخيرات البسيطة في الاختبارات الأسبوع المقبل.", "سيتم تقديم مزيد من التفاصيل بعد استلام المستندات المعلقة والتحقق منها."]
         },
         hi: {
             name: "हिन्दी",
@@ -190,7 +210,9 @@ const FillHubLocaleData = {
             firstNamesLatin: ["Rahul", "Priya", "Amit", "Anita", "Vikas", "Pooja", "Sanjay", "Sunita", "Ajay", "Neha", "Rohit", "Kavita", "Vijay", "Meena", "Anil", "Rekha", "Suresh", "Seema", "Manoj", "Deepika", "Akash", "Anjali", "Sandeep", "Swati", "Praveen", "Geeta", "Arjun", "Shalini", "Karan", "Ritu", "Neeraj", "Sonia", "Dinesh", "Pallavi", "Abhishek", "Reena", "Mahesh", "Jyoti", "Gaurav", "Madhu", "Harish", "Vandana", "Vikram", "Kamla", "Tarun", "Nandini", "Yogesh", "Savita", "Rajesh", "Uma", "Mayank", "Preeti"],
             lastNamesLatin: ["Sharma", "Verma", "Gupta", "Singh", "Kumar", "Yadav", "Patel", "Mishra", "Agarwal", "Jain", "Reddy", "Nair", "Choudhary", "Mehta", "Kapoor", "Rao", "Das", "Banerjee", "Khan", "Pandey", "Tripathi", "Chaturvedi", "Saxena", "Goyal", "Bhatt", "Joshi", "Dwivedi", "Shukla", "Tiwari", "Bansal", "Malhotra", "Saini", "Arora", "Chawla", "Bajaj", "Thakur", "Rastogi", "Mukherjee", "Ghosh", "Sen", "Menon", "Pillai", "Iyer", "Shetty", "Gowda", "Nath", "Kulkarni", "Deshmukh", "Patil", "Jadhav", "Sahu"],
             testStreet: "टेस्ट मार्ग",
-            testCompany: "टेस्ट कंपनी"
+            testCompany: "टेस्ट कंपनी",
+            sampleShort: ["त्रैमासिक रिपोर्ट का मसौदा", "टीम बैठक के नोट्स", "अद्यतन परियोजना समय-सारणी", "ग्राहक प्रतिक्रिया का सारांश", "पिछले सप्ताह के कार्यों का अनुवर्तन", "नई सुविधा के बारे में नोट्स"],
+            sampleLong: ["यह प्रविष्टि पिछली समीक्षा के मुख्य परिणामों का सारांश देती है और टीम के अगले चरण सूचीबद्ध करती है।", "कृपया संलग्न जानकारी देखें और भेजने से पहले पुष्टि करें कि सब सही है।", "परियोजना समय पर चल रही है; परीक्षण में छोटी देरी अगले सप्ताह तक सुलझने की उम्मीद है।", "लंबित दस्तावेज़ प्राप्त और जाँचे जाने के बाद अधिक विवरण दिए जाएँगे।"]
         },
         bn: {
             name: "বাংলা",
@@ -208,7 +230,9 @@ const FillHubLocaleData = {
             firstNamesLatin: ["Rahim", "Fatema", "Karim", "Ayesha", "Rafiq", "Nasrin", "Sumon", "Shirin", "Jahid", "Rumana", "Mahmud", "Sabina", "Hasan", "Tania", "Imran", "Mousumi", "Abdul", "Nurjahan", "Tarek", "Labani", "Saiful", "Ria", "Alamgir", "Sonia", "Shafiq", "Jasmin", "Kamrul", "Salma", "Mizanur", "Farzana", "Anisur", "Shahnaz", "Mamun", "Roshan", "Zakir", "Nilufa", "Mina", "Rashed", "Shakil", "Parveen", "Sumaiya", "Rezwan", "Halima", "Iqbal", "Khadija", "Nazmul", "Rokeya", "Asif", "Mostafa", "Sultana"],
             lastNamesLatin: ["Ahmed", "Hossain", "Rahman", "Islam", "Khan", "Chowdhury", "Mia", "Sarkar", "Biswas", "Das", "Majumder", "Haque", "Mondal", "Sheikh", "Alam", "Talukder", "Siddiqui", "Molla", "Kabir", "Halder", "Basu", "Ganguly", "Chakraborty", "Ghosh", "Pal", "Saha", "Roy", "Nath", "Poddar", "Dev", "Goswami", "Yusuf", "Azad", "Mahato", "Sen", "Howlader", "Kazi", "Sardar", "Shikdar", "Patwary", "Bhuiyan", "Fakir", "Dewan", "Mir", "Barua", "Sutradhar", "Tarafdar", "Bagchi", "Sattar", "Mridha"],
             testStreet: "টেস্ট সড়ক",
-            testCompany: "টেস্ট কোম্পানি"
+            testCompany: "টেস্ট কোম্পানি",
+            sampleShort: ["ত্রৈমাসিক প্রতিবেদনের খসড়া", "দলের সভার নোট", "হালনাগাদ প্রকল্প সময়সূচি", "গ্রাহক মতামতের সারসংক্ষেপ", "গত সপ্তাহের কাজের অগ্রগতি", "নতুন বৈশিষ্ট্য সম্পর্কে নোট"],
+            sampleLong: ["এই এন্ট্রিতে সর্বশেষ পর্যালোচনার মূল ফলাফল সংক্ষেপে দেওয়া হয়েছে এবং দলের পরবর্তী ধাপগুলো তালিকাভুক্ত করা হয়েছে।", "অনুগ্রহ করে সংযুক্ত তথ্য দেখুন এবং জমা দেওয়ার আগে সবকিছু সঠিক কিনা নিশ্চিত করুন।", "প্রকল্প পরিকল্পনা অনুযায়ী এগোচ্ছে; পরীক্ষায় সামান্য বিলম্ব আগামী সপ্তাহে সমাধান হওয়ার কথা।", "অপেক্ষমাণ নথিগুলো পাওয়া ও যাচাই হওয়ার পর আরও বিস্তারিত জানানো হবে।"]
         },
         ur: {
             name: "اردو",
@@ -226,7 +250,9 @@ const FillHubLocaleData = {
             firstNamesLatin: ["Muhammad", "Ali", "Imran", "Fatima", "Ahmed", "Iman", "Hassan", "Ayesha", "Usman", "Zainab", "Bilal", "Maryam", "Kamran", "Saima", "Faisal", "Nadia", "Shahid", "Sidra", "Tariq", "Hina", "Zahid", "Sana", "Waqas", "Rabia", "Asif", "Naziya", "Nadeem", "Shazia", "Junaid", "Kanwal", "Rizwan", "Aamna", "Farhan", "Mahwish", "Asad", "Maria", "Adnan", "Samira", "Rashid", "Nabeela", "Yasir", "Bushra", "Hamza", "Iram", "Salman", "Iffat", "Ammar", "Mahnoor", "Tauseef", "Rubina", "Anas", "Fariha", "Ibrahim"],
             lastNamesLatin: ["Khan", "Shah", "Chaudhry", "Malik", "Raza", "Hussain", "Qureshi", "Siddiqui", "Butt", "Javed", "Mir", "Ansari", "Abbasi", "Rajput", "Niazi", "Bhutto", "Hashmi", "Warraich", "Gilani", "Mughal", "Sheikh", "Dar", "Kayani", "Lodhi", "Awan", "Jatt", "Sial", "Gujjar", "Baloch", "Paracha", "Naqvi", "Rana", "Zaidi", "Usmani", "Mirza", "Bukhari", "Khokhar", "Qazi", "Sindhu", "Zia", "Jalali", "Tanoli", "Aziz", "Yousafzai", "Nawaz", "Khawaja", "Riaz", "Sattar", "Zafar", "Ghori"],
             testStreet: "ٹیسٹ روڈ",
-            testCompany: "ٹیسٹ کمپنی"
+            testCompany: "ٹیسٹ کمپنی",
+            sampleShort: ["سہ ماہی رپورٹ کا مسودہ", "ٹیم میٹنگ کے نوٹس", "تازہ ترین پروجیکٹ شیڈول", "کسٹمر فیڈبیک کا خلاصہ", "پچھلے ہفتے کے کاموں کا فالو اپ", "نئی خصوصیت کے بارے میں نوٹس"],
+            sampleLong: ["یہ اندراج آخری جائزے کے اہم نتائج کا خلاصہ پیش کرتا ہے اور ٹیم کے اگلے اقدامات درج کرتا ہے۔", "براہ کرم منسلک معلومات دیکھیں اور جمع کرانے سے پہلے تصدیق کریں کہ سب درست ہے۔", "پروجیکٹ طے شدہ شیڈول پر ہے؛ ٹیسٹنگ میں معمولی تاخیر اگلے ہفتے تک حل ہونے کی توقع ہے۔", "زیر التواء دستاویزات موصول اور چیک ہونے کے بعد مزید تفصیلات فراہم کی جائیں گی۔"]
         },
         id: {
             name: "Bahasa Indonesia",
@@ -242,7 +268,9 @@ const FillHubLocaleData = {
             firstNames: ["Budi", "Siti", "Agus", "Dewi", "Joko", "Rina", "Andi", "Sri", "Eko", "Wati", "Dedi", "Lestari", "Rudi", "Ayu", "Hendra", "Nurul", "Fajar", "Putri", "Bambang", "Yuni", "Yoga", "Maya", "Rizky", "Indah", "Dimas", "Ratna", "Taufik", "Lia", "Wahyu", "Sari", "Doni", "Ika", "Teguh", "Fitri", "Hadi", "Mega", "Irwan", "Dian", "Arif", "Nanda", "Bayu", "Wulan", "Ridwan", "Tika", "Galih", "Kartika", "Reza", "Sinta", "Ilham", "Yudi"],
             lastNames: ["Wijaya", "Santoso", "Saputra", "Pratama", "Hidayat", "Nugroho", "Kusuma", "Susanto", "Wibowo", "Setiawan", "Purnomo", "Hartono", "Gunawan", "Halim", "Utomo", "Rahmawati", "Permana", "Siregar", "Nasution", "Tanjung", "Sitompul", "Simanjuntak", "Hutapea", "Suryadi", "Kurniawan", "Firmansyah", "Hakim", "Irawan", "Wardhana", "Susilo", "Hermawan", "Suharto", "Mulyadi", "Kosasih", "Pangestu", "Iskandar", "Basuki", "Sutrisno", "Maulana", "Syahputra", "Lubis", "Harahap", "Batubara", "Sembiring", "Tarigan", "Ginting", "Situmorang", "Setyawan", "Anggraini", "Lesmana", "Prasetyo"],
             testStreet: "Jalan Uji",
-            testCompany: "PT Uji Coba"
+            testCompany: "PT Uji Coba",
+            sampleShort: ["Draf laporan triwulan", "Catatan rapat tim", "Jadwal proyek yang diperbarui", "Ringkasan masukan pelanggan", "Tindak lanjut tugas minggu lalu", "Catatan tentang fitur baru"],
+            sampleLong: ["Catatan ini merangkum hasil utama tinjauan terakhir dan mencantumkan langkah berikutnya untuk tim.", "Silakan tinjau informasi terlampir dan pastikan semuanya benar sebelum mengirim.", "Proyek berjalan sesuai jadwal; keterlambatan kecil pada pengujian diperkirakan selesai minggu depan.", "Rincian tambahan akan diberikan setelah dokumen yang tertunda diterima dan diperiksa."]
         },
         vi: {
             name: "Tiếng Việt",
@@ -262,7 +290,9 @@ const FillHubLocaleData = {
             firstNamesLatin: ["Minh", "Anh", "Hương", "Lan", "Tuấn", "Hoa", "Hùng", "Linh", "Đức", "Mai", "Quang", "Thảo", "Khang", "Ngọc", "Dũng", "Huyền", "Long", "Trang", "Nam", "Yến", "Hải", "Phương", "Bảo", "Thu", "Khải", "Trâm", "Phúc", "Vy", "Thắng", "Nga", "Tú", "Nhung", "Duy", "Hạnh", "Khoa", "Uyên", "Việt", "Diệp", "Sơn", "Thanh", "Hiếu", "Kiên", "Thùy", "Đạt", "Oanh", "Tâm", "Giang", "Hậu", "Bình", "Yên"],
             lastNamesLatin: ["Nguyen", "Tran", "Le", "Pham", "Hoang", "Huynh", "Phan", "Vu", "Vo", "Dang", "Bui", "Do", "Ho", "Ngo", "Duong", "Ly", "Dinh", "Trinh", "To", "Ma", "Doan", "Lam", "Chau", "Cao", "Ha", "Kieu", "Luong", "Luu", "Ta", "Thai", "Dao", "Truong", "Dam", "Vuong", "Quach", "Tang", "Chu", "Hua", "Van", "Ton", "Ung", "Kha", "Cu", "Au", "Phi", "Tu", "Sam", "Dau", "Vi", "Thieu"],
             testStreet: "Đường Thử Nghiệm",
-            testCompany: "Công ty Thử Nghiệm"
+            testCompany: "Công ty Thử Nghiệm",
+            sampleShort: ["Bản nháp báo cáo quý", "Ghi chú cuộc họp nhóm", "Lịch dự án đã cập nhật", "Tóm tắt phản hồi của khách hàng", "Theo dõi công việc tuần trước", "Ghi chú về tính năng mới"],
+            sampleLong: ["Bản ghi này tóm tắt các kết quả chính của đợt đánh giá gần nhất và liệt kê các bước tiếp theo của nhóm.", "Vui lòng xem thông tin đính kèm và xác nhận mọi thứ chính xác trước khi gửi.", "Dự án đang đúng tiến độ; các chậm trễ nhỏ trong kiểm thử dự kiến sẽ được xử lý vào tuần tới.", "Chi tiết bổ sung sẽ được cung cấp sau khi nhận và kiểm tra các tài liệu đang chờ."]
         }
     },
 

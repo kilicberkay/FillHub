@@ -695,10 +695,14 @@ function fillField(input, settings, checkVisibility = true) {
     if (checkVisibility && !isElementVisible(input)) return false;
 
     if (input.type === 'radio' || input.type === 'checkbox') {
-        // Her doldurma temiz sayfa: kutu çekilişe göre işaretlenir ya da temizlenir (birikme yok).
-        // required/aria-required kutular her zaman işaretlenir; radio'da rastgelelik uygulanmaz.
-        const shouldCheck = input.type === 'radio' || settings.checkAllBoxes || input.required
-            || input.getAttribute('aria-required') === 'true' || Math.random() >= 0.5;
+        // Her doldurma temiz sayfa: kutu hedef duruma getirilir (birikme yok). Karar sırası:
+        // radio ve required → checkAllBoxes → pazarlama (işaretsiz) → gizlilik/şart/KVKK onayı (işaretli) → rastgele
+        const kind = input.type === 'checkbox' ? FillHubDetect.classifyCheckbox(fieldTexts(input)) : 'other';
+        const shouldCheck = input.type === 'radio' || input.required || input.getAttribute('aria-required') === 'true'
+            || settings.checkAllBoxes ? true
+            : kind === 'marketing' ? false
+            : kind === 'consent' && settings.consentBoxes !== false ? true
+            : Math.random() >= 0.5;
         if (input.checked === shouldCheck) return false;
         snapshotField(input);
         setNativeChecked(input, shouldCheck);
@@ -760,6 +764,7 @@ function fillField(input, settings, checkVisibility = true) {
             pattern: input.getAttribute('pattern') || '',
             valueShape: detectValueShape(input),
             multiline: input.tagName === 'TEXTAREA',
+            maxLength: input.maxLength > 0 ? input.maxLength : 0,
             placeholder: input.placeholder || '',
             script: detectFieldScript(input),
             chaosMode: settings.chaosMode,

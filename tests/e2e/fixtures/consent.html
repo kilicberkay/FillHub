@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FillHub onay formu</title>
+</head>
+<body>
+    <form id="kayit" action="#">
+        <label for="ad">Adınız</label>
+        <input id="ad" name="ad" type="text">
+        <label for="faaliyet">Faaliyet Başlığı</label>
+        <input id="faaliyet" name="faaliyet" type="text" maxlength="30" placeholder="Faaliyet başlığı">
+        <label for="aciklama">Açıklama</label>
+        <textarea id="aciklama" name="aciklama"></textarea>
+        <label for="bitis">Bitiş Tarihi</label>
+        <input id="bitis" name="bitis" type="text" placeholder="gg.aa.yyyy" disabled>
+        <label><input id="kvkk" type="checkbox"> 6698 sayılı KVKK kapsamında aydınlatma metnini okudum ve kabul ediyorum</label>
+        <label><input id="sartlar" type="checkbox"> Kullanım şartlarını kabul ediyorum</label>
+        <label><input id="bulten" type="checkbox"> E-bülten ve kampanya bilgilendirmelerini almak istiyorum</label>
+        <label><input id="robot" type="checkbox"> Ben robot değilim</label>
+        <button type="submit">Gönder</button>
+    </form>
+</body>
+</html>
