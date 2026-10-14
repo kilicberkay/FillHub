@@ -2,6 +2,10 @@
   <img src="docs/images/banner.png" alt="FillHub banner: realistic fake form data in 15 languages" width="100%">
 </p>
 
+<p align="center">
+  <img src="docs/images/demo.gif" alt="FillHub fills a sign-up form, then undo restores it" width="90%">
+</p>
+
 <h1 align="center">FillHub</h1>
 
 <p align="center">
@@ -95,7 +99,10 @@ A profile decides who is used for a fill:
 Create, edit, and switch profiles on the **Profiles** page. The active profile is always shown at the top.
 
 <p align="center">
-  <img src="docs/images/settings-profiles.png" alt="Identity profiles page with the active profile banner and profile cards" width="90%">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/settings-profiles.png">
+    <img src="docs/images/light/settings-profiles.png" alt="Identity profiles page with the active profile banner and profile cards" width="90%">
+  </picture>
 </p>
 
 ### Custom rules
@@ -103,17 +110,22 @@ Create, edit, and switch profiles on the **Profiles** page. The active profile i
 When built-in detection misses a field, map a CSS selector to a data type on the **Custom Rules** page.
 
 <p align="center">
-  <img src="docs/images/settings-rules.png" alt="Custom rules page" width="90%">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/settings-rules.png">
+    <img src="docs/images/light/settings-rules.png" alt="Custom rules page" width="90%">
+  </picture>
 </p>
 
 ### Smart form behavior
 
 - **Smart e-mail linking**: e-mail fields follow the generated name.
 - **Match passwords**: "confirm password" fields receive the same value.
-- **Checkboxes**: required ones are checked; the others are set at random, unless **Check all checkboxes** is on.
+- **Consent checkboxes** (terms, privacy, KVKK) are checked, and **marketing checkboxes** (newsletter, campaigns) stay unchecked. Required boxes are always checked. Other boxes are set at random, unless **Check all checkboxes** is on. Turn off **Check consent boxes** to use the random policy for consent boxes too.
 - **Radio groups** receive exactly one choice.
 - **HTML constraints** are respected: `pattern`, `minlength`, and the `min` and `max` limits of date and time fields.
 - **Date fields** receive dates between 2000 and today.
+- **Text fields** receive sample sentences in the language of the country profile. Long sentences go into multi-line fields, and values are cut to the field's `maxlength`.
+- **URL fields** receive links to reserved example domains, never to real sites.
 - **File inputs** receive a generated file.
 - **Auto-submit** (off by default) clicks the real submit button after filling. Fake buttons and destructive controls such as Cancel or Delete are never clicked.
 - **Works inside iframes**, skips disabled and read-only fields, and keeps framework state (React, Vue) in sync with the values it writes.
@@ -125,7 +137,10 @@ FillHub does not click, solve, or call captcha APIs. When a visible reCAPTCHA, h
 ### Settings
 
 <p align="center">
-  <img src="docs/images/settings-general.png" alt="General settings page with default country and smart features" width="90%">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/settings-general.png">
+    <img src="docs/images/light/settings-general.png" alt="General settings page with default country and smart features" width="90%">
+  </picture>
 </p>
 
 - **General**: default country, smart features, and PII Safe mode.
@@ -135,7 +150,10 @@ FillHub does not click, solve, or call captcha APIs. When a visible reCAPTCHA, h
 - **Support**: how to support the project.
 
 <p align="center">
-  <img src="docs/images/settings-support.png" alt="Support page with the GitHub Sponsors link" width="90%">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/settings-support.png">
+    <img src="docs/images/light/settings-support.png" alt="Support page with the GitHub Sponsors link" width="90%">
+  </picture>
 </p>
 
 ## Install
@@ -245,6 +263,12 @@ FillHub/
 ├── tools/               Syntax check, data verification, zip build, store image generator
 └── .github/             CI and release workflows, issue and pull request templates
 ```
+
+## Documentation
+
+- [FAQ](docs/FAQ.md): common questions, including captchas, PII Safe, and consent boxes.
+- [Architecture](docs/ARCHITECTURE.md): how the pieces fit together.
+- [Translating](docs/TRANSLATING.md): how to improve or add translations.
 
 ## Contributing and security
 

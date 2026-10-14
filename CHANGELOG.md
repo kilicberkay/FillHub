@@ -34,6 +34,13 @@ All notable changes to FillHub are documented here. The format follows
 - Removed the automatic interaction with reCAPTCHA and Turnstile widgets that ran on every fill in 1.1.0.
   FillHub never clicks or executes CAPTCHA challenges. When a visible CAPTCHA is on the page, FillHub
   highlights it and asks you to complete it yourself.
+- Consent checkboxes (terms, privacy, KVKK) are checked on fill; marketing checkboxes stay unchecked. New
+  setting "Check consent boxes" (on by default).
+- URL fields receive reserved example domains only (previously some were not reserved names).
+- Text fields receive localized sample sentences instead of English Lorem ipsum, and respect maxlength.
+- Onboarding text, page title, and the "Remove" rule button are translated; the onboarding text now describes
+  the current behavior.
+- Demo animation, FAQ, translation guide, and GitHub issue forms for field detection and translation.
 - README rewritten with screenshots for each feature, a supported-identity table, and an architecture diagram.
 - The PII Safe description now matches what the mode does (test values instead of generic "User 1" values).
 - The settings sidebar subtitle is translated in every language.

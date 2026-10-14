@@ -35,13 +35,18 @@ const SHOT_PLAN = [
     { file: '05-support.png', nav: 'nav-support', theme: 'light' },
 ];
 
-async function captureScreenshots(env, uiLang) {
-    const dir = join(SHOTS, uiLang === 'tr' ? 'tr' : 'en');
+// Arayüz dili → tarayıcı yerel ayarı (ülke ve dil profili için)
+const LOCALE_OF = { en: 'en-US', tr: 'tr-TR', es: 'es-MX', fr: 'fr-FR', de: 'de-DE', pt: 'pt-BR', ru: 'ru-RU', zh: 'zh-CN',
+    ja: 'ja-JP', ar: 'ar-EG', hi: 'hi-IN', bn: 'bn-BD', ur: 'ur-PK', id: 'id-ID', vi: 'vi-VN' };
+const ALL_LANGS = Object.keys(LOCALE_OF);
+
+async function captureScreenshots(env, uiLang, dir) {
     mkdirSync(dir, { recursive: true });
     const done = [];
     for (const shot of SHOT_PLAN) {
         if (shot.kind === 'fill') {
-            await setStorage(env, { preferredLocale: uiLang === 'tr' ? 'tr-TR' : 'en-US', piiSafe: true, uiLang, onboardingComplete: true });
+            await setStorage(env, { preferredLocale: LOCALE_OF[uiLang], piiSafe: true, uiLang, onboardingComplete: true });
+            // Demo formu: Türkçe etiketli form yalnızca Türkçe arayüz için; diğer diller İngilizce etiketli formu kullanır
             const form = await openForm(env, { lang: uiLang === 'tr' ? 'tr' : 'en' });
             try {
                 await send(env, form.tabId, { action: 'fill' });
@@ -52,7 +57,7 @@ async function captureScreenshots(env, uiLang) {
             }
             continue;
         }
-        await setStorage(env, { uiLang, theme: shot.theme, onboardingComplete: true, preferredLocale: uiLang === 'tr' ? 'tr-TR' : 'en-US' });
+        await setStorage(env, { uiLang, theme: shot.theme, onboardingComplete: true, preferredLocale: LOCALE_OF[uiLang] });
         const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/options/options.html`);
         try {
             await page.waitFor('!!document.getElementById("nav-general")', 10000);
@@ -96,8 +101,14 @@ async function main() {
 
     const env = await startEnv();
     try {
-        for (const uiLang of ['en', 'tr']) {
-            const shots = await withTimeout(captureScreenshots(env, uiLang), 240000, `ekran görüntüleri ${uiLang}`);
+        // Varsayılan: yalnızca İngilizce ve Türkçe (store/assets/screenshots, commit'lenir).
+        // --all: 15 dilin tümü (dist/store-screenshots, commit'lenmez).
+        const all = process.argv.includes('--all');
+        const langs = all ? ALL_LANGS : ['en', 'tr'];
+        for (const uiLang of langs) {
+            const dir = all ? join(ROOT, 'dist', 'store-screenshots', uiLang) : join(SHOTS, uiLang);
+            mkdirSync(dir, { recursive: true });
+            const shots = await withTimeout(captureScreenshots(env, uiLang, dir), 240000, `ekran görüntüleri ${uiLang}`);
             console.log(`ekran görüntüleri (${uiLang}):`, shots.map((p) => p.split('/').pop()).join(', '));
         }
     } finally {

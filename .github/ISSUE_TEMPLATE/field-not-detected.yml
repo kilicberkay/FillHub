@@ -1,0 +1,53 @@
+name: Field not detected or filled incorrectly
+description: A form field was not filled, or got the wrong kind of value
+labels: [bug, detection]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please remove personal data from the report. The information below is enough for us to reproduce the problem.
+  - type: input
+    id: website
+    attributes:
+      label: Website (or a public test page)
+      placeholder: https://example.com/signup
+    validations:
+      required: false
+  - type: input
+    id: label
+    attributes:
+      label: The field's label text
+      placeholder: "e.g. Soyadınız"
+    validations:
+      required: true
+  - type: input
+    id: attributes
+    attributes:
+      label: "The field's name, id, autocomplete and type attributes"
+      placeholder: 'name="surname" id="ln" autocomplete="family-name" type="text"'
+    validations:
+      required: true
+  - type: dropdown
+    id: got
+    attributes:
+      label: What did FillHub put there?
+      options:
+        - Nothing (the field was skipped)
+        - A value of the wrong type
+        - A value that fails the site's format check
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: FillHub version
+      description: Shown at the bottom of the settings page.
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and operating system
+    validations:
+      required: true

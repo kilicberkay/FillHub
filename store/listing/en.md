@@ -27,6 +27,8 @@ Highlights
   labelled "Cep telefonu" or "Soyadınız" receives the right value.
 - PII Safe mode (on by default). Personal identifiers use obvious test values: example.com e-mail
   addresses, placeholder phone numbers, and test identity numbers that are never meant for real use.
+- Consent checkboxes (terms, privacy, KVKK) are checked; marketing checkboxes stay unchecked.
+- Text fields receive sample sentences in the country's language, cut to the field's maximum length.
 - Chaos mode for fuzz-style testing of unusual inputs.
 - Undo restores the form to the state it had before the last fill.
 - Works in iframes, reads labels in the page's own language, and keeps values in sync with

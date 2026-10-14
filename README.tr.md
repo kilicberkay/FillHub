@@ -2,6 +2,10 @@
   <img src="docs/images/banner.png" alt="FillHub afişi: 15 dilde gerçekçi sahte form verisi" width="100%">
 </p>
 
+<p align="center">
+  <img src="docs/images/tr/demo.gif" alt="FillHub bir kayıt formunu doldurur, geri al ile eski hâline döner" width="90%">
+</p>
+
 <h1 align="center">FillHub</h1>
 
 <p align="center">
@@ -95,7 +99,10 @@ Bir profil, doldurmada kimin kullanılacağını belirler:
 Profilleri **Profiller** sayfasında oluşturun, düzenleyin ve değiştirin. Aktif profil her zaman en üstte gösterilir.
 
 <p align="center">
-  <img src="docs/images/tr/settings-profiles.png" alt="Aktif profil şeridi ve profil kartlarıyla kimlik profilleri sayfası" width="90%">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/tr/dark/settings-profiles.png">
+    <img src="docs/images/tr/light/settings-profiles.png" alt="Aktif profil şeridi ve profil kartlarıyla kimlik profilleri sayfası" width="90%">
+  </picture>
 </p>
 
 ### Özel kurallar
@@ -103,17 +110,22 @@ Profilleri **Profiller** sayfasında oluşturun, düzenleyin ve değiştirin. Ak
 Yerleşik tanıma bir alanı kaçırırsa, **Özel Kurallar** sayfasında bir CSS seçicisini bir veri türüne eşleyebilirsiniz.
 
 <p align="center">
-  <img src="docs/images/tr/settings-rules.png" alt="Özel kurallar sayfası" width="90%">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/tr/dark/settings-rules.png">
+    <img src="docs/images/tr/light/settings-rules.png" alt="Özel kurallar sayfası" width="90%">
+  </picture>
 </p>
 
 ### Akıllı form davranışı
 
 - **Akıllı e-posta bağlantısı**: e-posta alanları üretilen ada uyar.
 - **Şifreleri eşleştir**: "şifreyi tekrar yazın" alanları aynı değeri alır.
-- **Onay kutuları**: zorunlu olanlar işaretlenir; diğerleri rastgele ayarlanır, **Tüm onay kutularını işaretle** açıksa hepsi işaretlenir.
+- **Onay kutuları** (şartlar, gizlilik, KVKK) işaretlenir; **pazarlama kutuları** (bülten, kampanya) işaretsiz kalır. Zorunlu kutular her zaman işaretlenir. Diğer kutular rastgele ayarlanır; **Tüm onay kutularını işaretle** açıksa hepsi işaretlenir. **Onay kutularını işaretle** ayarını kapatırsanız onay kutuları da rastgele politikaya girer.
 - **Radyo grupları** yalnızca bir seçenek alır.
 - **HTML kısıtları** uygulanır: `pattern`, `minlength`, tarih ve saat alanlarının `min` ve `max` sınırları.
 - **Tarih alanları** 2000 ile bugün arasında tarihler alır.
+- **Metin alanları**, seçilen ülke profilinin dilinde örnek cümleler alır. Uzun cümleler çok satırlı alanlara, değerler alanın `maxlength` sınırına kırpılarak yazılır.
+- **URL alanları** gerçek sitelere değil, ayrılmış örnek alan adlarına bağlantılar alır.
 - **Dosya alanları** üretilmiş bir dosya alır.
 - **Otomatik gönderim** (varsayılan olarak kapalı) doldurmadan sonra gerçek gönderim düğmesine basar. İptal, Sil gibi sahte veya yıkıcı düğmelere hiçbir zaman basılmaz.
 - **iframe içinde çalışır**, devre dışı ve salt okunur alanları atlar, yazdığı değerleri React ve Vue gibi çerçevelerin durumuyla senkron tutar.
@@ -125,7 +137,10 @@ FillHub captcha'ya tıklamaz, çözmez ve captcha API'lerini çağırmaz. Sayfad
 ### Ayarlar
 
 <p align="center">
-  <img src="docs/images/tr/settings-general.png" alt="Varsayılan ülke ve akıllı özelliklerin bulunduğu genel ayarlar" width="90%">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/tr/dark/settings-general.png">
+    <img src="docs/images/tr/light/settings-general.png" alt="Varsayılan ülke ve akıllı özelliklerin bulunduğu genel ayarlar" width="90%">
+  </picture>
 </p>
 
 - **Genel**: varsayılan ülke, akıllı özellikler ve güvenli mod.
@@ -135,7 +150,10 @@ FillHub captcha'ya tıklamaz, çözmez ve captcha API'lerini çağırmaz. Sayfad
 - **Destek ol**: projeyi nasıl destekleyebileceğiniz.
 
 <p align="center">
-  <img src="docs/images/tr/settings-support.png" alt="GitHub Sponsors bağlantısının bulunduğu destek sayfası" width="90%">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/tr/dark/settings-support.png">
+    <img src="docs/images/tr/light/settings-support.png" alt="GitHub Sponsors bağlantısının bulunduğu destek sayfası" width="90%">
+  </picture>
 </p>
 
 ## Kurulum
@@ -245,6 +263,12 @@ FillHub/
 ├── tools/               Sözdizimi denetimi, veri doğrulama, zip derleme, mağaza görseli üreteci
 └── .github/             CI ve yayın iş akışları, sorun ve çekme isteği şablonları
 ```
+
+## Belgeler
+
+- [SSS](docs/FAQ.md): captcha, güvenli mod ve onay kutuları dahil sık sorulan sorular (İngilizce).
+- [Mimari](docs/ARCHITECTURE.md): parçaların nasıl bir araya geldiği (İngilizce).
+- [Çeviri](docs/TRANSLATING.md): çevirileri nasıl iyileştireceğiniz veya yeni dil ekleyeceğiniz (İngilizce).
 
 ## Katkı ve güvenlik
 

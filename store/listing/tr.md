@@ -26,6 +26,8 @@ kullanmadan deneyebilir.
   "Cep telefonu" ya da "Soyadınız" etiketli alan doğru değeri alır.
 - Güvenli mod (varsayılan olarak açık). Kişisel tanımlayıcılar belli belirsiz test değerleridir:
   example.com e-postaları, yer tutucu telefonlar ve gerçek kullanım için tasarlanmamış test kimlik numaraları.
+- Onay kutuları (şartlar, gizlilik, KVKK) işaretlenir; pazarlama kutuları işaretsiz kalır.
+- Metin alanları, ülkenin dilinde örnek cümleler alır ve alanın en fazla uzunluğuna göre kırpılır.
 - Uç durumları denemek için kaos modu.
 - Geri al: son doldurmayı, doldurmadan önceki haline döndürür.
 - iframe içindeki formlarda çalışır; JavaScript çerçeveleriyle değer senkronizasyonunu korur.
