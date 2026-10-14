@@ -64,182 +64,328 @@ const FakeDataGenerator = (() => {
         { code: "ZW", name: "Zimbabwe" }
     ];
 
-    const LOCALES = {
-        tr: {
-            name: "Turkish",
-            firstNames: ["Ahmet", "Mehmet", "Can", "Burak", "Zeynep", "Elif", "Ayşe", "Merve", "Bora", "Efe", "Derya", "Emre", "Selin", "Murat", "Hakan"],
-            lastNames: ["Yılmaz", "Demir", "Kaya", "Şahin", "Çelik", "Yıldız", "Öztürk", "Aydın", "Arslan", "Doğan", "Kılıç", "Aslan", "Çetin", "Kara"],
-            cities: ["İstanbul", "Ankara", "İzmir", "Bursa", "Antalya", "Adana", "Konya", "Gaziantep", "Şanlıurfa", "Kocaeli", "Mersin"],
-            streets: ["Atatürk Blv", "İstiklal Cd", "Bağdat Cd", "Mevlana Cd", "Cumhuriyet Cd", "İnönü Cd", "Barbaros Blv", "Alemdar Sk"],
-            companies: ["Koç Holding", "Sabancı", "Eczacıbaşı", "Vestel", "Turkcell", "THY", "Aselsan", "Arçelik", "Beko"],
-            phonePrefixes: ["532", "533", "535", "542", "543", "544", "505", "506", "555"],
-            phonePattern: "#######",
-            meetingTypes: ["Proje Toplantısı", "Strateji Görüşmesi", "Aylık Değerlendirme", "Bütçe Planlama"],
-            organizerTypes: ["İK Departmanı", "Yönetim Kurulu", "Proje Ofisi", "Pazarlama Ekibi"],
-            locationTypes: ["Toplantı Odası A", "Konferans Salonu", "Zoom", "Ana Merkez"],
-            agendaTypes: ["1. Açılış\n2. Raporlar\n3. Kapanış", "1. Bütçe\n2. Hedefler", "1. Proje Durumu\n2. Riskler"],
-            positionTypes: ["Yazılım Mühendisi", "Proje Yöneticisi", "İK Uzmanı", "Satış Temsilcisi", "Genel Müdür"]
-        },
-        en: {
-            name: "English (US)",
-            firstNames: ["James", "John", "Robert", "Michael", "William", "David", "Richard", "Joseph", "Thomas", "Charles", "Patricia", "Jennifer"],
-            lastNames: ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez"],
-            cities: ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", "San Antonio", "San Diego", "Dallas", "San Jose"],
-            streets: ["Main St", "High St", "Broad St", "Maple Ave", "Park Ave", "Oak St", "Washington Blvd", "Lakeview Dr"],
-            companies: ["Acme Corp", "Globex", "Soylent Corp", "Initech", "Umbrella Corp", "Stark Ind", "Wayne Ent"],
-            phonePrefixes: ["202", "212", "310", "415", "646", "702", "917"],
-            phonePattern: "#######",
-            meetingTypes: ["Project Kickoff", "Quarterly Review", "Strategy Sync", "Daily Standup"],
-            organizerTypes: ["HR Department", "Executive Board", "Engineering Team", "Sales Ops"],
-            locationTypes: ["Conference Room A", "Boardroom", "Google Meet", "HQ Lobby"],
-            agendaTypes: ["1. Intro\n2. Review\n3. Q&A", "1. Budget\n2. Goals", "1. Status Updates\n2. Blockers"],
-            positionTypes: ["Software Engineer", "Product Manager", "HR Specialist", "Sales Rep", "CEO"]
-        },
-        es: {
-            name: "Spanish",
-            firstNames: ["José", "María", "Juan", "Ana", "Luis", "Isabel", "Carlos", "Laura", "Diego", "Carmen", "Antonio", "Lucía"],
-            lastNames: ["García", "Rodríguez", "González", "Fernández", "López", "Martínez", "Sánchez", "Pérez", "Gómez", "Martín"],
-            cities: ["Madrid", "Barcelona", "Valencia", "Sevilla", "Zaragoza", "Málaga", "Murcia", "Palma", "Las Palmas", "Bilbao"],
-            streets: ["Calle Mayor", "Gran Vía", "Calle de Alcalá", "Avenida de la Constitución", "Paseo de la Castellana"],
-            companies: ["Inditex", "Mercadona", "Telefónica", "Repsol", "Iberdrola", "Banco Santander", "BBVA"],
-            phonePrefixes: ["611", "622", "633", "644", "655", "666", "711", "722"],
-            phonePattern: "#######",
-            meetingTypes: ["Reunión de Proyecto", "Revisión Trimestral", "Estrategia", "Standup Diario"],
-            organizerTypes: ["Recursos Humanos", "Junta Directiva", "Equipo de Ingeniería", "Ventas"],
-            locationTypes: ["Sala de Conferencias", "Sala de Juntas", "Videollamada", "Oficina Principal"],
-            agendaTypes: ["1. Intro\n2. Revisión\n3. Preguntas", "1. Presupuesto\n2. Objetivos"],
-            positionTypes: ["Ingeniero de Software", "Gerente de Producto", "Especialista RRHH", "Representante de Ventas"]
-        },
-        fr: {
-            name: "French",
-            firstNames: ["Jean", "Marie", "Pierre", "Anne", "Luc", "Sophie", "Thomas", "Julie", "Nicolas", "Emma", "Louis", "Chloe"],
-            lastNames: ["Martin", "Bernard", "Thomas", "Petit", "Robert", "Richard", "Durand", "Dubois", "Moreau", "Laurent"],
-            cities: ["Paris", "Marseille", "Lyon", "Toulouse", "Nice", "Nantes", "Strasbourg", "Montpellier", "Bordeaux", "Lille"],
-            streets: ["Rue de Rivoli", "Avenue des Champs-Élysées", "Boulevard Haussmann", "Rue de la Paix", "Rue du Faubourg"],
-            companies: ["TotalEnergies", "AXA", "L'Oréal", "Sanofi", "Orange", "Renault", "Peugeot", "Danone", "Carrefour"],
-            phonePrefixes: ["06", "07"],
-            phonePattern: "########",
-            meetingTypes: ["Lancement de Projet", "Revue Trimestrielle", "Stratégie", "Point Quotidien"],
-            organizerTypes: ["Ressources Humaines", "Comité Exécutif", "Équipe Technique", "Ventes"],
-            locationTypes: ["Salle de Conférence", "Salle de Réunion", "Teams", "Siège Social"],
-            agendaTypes: ["1. Intro\n2. Revue\n3. Q&R", "1. Budget\n2. Objectifs"],
-            positionTypes: ["Ingénieur Logiciel", "Chef de Produit", "Spécialiste RH", "Commercial", "PDG"]
-        },
-        de: {
-            name: "German",
-            firstNames: ["Hans", "Anna", "Karl", "Maria", "Stefan", "Julia", "Thomas", "Laura", "Andreas", "Sarah", "Michael", "Lisa"],
-            lastNames: ["Müller", "Schmidt", "Schneider", "Fischer", "Meyer", "Weber", "Schulz", "Wagner", "Becker", "Hoffmann"],
-            cities: ["Berlin", "Hamburg", "München", "Köln", "Frankfurt", "Stuttgart", "Düsseldorf", "Leipzig", "Dortmund", "Essen"],
-            streets: ["Hauptstraße", "Bahnhofstraße", "Schillerstraße", "Goethestraße", "Lindenstraße", "Dorfstraße", "Schulstraße"],
-            companies: ["Volkswagen", "Allianz", "Siemens", "BMW", "Deutsche Telekom", "Mercedes-Benz", "Bayer", "Adidas"],
-            phonePrefixes: ["0151", "0160", "0170", "0171", "0175", "0152", "0162", "0172"],
-            phonePattern: "#######",
-            meetingTypes: ["Projektstart", "Quartalsrückblick", "Strategie", "Tägliches Standup"],
-            organizerTypes: ["Personalabteilung", "Vorstand", "Technikteam", "Vertrieb"],
-            locationTypes: ["Konferenzraum A", "Sitzungssaal", "Online Meeting", "Hauptquartier"],
-            agendaTypes: ["1. Einführung\n2. Rückblick\n3. Fragen", "1. Budget\n2. Ziele"],
-            positionTypes: ["Softwareentwickler", "Produktmanager", "Personaler", "Vertriebler", "Geschäftsführer"]
-        },
-        pt: {
-            name: "Portuguese",
-            firstNames: ["João", "Maria", "Pedro", "Ana", "Miguel", "Sofia", "Tiago", "Bárbara", "Ricardo", "Inês", "Lucas", "Beatriz"],
-            lastNames: ["Silva", "Santos", "Ferreira", "Pereira", "Oliveira", "Costa", "Rodrigues", "Martins", "Jesus", "Sousa"],
-            cities: ["Lisboa", "Porto", "Vila Nova de Gaia", "Amadora", "Braga", "Funchal", "Coimbra", "Setúbal", "Almada", "Agualva-Cacém"],
-            streets: ["Avenida da Liberdade", "Rua Garrett", "Rua Augusta", "Avenida da Boavista", "Rua de Santa Catarina"],
-            companies: ["EDP", "Galp", "Jerónimo Martins", "TAP Air Portugal", "Sonae", "NOS", "Mota-Engil"],
-            phonePrefixes: ["91", "92", "93", "96"],
-            phonePattern: "#######",
-            meetingTypes: ["Início do Projeto", "Revisão Trimestral", "Estratégia", "Reunião Diária"],
-            organizerTypes: ["Recursos Humanos", "Diretoria", "Equipe de Engenharia", "Vendas"],
-            locationTypes: ["Sala de Conferência", "Sala de Reuniões", "Videochamada", "Sede"],
-            agendaTypes: ["1. Intro\n2. Revisão\n3. Perguntas", "1. Orçamento\n2. Metas"],
-            positionTypes: ["Engenheiro de Software", "Gerente de Produto", "Especialista de RH", "Vendedor", "CEO"]
-        },
-        ru: {
-            name: "Russian",
-            firstNames: ["Ivan", "Anna", "Dmitry", "Elena", "Alexey", "Olga", "Sergey", "Maria", "Andrey", "Tatiana", "Alexander", "Natalia"],
-            lastNames: ["Ivanov", "Smirnov", "Kuznetsov", "Popov", "Vasilyev", "Petrov", "Sokolov", "Mikhailov", "Novikov", "Fedorov"],
-            cities: ["Moscow", "Saint Petersburg", "Novosibirsk", "Yekaterinburg", "Kazan", "Nizhny Novgorod", "Chelyabinsk", "Samara", "Omsk", "Rostov-on-Don"],
-            streets: ["Arbat St", "Nevsky Prospect", "Tverskaya St", "Leninsky Prospect", "Kutuzovsky Prospect"],
-            companies: ["Gazprom", "Lukoil", "Rosneft", "Sberbank", "Yandex", "X5 Group", "Surgutneftegas"],
-            phonePrefixes: ["901", "902", "903", "905", "906", "909", "910", "911"],
-            phonePattern: "#######",
-            meetingTypes: ["Запуск проекта", "Квартальный обзор", "Стратегия", "Ежедневная летучка"],
-            organizerTypes: ["HR отдел", "Совет директоров", "Инженерный отдел", "Продажи"],
-            locationTypes: ["Конференц-зал А", "Переговорная", "Zoom", "Главный офис"],
-            agendaTypes: ["1. Введение\n2. Обзор\n3. Вопросы", "1. Бюджет\n2. Цели"],
-            positionTypes: ["Разработчик ПО", "Менеджер продукта", "HR специалист", "Менеджер по продажам", "Гендиректор"]
-        },
-        zh: {
-            name: "Chinese",
-            firstNames: ["Wei", "Fang", "Lei", "Xiu", "Ming", "Jing", "Qiang", "Li", "Jun", "Yan", "Min", "Yang"],
-            lastNames: ["Li", "Wang", "Zhang", "Liu", "Chen", "Yang", "Zhao", "Huang", "Zhou", "Wu"],
-            cities: ["Beijing", "Shanghai", "Guangzhou", "Shenzhen", "Chengdu", "Wuhan", "Hangzhou", "Xi'an", "Chongqing", "Tianjin"],
-            streets: ["Nanjing Road", "Wangfujing St", "Huaihai Road", "Renmin Avenue", "Chang'an Avenue"],
-            companies: ["Alibaba", "Tencent", "ByteDance", "Huawei", "ICBC", "Ping An", "China Mobile"],
-            phonePrefixes: ["130", "131", "132", "133", "135", "186", "188"],
-            phonePattern: "########",
-            meetingTypes: ["项目启动会", "季度回顾", "战略会议", "每日站会"],
-            organizerTypes: ["人力资源部", "董事会", "工程团队", "销售部"],
-            locationTypes: ["会议室 A", "董事会议室", "线上会议", "总部大厅"],
-            agendaTypes: ["1. 介绍\n2. 回顾\n3. 问答", "1. 预算\n2. 目标"],
-            positionTypes: ["软件工程师", "产品经理", "HR 专员", "销售代表", "CEO"]
-        },
-        ja: {
-            name: "Japanese",
-            firstNames: ["Hiroshi", "Yuki", "Kenji", "Ai", "Takashi", "Mami", "Satoshi", "Rina", "Akira", "Yoko", "Taro", "Hanako"],
-            lastNames: ["Sato", "Suzuki", "Takahashi", "Tanaka", "Watanabe", "Ito", "Yamamoto", "Nakamura", "Kobayashi", "Kato"],
-            cities: ["Tokyo", "Yokohama", "Osaka", "Nagoya", "Sapporo", "Fukuoka", "Kyoto", "Kawasaki", "Saitama", "Hiroshima"],
-            streets: ["Chuo-dori", "Takeshita-dori", "Omotesando", "Nakamise-dori", "Yasukuni-dori"],
-            companies: ["Toyota", "Sony", "Mitsubishi", "Nintendo", "SoftBank", "Honda", "Hitachi"],
-            phonePrefixes: ["070", "080", "090"],
-            phonePattern: "########",
-            meetingTypes: ["キックオフ", "四半期レビュー", "戦略会議", "朝会"],
-            organizerTypes: ["人事部", "役員会", "技術チーム", "営業部"],
-            locationTypes: ["会議室 A", "重役室", "オンライン", "本社ロビー"],
-            agendaTypes: ["1. 導入\n2. レビュー\n3. Q&A", "1. 予算\n2. 目標"],
-            positionTypes: ["ソフトウェアエンジニア", "プロダクトマネージャー", "人事担当", "営業担当", "代表取締役"]
-        },
-        ar: {
-            name: "Arabic",
-            firstNames: ["Mohammed", "Fatima", "Ahmed", "Layla", "Ali", "Sara", "Omar", "Mariam", "Youssef", "Noor", "Ibrahim", "Aisha"],
-            lastNames: ["Al-Farsi", "Haddad", "Mansour", "Saleh", "Bakir", "Zaid", "Khalil", "Nasser", "Al-Sayed", "Abdullah"],
-            cities: ["Cairo", "Dubai", "Riyadh", "Beirut", "Casablanca", "Muscat", "Amman", "Doha", "Kuwait City", "Jeddah"],
-            streets: ["Tahrir Square", "Sheikh Zayed Road", "Corniche Rd", "Hamra St", "King Fahd Road"],
-            companies: ["Aramco", "Etisalat", "Emirates", "QNB", "STC", "Almarai", "SABIC"],
-            phonePrefixes: ["050", "055", "056", "010", "011", "012"],
-            phonePattern: "#######",
-            meetingTypes: ["إطلاق المشروع", "مراجعة ربع سنوية", "اجتماع استراتيجي", "الاجتماع اليومي"],
-            organizerTypes: ["الموارد البشرية", "مجلس الإدارة", "فريق الهندسة", "المبيعات"],
-            locationTypes: ["غرفة الاجتماعات أ", "قاعة المجلس", "اجتماع عبر الإنترنت", "ردهة المقر"],
-            agendaTypes: ["1. مقدمة\n2. مراجعة\n3. أسئلة وأجوبة", "1. ميزانية\n2. أهداف"],
-            positionTypes: ["مهندس برمجيات", "مدير منتج", "اخصائي موارد بشرية", "ممثل مبيعات", "المدير التنفيذي"]
-        }
-    };
+    // Veri ve kimlik kuralları: tarayıcıda global, Node'da require ile
+    const LOCALE_DATA = (typeof FillHubLocaleData !== 'undefined') ? FillHubLocaleData : require('./locale-data.js');
+    const ID_RULES = (typeof FillHubIdRules !== 'undefined') ? FillHubIdRules : require('./id-rules.js');
+    const LANGS = LOCALE_DATA.languages;
+    const PROFILES = LOCALE_DATA.countries;
 
-    const LANGUAGE_MAP = {
-        // Mapping countries to available generators
-        'US': 'en', 'GB': 'en', 'AU': 'en', 'CA': 'en', 'NZ': 'en', 'IE': 'en',
-        'TR': 'tr', 'CY': 'tr',
-        'DE': 'de', 'AT': 'de', 'CH': 'de', 'LI': 'de', 'LU': 'de',
-        'FR': 'fr', 'BE': 'fr', 'MC': 'fr', 'CI': 'fr', 'SN': 'fr', 'CD': 'fr',
-        'IT': 'it', 'VA': 'it', 'SM': 'it',
-        'ES': 'es', 'MX': 'es', 'AR': 'es', 'CO': 'es', 'PE': 'es', 'VE': 'es', 'CL': 'es', 'CU': 'es',
-        'PT': 'pt', 'BR': 'pt', 'AO': 'pt', 'MZ': 'pt', 'CV': 'pt',
-        'RU': 'ru', 'BY': 'ru', 'KZ': 'ru', 'KG': 'ru', 'UA': 'ru',
-        'JP': 'ja', 'ZH': 'zh', 'CN': 'zh', 'TW': 'zh', 'HK': 'zh',
-        'KR': 'ko', 'KP': 'ko',
-        'EG': 'ar', 'SA': 'ar', 'AE': 'ar', 'IQ': 'ar', 'JO': 'ar', 'LB': 'ar', 'MA': 'ar', 'QA': 'ar',
-        'IN': 'hi', 'NP': 'hi', 'BD': 'hi',
-        'VN': 'vi', 'ID': 'id', 'MY': 'id',
-        'SE': 'sv', 'FI': 'sv', 'NO': 'sv', 'DK': 'sv', 'IS': 'sv',
-        'GR': 'el', 'IL': 'he', 'NL': 'nl', 'PL': 'pl'
+    const COUNTRY_CODES = new Set(COUNTRIES.map(c => c.code.toUpperCase()));
+
+    // Hedef dışı ülkelerin dili (seçici ve tarayıcı dili için). Dil havuzu yoksa İngilizce.
+    const COUNTRY_LANGUAGE = {
+        GB: 'en', AU: 'en', CA: 'en', NZ: 'en', IE: 'en', ZA: 'en', SG: 'en', PH: 'en', NG: 'en', KE: 'en', GH: 'en',
+        AT: 'de', CH: 'de', LI: 'de', LU: 'de',
+        BE: 'fr', MC: 'fr', CI: 'fr', SN: 'fr', CD: 'fr', CM: 'fr', MA: 'ar', DZ: 'ar', TN: 'ar', SA: 'ar', AE: 'ar',
+        IQ: 'ar', JO: 'ar', LB: 'ar', QA: 'ar', KW: 'ar', BH: 'ar', OM: 'ar', SY: 'ar', LY: 'ar', YE: 'ar',
+        ES: 'es', AR: 'es', CO: 'es', CL: 'es', PE: 'es', VE: 'es', CU: 'es', EC: 'es', BO: 'es', PY: 'es', UY: 'es',
+        GT: 'es', HN: 'es', NI: 'es', SV: 'es', CR: 'es', PA: 'es', DO: 'es',
+        PT: 'pt', AO: 'pt', MZ: 'pt', CV: 'pt',
+        IT: 'en', VA: 'en', SM: 'en', NL: 'en', SE: 'en', NO: 'en', DK: 'en', FI: 'en', PL: 'en', GR: 'en', IL: 'en',
+        UA: 'ru', BY: 'ru', KZ: 'ru', KG: 'ru', UZ: 'ru', TJ: 'ru', TM: 'ru', AZ: 'ru', AM: 'ru', GE: 'ru',
+        HK: 'zh', TW: 'zh', MO: 'zh',
+        IN: 'hi', NP: 'hi', BD: 'bn', PK: 'ur', ID: 'id', VN: 'vi'
     };
 
     const random = (arr) => arr[Math.floor(Math.random() * arr.length)];
     const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-    const slug = (value) => String(value).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '');
+    const digitsOf = (n) => Array.from({ length: n }, () => Math.floor(Math.random() * 10)).join('');
+    const pad2 = (n) => String(n).padStart(2, '0');
+    // E-posta / kullanıcı adı yerel kısmı: aksanlar ve özel harfler açılır (ı→i, đ→d, ß→ss…)
+    const slug = (value) => String(value).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/đ/g, 'd').replace(/ß/g, 'ss').replace(/ø/g, 'o').replace(/ł/g, 'l')
+        .replace(/æ/g, 'ae').replace(/œ/g, 'oe').replace(/ı/g, 'i').replace(/[^a-z0-9]/g, '');
 
+    // Dil ve ülke kanonik biçimi: "xx-YY". Çıplak dil kodu dildir (ar → ar-EG); bölgeli değer bölgeyi korur.
+    // Eski kayıtlardaki çıplak ülke kodları (us, tr, de…) ülke olarak çözülür.
+    function languageOfCountry(cc) {
+        const known = COUNTRY_LANGUAGE[cc];
+        if (known && LANGS[known]) return known;
+        const profile = PROFILES[cc];
+        return profile ? profile.lang : 'en';
+    }
+
+    function canonicalLocale(input) {
+        const raw = String(input || '').trim().replace(/_/g, '-');
+        const parts = raw.split('-');
+        const lang = (parts[0] || '').toLowerCase();
+        const region = (parts[1] || '').toUpperCase();
+        if (region.length === 2 && COUNTRY_CODES.has(region)) {
+            return `${LANGS[lang] ? lang : languageOfCountry(region)}-${region}`;
+        }
+        if (LANGS[lang]) return `${lang}-${LANGS[lang].defaultCountry}`;
+        const bare = lang.toUpperCase();
+        if (COUNTRY_CODES.has(bare)) return `${languageOfCountry(bare)}-${bare}`;
+        return 'en-US';
+    }
+
+    function resolveLocale(input) {
+        const canon = canonicalLocale(input);
+        const [lang, country] = canon.split('-');
+        const pools = LANGS[lang] || LANGS.en;
+        const profile = PROFILES[country] || PROFILES[pools.defaultCountry] || PROFILES.US;
+        return { lang, country, pools, profile };
+    }
+
+    // Kişinin ülke profili (kişi kaydında profil referansı tutulmaz; ülke kodundan yeniden çözülür)
+    function profileOf(person) {
+        return resolveLocale(`${person.lang}-${person.country}`).profile;
+    }
+
+    // Yerel yazı tercihi: dil Latin ise her zaman Latin; değilse ctx.script, yoksa ülkenin varsayılanı
+    function wantNative(r, ctx) {
+        if (r.pools.script === 'Latin') return false;
+        if (ctx.script === 'native') return true;
+        if (ctx.script === 'latin') return false;
+        return r.profile.defaultScript === 'native';
+    }
+
+    function feminizeRu(surname) {
+        return /[бвгджзклмнпрстфхцчшщ]$/i.test(surname) ? surname + 'а' : surname;
+    }
+
+    // Ad seçimi: her kayıt {n: yerel, l: Latin}. Ad ile soyad aynı olamaz (R8).
+    function pickName(pools, male) {
+        for (let attempt = 0; attempt < 8; attempt++) {
+            let first;
+            let middle = null;
+            let idx;
+            if (pools.firstNamesM) {
+                idx = randomInt(0, pools.firstNamesM.length - 1);
+                first = male
+                    ? { n: pools.firstNamesM[idx], l: pools.firstNamesMLatin[idx] }
+                    : { n: pools.firstNamesF[randomInt(0, pools.firstNamesF.length - 1)], l: null };
+                if (!male) {
+                    const fi = pools.firstNamesF.indexOf(first.n);
+                    first.l = pools.firstNamesFLatin[fi];
+                }
+                const patro = pools.patronymicsM[idx];
+                middle = { n: male ? patro : patro.replace(/ович$/, 'овна').replace(/евич$/, 'евна'), l: null };
+            } else {
+                idx = randomInt(0, pools.firstNames.length - 1);
+                const latin = pools.firstNamesLatin || pools.firstNames;
+                first = { n: pools.firstNames[idx], l: latin[idx] };
+                if (pools.middleNamesM) {
+                    const m = random(male ? pools.middleNamesM : pools.middleNamesF);
+                    middle = { n: m, l: m };
+                }
+            }
+            const lIdx = randomInt(0, pools.lastNames.length - 1);
+            const latinLast = pools.lastNamesLatin || pools.lastNames;
+            let last = { n: pools.lastNames[lIdx], l: latinLast[lIdx] };
+            if (pools.firstNamesM && !male) last = { n: feminizeRu(last.n), l: last.l + 'a' };
+            if (first.n !== last.n && first.l !== last.l) return { first, last, middle };
+        }
+        return null;
+    }
+
+    // Ad sıralaması: aile önce (zh, ja, vi) ya da ad önce; Latin karşılıklar Batı sırasına uyar
+    function joinName(pools, person, native) {
+        const f = native ? person.first.n : person.first.l;
+        const l = native ? person.last.n : person.last.l;
+        const m = person.middle ? (native ? person.middle.n : person.middle.l) : null;
+        if (pools.order === 'family-first' && native) {
+            return [l, m, f].filter(Boolean).join(pools.joiner === '' ? '' : ' ');
+        }
+        if (pools.order === 'family-first' && !native && pools.script === 'Latin') {
+            return [l, m, f].filter(Boolean).join(' ');
+        }
+        return [f, m, l].filter(Boolean).join(' ');
+    }
+
+    // Posta kodu: şehrin öneki + rastgele haneler; ayraç (ör. BR 01310-100, JP 100-0001)
+    function buildPostal(profile, city) {
+        const spec = profile.postal;
+        const prefix = city.prefix || '';
+        let code = prefix + digitsOf(Math.max(0, spec.length - prefix.length));
+        if (spec.sep) code = code.slice(0, spec.sep.at) + spec.sep.char + code.slice(spec.sep.at);
+        return code;
+    }
+
+    // Telefon (ulusal anlamlı kısım). Şablon: {p} önek, {area} alan kodu, {fill2} 2 hane, {fill} kalan hane
+    function buildPhoneNsn(profile, city) {
+        const spec = profile.phone;
+        let s = spec.template || '{p}{fill}';
+        const prefix = spec.prefixes ? random(spec.prefixes) : '';
+        s = s.replace(/\{p\}/g, prefix).replace(/\{area\}/g, city && city.area ? city.area : '');
+        s = s.replace(/\{fill2\}/g, digitsOf(2));
+        const fillCount = spec.length - s.replace('{fill}', '').length;
+        return s.replace('{fill}', digitsOf(Math.max(0, fillCount)));
+    }
+
+    // PII Safe telefonu: operatör öneki (veya alan kodu) + sıfırlar → TR: 5320000000
+    function buildPiiPhoneNsn(profile, city) {
+        const spec = profile.phone;
+        const prefix = spec.prefixes ? random(spec.prefixes) : (city && city.area ? city.area : '');
+        return (prefix + '0'.repeat(Math.max(0, spec.length - prefix.length))).slice(0, spec.length);
+    }
+
+    // Çıktı biçimi: "+" ile başlayan yer tutucu uluslararası; trunk ile başlayan yer tutucu yerel; varsayılan ülke kuralı
+    function phoneOutput(profile, nsn, placeholder) {
+        const spec = profile.phone;
+        const hint = String(placeholder || '').trim();
+        if (/^\+/.test(hint)) return `+${spec.cc}${nsn}`;
+        const trunk = spec.trunk || '';
+        if (trunk && hint.startsWith(trunk)) return trunk + nsn;
+        if (trunk && spec.defaultTrunk) return trunk + nsn;
+        return nsn;
+    }
+
+    const IBAN_BBAN = {
+        DE: () => digitsOf(18),
+        FR: () => digitsOf(23),
+        TR: () => digitsOf(5) + '0' + digitsOf(16),
+        EG: () => digitsOf(25),
+        PK: () => Array.from({ length: 4 }, () => String.fromCharCode(65 + randomInt(0, 25))).join('') + digitsOf(16),
+        BR: () => digitsOf(8) + digitsOf(5) + digitsOf(10) + random(['C', 'P']) + digitsOf(1)
+    };
+
+    // Kimlik üretimi: gerçekçi değerler ve PII Safe test değerleri birlikte döner (kişi sabit kalır)
+    function buildIds(profile, cc, birthDate, male, d) {
+        const idSpec = profile.ids || {};
+        const gen = (key) => {
+            const rule = ID_RULES[key];
+            if (!rule) return '';
+            if (key === 'curp') return rule.generate(birthDate, male, random(['DF', 'JC', 'NL', 'MC', 'VZ', 'JL', 'GT', 'CH']));
+            if (['nir', 'cnId', 'cnic', 'nik', 'vnCccd', 'egId', 'rfc'].includes(key)) return rule.generate(birthDate, male);
+            return rule.generate();
+        };
+        const sent = (key) => ID_RULES.sentinel(key, d, birthDate, male);
+        const realIban = profile.iban && IBAN_BBAN[cc] ? ID_RULES.iban.build(cc, IBAN_BBAN[cc]()) : null;
+        const piiIban = profile.iban ? ID_RULES.ibanSentinel(cc) : null;
+        return {
+            real: { person: gen(idSpec.person), tax: gen(idSpec.tax), iban: realIban },
+            pii: { person: sent(idSpec.person), tax: sent(idSpec.tax), iban: piiIban }
+        };
+    }
+
+    function buildAddress(profile, person, native) {
+        const template = native && profile.address.native ? profile.address.native : profile.address.latin;
+        const latinStreets = profile.streetsLatin || profile.streets;
+        const latinDistricts = profile.districtsLatin || profile.districts || [''];
+        const city = person.city;
+        const tokens = {
+            num: randomInt(1, 999),
+            street: native ? random(profile.streets || ['']) : random(latinStreets || ['']),
+            city: native ? city.name : (city.latin || city.name),
+            region: city.region,
+            zip: person.zip,
+            // İlçe önce şehrin kendi listesinden (ör. TR), yoksa ülke listesinden seçilir
+            district: random(city.districts || (native ? (profile.districts || ['']) : latinDistricts))
+        };
+        tokens.area = random((profile.areas || ['']));
+        tokens.apt = randomInt(1, 400);
+        tokens.st = randomInt(1, 20);
+        tokens.rt = randomInt(1, 15);
+        tokens.rw = randomInt(1, 15);
+        tokens.chome = randomInt(1, 9);
+        tokens.banchi = randomInt(1, 30);
+        tokens.go = randomInt(1, 30);
+        tokens.ward = profile.wards ? random(native ? profile.wards : (profile.wardsLatin || profile.wards)) : '';
+        tokens.colonia = profile.colonias ? random(profile.colonias) : '';
+        tokens.bairro = profile.bairros ? random(profile.bairros) : '';
+        tokens.mahalle = profile.lang === 'tr' ? `${random(['Cumhuriyet', 'Yenişehir', 'Atatürk', 'Güzelyurt', 'Merkez'])} Mah.` : '';
+        return template.replace(/\{(\w+)\}/g, (m, key) => (tokens[key] !== undefined && tokens[key] !== null ? String(tokens[key]) : m));
+    }
+
+    // PII Safe adresi: test sokağı + ayrılmış numara + posta kodu + şehir (ör. "Test Sokak No:42 34000 Kadıköy")
+    function buildPiiAddress(profile, person, native, pools) {
+        const city = person.city;
+        const cityName = native ? city.name : (city.latin || city.name);
+        return `${pools.testStreet} No:${randomInt(1, 99)} ${person.zip} ${cityName}`;
+    }
+
+    // Tek doldurmada tutarlı kişi. Düz, JSON'lanabilir bir kayıt döner (profil veya havuz referansı yok).
+    // Kayıt iki kimlik kümesi taşır: gerçekçi (real) ve PII Safe test değerleri (pii).
+    function createPerson(input, opts) {
+        const r = resolveLocale(input);
+        const male = Math.random() < 0.5;
+        const d = randomInt(1, 9);
+        const d0 = randomDateParts();
+        const birthDate = `${d0.year}-${pad2(d0.month)}-${pad2(d0.day)}`;
+        const name = pickName(r.pools, male) || pickName(r.pools, male);
+        const city = { ...random(r.profile.cities) };
+        const zip = buildPostal(r.profile, city);
+        const ids = buildIds(r.profile, r.country, birthDate, male, d);
+        const first = name.first;
+        const last = name.last;
+        const companyPool = r.profile.companies;
+        const companyIdx = randomInt(0, companyPool.length - 1);
+        const companyLatin = r.profile.companiesLatin ? r.profile.companiesLatin[companyIdx] : null;
+        const emailLocal = `${slug(first.l)}.${slug(last.l)}${randomInt(10, 99)}`;
+        const person = {
+            tag: digitsOf(8),
+            lang: r.lang,
+            country: r.country,
+            male,
+            sentinel: d,
+            birthDate,
+            first,
+            last,
+            middle: name.middle,
+            city,
+            zip,
+            phoneNsn: buildPhoneNsn(r.profile, city),
+            phonePii: buildPiiPhoneNsn(r.profile, city),
+            ids: ids.real,
+            piiIds: ids.pii,
+            company: companyPool[companyIdx],
+            companyLatin: companyLatin || companyPool[companyIdx],
+            position: random(r.pools.positionTypes),
+            emailLocal,
+            emailDomain: random(['example.com', 'test.com', 'mail.com', 'demo.org']),
+            piiEmailDomain: random(['example.com', 'example.org', 'test.example.com']),
+            username: `${slug(first.l)}${slug(last.l)}${randomInt(10, 999)}`
+        };
+        person.fullNative = joinName(r.pools, person, true);
+        person.fullLatin = joinName(r.pools, person, false);
+        return person;
+    }
+
+    // Etkin kimlik: sabit kimlik modundaki şablonun kişisi; yoksa null (çağıran rastgele üretir)
+    function activeIdentity(settings) {
+        const list = Array.isArray(settings && settings.profiles) ? settings.profiles : [];
+        const p = list.find(x => x && x.id === (settings && settings.activeProfileId));
+        return p && p.mode === 'fixed' && p.identity ? p.identity : null;
+    }
+
+    // Eski sürüm şablonlarını yeni modele taşır. "default" her zaman rastgele; eski dolu şablon sabit kimlik olur.
+    function migrateProfiles(profiles, locale) {
+        const list = Array.isArray(profiles) ? profiles : [];
+        let changed = false;
+        const out = list.map((p) => {
+            if (!p || typeof p !== 'object') { changed = true; return null; }
+            if (p.mode === 'fixed' && p.identity) return p;
+            if (p.mode === 'random') return p;
+            changed = true;
+            if (p.id === 'default') return { id: 'default', name: 'Standard Persona', mode: 'random' };
+            if (typeof p.firstName === 'string' && typeof p.lastName === 'string') {
+                const identity = createPerson(locale, {});
+                identity.first = { n: p.firstName, l: p.firstName };
+                identity.last = { n: p.lastName, l: p.lastName };
+                identity.fullNative = `${p.firstName} ${p.lastName}`;
+                identity.fullLatin = identity.fullNative;
+                identity.emailLocal = slugOf(p.firstName) + '.' + slugOf(p.lastName) + randomInt(10, 99);
+                return { id: p.id, name: p.name || 'Persona', mode: 'fixed', identity };
+            }
+            return { id: p.id, name: p.name || 'Persona', mode: 'random' };
+        }).filter(Boolean);
+        if (!out.some(p => p.id === 'default')) {
+            out.unshift({ id: 'default', name: 'Standard Persona', mode: 'random' });
+            changed = true;
+        }
+        return { profiles: out, changed };
+    }
+    function slugOf(v) { return slug(v) || 'user'; }
+
+    // Kişi özeti (ayar sayfası için): "Elif Kaplan · Kadıköy · 5320000000"
+    function describePerson(person) {
+        if (!person) return '';
+        const name = `${person.first.l} ${person.last.l}`;
+        return `${name} · ${person.city.name} · +${profileOf(person).phone.cc} ${person.phoneNsn}`;
+    }
+
+    // ---------- Metin/desen yardımcıları ----------
     const PATTERN_CLASSES = { 'd': '0123456789', 'w': 'abcdefghijklmnopqrstuvwxyz0123456789' };
     const PATTERN_CLASS_BODIES = {
         '0-9': '0123456789',
@@ -330,18 +476,23 @@ const FakeDataGenerator = (() => {
         };
     }
 
+    const DOMAINS = ['example.com', 'test.com', 'mail.com', 'demo.org'];
+
     return {
-        getLocales() { return Object.keys(LOCALES); },
+        getLocales() { return Object.keys(LANGS); },
         getCountries() { return COUNTRIES; },
-        getCountryForLanguage(lang) {
-            const code = String(lang || '').toLowerCase();
-            if (!code) return null;
-            if (COUNTRIES.some(c => c.code.toLowerCase() === code)) return code;
-            const entry = Object.entries(LANGUAGE_MAP).find(([country, locale]) => locale === code && COUNTRIES.some(c => c.code === country));
-            return entry ? entry[0].toLowerCase() : null;
-        },
+        canonicalLocale,
+        // Ülke seçicisinin değeri: ülkenin dili + ülke kodu (ör. MX → es-MX)
+        localeForCountry(cc) { return canonicalLocale(`${languageOfCountry(String(cc).toUpperCase())}-${String(cc).toUpperCase()}`); },
+        resolveLocale,
+        profileOf,
+        createPerson,
+        createIdentity: (input) => createPerson(input, {}),
+        activeIdentity,
+        migrateProfiles,
+        describePerson,
         getDataTypes() {
-            return ["firstName", "lastName", "fullName", "email", "phone", "address", "city", "zip", "company", "text", "date", "datetime", "select", "password", "number", "url", "meeting", "organizer", "location", "agenda", "position", "website"];
+            return ["firstName", "lastName", "middleName", "fullName", "username", "email", "phone", "phoneCode", "address", "city", "state", "country", "zip", "company", "website", "text", "date", "datetime", "select", "password", "number", "url", "meeting", "organizer", "location", "agenda", "position", "idNumber", "taxId", "iban"];
         },
         generate(type, inputLocale = 'en', context = {}) {
             // CHAOS MODE / FUZZING LOGIC
@@ -370,28 +521,13 @@ const FakeDataGenerator = (() => {
                 }
             }
 
-            // PII SAFE MODE LOGIC
-            if (context.piiSafe) {
-                const randomId = Math.floor(Math.random() * 10000);
-                switch (type) {
-                    case 'firstName': return "User";
-                    case 'lastName': return randomId.toString();
-                    case 'fullName': return `User ${randomId}`;
-                    case 'email': return `user.${randomId}@example.com`;
-                    case 'company': return "Test Company Inc.";
-                    case 'address': return "123 Test Street, Test City";
-                    case 'phone': return "+0000000000";
-                    case 'position': return "Test User";
-                    case 'website': return "https://example.com";
-                    default: break; // Fallback to normal generation for non-PII sensitive fields (like numbers, dates)
-                }
-            }
-
-            const parts = inputLocale.split('-');
-            const country = (parts[1] || parts[0]).toUpperCase();
-            const lang = parts[0].toLowerCase();
-
-            const locale = LOCALES[lang] || LOCALES[LANGUAGE_MAP[country]] || LOCALES['en'];
+            const r = resolveLocale(inputLocale);
+            const person = context.person || createPerson(inputLocale, {});
+            const profile = profileOf(person);
+            const pools = r.pools;
+            const native = wantNative(r, context);
+            const pii = !!context.piiSafe;
+            const pick = (list) => random(list);
 
             // Alanın HTML `pattern` kuralı desteklenen alt kümedeyse önce o karşılanır
             if (context.pattern) {
@@ -399,54 +535,48 @@ const FakeDataGenerator = (() => {
                 if (patternValue) return patternValue;
             }
 
-            // Smart Linking Logic
-            if (type === 'email') {
-                if (context.smartEmail === false) {
-                    return `${slug(random(locale.firstNames))}${randomInt(10, 999)}@${random(['example.com', 'test.com', 'mail.com', 'demo.org'])}`;
-                }
-                const first = slug(context.firstName || random(locale.firstNames));
-                const last = slug(context.lastName || random(locale.lastNames));
-                const domains = ['example.com', 'test.com', 'mail.com', 'demo.org'];
-                const randomNum = Math.floor(Math.random() * 99);
-                return `${first}.${last}${randomNum}@${random(domains)}`;
-            }
-
             switch (type) {
-                case 'firstName': return locale.firstNames[Math.floor(Math.random() * locale.firstNames.length)];
-                case 'lastName': return locale.lastNames[Math.floor(Math.random() * locale.lastNames.length)];
-                case 'fullName':
-                    return locale.firstNames[Math.floor(Math.random() * locale.firstNames.length)] + " " +
-                        locale.lastNames[Math.floor(Math.random() * locale.lastNames.length)];
-                case 'phone':
-                    const phonePrefix = locale.phonePrefixes ? locale.phonePrefixes[Math.floor(Math.random() * locale.phonePrefixes.length)] : "";
-                    const phonePattern = locale.phonePattern || "#######";
-                    return phonePrefix + phonePattern.replace(/#/g, () => Math.floor(Math.random() * 10));
-                case 'address':
-                    return `${Math.floor(Math.random() * 900 + 100)} ${locale.streets[Math.floor(Math.random() * locale.streets.length)]}`;
-                case 'city': return locale.cities[Math.floor(Math.random() * locale.cities.length)];
-                case 'zip': return Math.floor(Math.random() * 90000 + 10000).toString();
-                case 'company':
-                    if (locale.companies) return locale.companies[Math.floor(Math.random() * locale.companies.length)];
-                    const suffixes = ['Inc', 'LLC', 'Group', 'Solutions', 'Global'];
-                    return locale.lastNames[Math.floor(Math.random() * locale.lastNames.length)] + " " +
-                        suffixes[Math.floor(Math.random() * suffixes.length)];
-                case 'url':
+                case 'firstName': return native ? person.first.n : person.first.l;
+                case 'lastName': return native ? person.last.n : person.last.l;
+                case 'middleName': return person.middle ? (native ? person.middle.n : (person.middle.l || person.middle.n)) : pick(pools.firstNames || pools.firstNamesM);
+                case 'fullName': return native ? person.fullNative : person.fullLatin;
+                case 'username': return person.username;
+                case 'email': {
+                    // Aynı kişi aynı e-postayı verir (onay alanı eşleşir); akıllı bağlantı kapalıysa bağımsız
+                    if (context.smartEmail === false) return `${slug(person.first.l)}${randomInt(10, 999)}@${pick(DOMAINS)}`;
+                    return `${person.emailLocal}@${pii ? person.piiEmailDomain : person.emailDomain}`;
+                }
+                case 'phone': return phoneOutput(profile, pii ? person.phonePii : person.phoneNsn, context.placeholder);
+                case 'phoneCode': return `+${profile.phone.cc}`;
+                case 'address': return pii ? buildPiiAddress(profile, person, native, pools) : buildAddress(profile, person, native);
+                case 'city': return native ? person.city.name : (person.city.latin || person.city.name);
+                case 'state': return person.city.region;
+                case 'country': {
+                    const entry = COUNTRIES.find(c => c.code === person.country);
+                    return entry ? entry.name : profile.name;
+                }
+                case 'zip': return person.zip;
+                case 'company': {
+                    if (pii) return `${pools.testCompany} ${randomInt(1000, 9999)}`;
+                    return native ? person.company : person.companyLatin;
+                }
+                case 'website': {
+                    if (pii) return 'https://www.example.org';
+                    return `https://www.${slug(person.companyLatin || person.company)}.com`;
+                }
+                case 'idNumber': return pii ? person.piiIds.person : person.ids.person;
+                case 'taxId': return pii ? person.piiIds.tax : person.ids.tax;
+                case 'iban': return (pii ? person.piiIds.iban : person.ids.iban) || '';
+                case 'url': {
                     const domains = ['example.com', 'test-site.org', 'demo.net', 'sample.co'];
-                    return `https://www.${domains[Math.floor(Math.random() * domains.length)]}`;
-                case 'website':
-                    const comp = (locale.companies ? locale.companies[Math.floor(Math.random() * locale.companies.length)] : "Business").replace(/\s/g, '').toLowerCase();
-                    return `https://www.${comp}.com`;
-                case 'meeting':
-                    return locale.meetingTypes ? locale.meetingTypes[Math.floor(Math.random() * locale.meetingTypes.length)] : "Project Sync";
-                case 'organizer':
-                    return locale.organizerTypes ? locale.organizerTypes[Math.floor(Math.random() * locale.organizerTypes.length)] : "Admin";
-                case 'location':
-                    return locale.locationTypes ? locale.locationTypes[Math.floor(Math.random() * locale.locationTypes.length)] : "Room 101";
-                case 'agenda':
-                    return locale.agendaTypes ? locale.agendaTypes[Math.floor(Math.random() * locale.agendaTypes.length)] : "1. Review\n2. Plan";
-                case 'position':
-                    return locale.positionTypes ? locale.positionTypes[Math.floor(Math.random() * locale.positionTypes.length)] : "Employee";
-                case 'text':
+                    return `https://www.${pick(domains)}`;
+                }
+                case 'meeting': return pools.meetingTypes ? pick(pools.meetingTypes) : "Project Sync";
+                case 'organizer': return pools.organizerTypes ? pick(pools.organizerTypes) : "Admin";
+                case 'location': return pools.locationTypes ? pick(pools.locationTypes) : "Room 101";
+                case 'agenda': return pools.agendaTypes ? pick(pools.agendaTypes) : "1. Review\n2. Plan";
+                case 'position': return pools.positionTypes ? pick(pools.positionTypes) : "Employee";
+                case 'text': {
                     const fname = (context.fieldName || '').toLowerCase();
                     const shaped = context.valueShape ? fillFromShape(context.valueShape) : null;
                     if (shaped) return shaped;
@@ -461,6 +591,7 @@ const FakeDataGenerator = (() => {
                         return "<h2>Welcome</h2><p>This is a generated QR content.</p><ul><li>Feature 1</li><li>Feature 2</li></ul>";
                     }
                     return "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+                }
                 case 'date': {
                     const d = randomDateParts();
                     return `${d.year}-${d.month.toString().padStart(2, '0')}-${d.day.toString().padStart(2, '0')}`;
@@ -475,9 +606,6 @@ const FakeDataGenerator = (() => {
                 case 'number': return Math.floor(Math.random() * 100).toString();
                 case 'select': return null; // Handled in content script
                 default:
-                    // Only smart fallback for unknown types handled in content script call,
-                    // but if it reaches here with 'text', we give generic text.
-                    // If type is truly unknown/custom:
                     return "Data " + Math.floor(Math.random() * 1000);
             }
         }

@@ -1,0 +1,29 @@
+{
+  "extName": {
+    "message": "FillHub"
+  },
+  "extDescription": {
+    "message": "Mengisi formulir web dengan data palsu yang realistis dan konsisten dalam 15 bahasa. Mode aman, batalkan; tanpa pengumpulan data."
+  },
+  "actionTitle": {
+    "message": "FillHub: isi formulir dengan data palsu"
+  },
+  "cmdFill": {
+    "message": "Isi formulir dengan data palsu"
+  },
+  "cmdChaos": {
+    "message": "Mode kacau (uji fuzz)"
+  },
+  "cmdUndo": {
+    "message": "Batalkan pengisian data palsu"
+  },
+  "menuFillForm": {
+    "message": "Isi formulir dengan data palsu"
+  },
+  "menuFillField": {
+    "message": "Isi kolom ini"
+  },
+  "menuUndo": {
+    "message": "Batalkan pengisian data palsu"
+  }
+}

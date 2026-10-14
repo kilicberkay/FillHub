@@ -1,0 +1,29 @@
+{
+  "extName": {
+    "message": "FillHub"
+  },
+  "extDescription": {
+    "message": "Füllt Webformulare mit realistischen, konsistenten Testdaten in 15 Sprachen. Datenschutzmodus, Rückgängig, keine Datenerhebung."
+  },
+  "actionTitle": {
+    "message": "FillHub: Formular mit Testdaten füllen"
+  },
+  "cmdFill": {
+    "message": "Formular mit Testdaten füllen"
+  },
+  "cmdChaos": {
+    "message": "Chaos-Modus (Fuzz-Tests)"
+  },
+  "cmdUndo": {
+    "message": "Testdaten-Füllung rückgängig machen"
+  },
+  "menuFillForm": {
+    "message": "Formular mit Testdaten füllen"
+  },
+  "menuFillField": {
+    "message": "Dieses Feld füllen"
+  },
+  "menuUndo": {
+    "message": "Testdaten-Füllung rückgängig machen"
+  }
+}

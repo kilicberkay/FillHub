@@ -1,8 +1,11 @@
 {
     "manifest_version": 3,
-    "name": "Filler Max",
-    "version": "1.1.0",
-    "description": "Advanced multi-language form filler for developers and testers.",
+    "name": "__MSG_extName__",
+    "version": "1.2.0",
+    "description": "__MSG_extDescription__",
+    "default_locale": "en",
+    "minimum_chrome_version": "116",
+    "homepage_url": "https://github.com/kilicberkay/FillHub",
     "permissions": [
         "storage",
         "contextMenus"
@@ -11,6 +14,7 @@
         "<all_urls>"
     ],
     "action": {
+        "default_title": "__MSG_actionTitle__",
         "default_icon": {
             "16": "icons/logo16.png",
             "48": "icons/logo48.png",
@@ -31,6 +35,9 @@
                 "<all_urls>"
             ],
             "js": [
+                "scripts/locale-data.js",
+                "scripts/id-rules.js",
+                "scripts/field-detect.js",
                 "scripts/generator.js",
                 "scripts/content.js"
             ],
@@ -45,21 +52,21 @@
                 "default": "Ctrl+Shift+F",
                 "mac": "Command+Shift+F"
             },
-            "description": "Fill form with fake data"
+            "description": "__MSG_cmdFill__"
         },
         "fill_chaos": {
             "suggested_key": {
                 "default": "Ctrl+Shift+D",
                 "mac": "Command+Shift+D"
             },
-            "description": "Chaos Mode (Fuzz Testing)"
+            "description": "__MSG_cmdChaos__"
         },
         "undo_fill": {
             "suggested_key": {
                 "default": "Ctrl+Shift+U",
                 "mac": "Command+Shift+U"
             },
-            "description": "Undo fake fill"
+            "description": "__MSG_cmdUndo__"
         }
     }
 }

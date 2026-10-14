@@ -1,0 +1,29 @@
+{
+  "extName": {
+    "message": "FillHub"
+  },
+  "extDescription": {
+    "message": "Preencha formulários web com dados fictícios realistas e consistentes em 15 idiomas. Modo seguro, desfazer e sem coleta de dados."
+  },
+  "actionTitle": {
+    "message": "FillHub: preencher formulário com dados fictícios"
+  },
+  "cmdFill": {
+    "message": "Preencher formulário com dados fictícios"
+  },
+  "cmdChaos": {
+    "message": "Modo caos (testes fuzz)"
+  },
+  "cmdUndo": {
+    "message": "Desfazer preenchimento fictício"
+  },
+  "menuFillForm": {
+    "message": "Preencher formulário com dados fictícios"
+  },
+  "menuFillField": {
+    "message": "Preencher este campo"
+  },
+  "menuUndo": {
+    "message": "Desfazer preenchimento fictício"
+  }
+}

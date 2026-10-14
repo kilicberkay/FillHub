@@ -1,0 +1,29 @@
+{
+  "extName": {
+    "message": "FillHub"
+  },
+  "extDescription": {
+    "message": "Fill web forms with realistic, consistent fake data in 15 languages. Privacy-safe mode, undo, and no data collection."
+  },
+  "actionTitle": {
+    "message": "FillHub: fill form with fake data"
+  },
+  "cmdFill": {
+    "message": "Fill form with fake data"
+  },
+  "cmdChaos": {
+    "message": "Chaos mode (fuzz testing)"
+  },
+  "cmdUndo": {
+    "message": "Undo fake fill"
+  },
+  "menuFillForm": {
+    "message": "Fill form with fake data"
+  },
+  "menuFillField": {
+    "message": "Fill this field"
+  },
+  "menuUndo": {
+    "message": "Undo fake fill"
+  }
+}

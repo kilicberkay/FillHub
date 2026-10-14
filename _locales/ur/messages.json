@@ -1,0 +1,29 @@
+{
+  "extName": {
+    "message": "FillHub"
+  },
+  "extDescription": {
+    "message": "15 زبانوں میں حقیقی اور ہم آہنگ جعلی ڈیٹا سے ویب فارم بھریں۔ محفوظ موڈ، واپس کریں؛ کوئی ڈیٹا جمع نہیں۔"
+  },
+  "actionTitle": {
+    "message": "FillHub: جعلی ڈیٹا سے فارم بھریں"
+  },
+  "cmdFill": {
+    "message": "جعلی ڈیٹا سے فارم بھریں"
+  },
+  "cmdChaos": {
+    "message": "کیاس موڈ (فزز ٹیسٹ)"
+  },
+  "cmdUndo": {
+    "message": "جعلی بھرائی واپس کریں"
+  },
+  "menuFillForm": {
+    "message": "جعلی ڈیٹا سے فارم بھریں"
+  },
+  "menuFillField": {
+    "message": "یہ فیلڈ بھریں"
+  },
+  "menuUndo": {
+    "message": "جعلی بھرائی واپس کریں"
+  }
+}

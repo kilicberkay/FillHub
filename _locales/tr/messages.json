@@ -1,0 +1,29 @@
+{
+  "extName": {
+    "message": "FillHub"
+  },
+  "extDescription": {
+    "message": "15 dilde gerçekçi ve tutarlı sahte verilerle web formlarını doldurun. Güvenli mod, geri alma; veri toplama yok."
+  },
+  "actionTitle": {
+    "message": "FillHub: formu sahte verilerle doldur"
+  },
+  "cmdFill": {
+    "message": "Formu sahte verilerle doldur"
+  },
+  "cmdChaos": {
+    "message": "Kaos modu (fuzz testi)"
+  },
+  "cmdUndo": {
+    "message": "Sahte doldurmayı geri al"
+  },
+  "menuFillForm": {
+    "message": "Formu sahte verilerle doldur"
+  },
+  "menuFillField": {
+    "message": "Bu alanı doldur"
+  },
+  "menuUndo": {
+    "message": "Sahte doldurmayı geri al"
+  }
+}

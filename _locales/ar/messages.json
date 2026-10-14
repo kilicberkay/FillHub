@@ -1,0 +1,29 @@
+{
+  "extName": {
+    "message": "FillHub"
+  },
+  "extDescription": {
+    "message": "يملأ نماذج الويب ببيانات وهمية واقعية ومتسقة بـ 15 لغة. وضع آمن، وتراجع، ولا يجمع أي بيانات."
+  },
+  "actionTitle": {
+    "message": "FillHub: ملء النموذج ببيانات وهمية"
+  },
+  "cmdFill": {
+    "message": "ملء النموذج ببيانات وهمية"
+  },
+  "cmdChaos": {
+    "message": "وضع الفوضى (اختبار عشوائي)"
+  },
+  "cmdUndo": {
+    "message": "التراجع عن الملء الوهمي"
+  },
+  "menuFillForm": {
+    "message": "ملء النموذج ببيانات وهمية"
+  },
+  "menuFillField": {
+    "message": "ملء هذا الحقل"
+  },
+  "menuUndo": {
+    "message": "التراجع عن الملء الوهمي"
+  }
+}

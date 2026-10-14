@@ -1,0 +1,29 @@
+{
+  "extName": {
+    "message": "FillHub"
+  },
+  "extDescription": {
+    "message": "Remplit les formulaires web avec des données fictives réalistes et cohérentes en 15 langues. Mode sûr, annulation, sans collecte."
+  },
+  "actionTitle": {
+    "message": "FillHub : remplir le formulaire avec des données fictives"
+  },
+  "cmdFill": {
+    "message": "Remplir le formulaire avec des données fictives"
+  },
+  "cmdChaos": {
+    "message": "Mode chaos (tests fuzz)"
+  },
+  "cmdUndo": {
+    "message": "Annuler le remplissage fictif"
+  },
+  "menuFillForm": {
+    "message": "Remplir le formulaire avec des données fictives"
+  },
+  "menuFillField": {
+    "message": "Remplir ce champ"
+  },
+  "menuUndo": {
+    "message": "Annuler le remplissage fictif"
+  }
+}

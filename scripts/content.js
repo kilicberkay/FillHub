@@ -1,30 +1,41 @@
-const fieldPatterns = {
-    firstName: /first.?name|given.?name|adınız|isminiz|^ad$|vorname|prénom|nombre|nome|primeiro.?nome|имя|名|名字|الاسم الأول/i,
-    lastName: /last.?name|family.?name|surname|soyadınız|soyad|nachname|nom|apellido|cognome|sobrenome|família|фамилия|姓|姓氏|اسم العائلة/i,
-    fullName: /full.?name|name|ad.?soyad|isim|tam.?ad|ganzer.?name|nom.?complet|nombre.?completo|nome.?completo|фио|полное.?имя|姓名|氏名|الاسم الكامل/i,
-    email: /email|e-mail|mail|eposta|e-posta|courriel|correo|correio|электронная.?почта|邮件|メール|البريد الإلكتروني/i,
-    phone: /phone|(?:^|[^a-z])tel(?:no|_|-|\.|:|\s|$)|gsm|mobile|cep|telefon|handy|téléphone|teléfono|teleforne|celular|телефон|电话|電話|الهاتف/i,
-    address: /address|street|adres|cadde|sokak|straße|adresse|dirección|endereço|morada|адрес|地址|住所|العنوان/i,
-    city: /city|town|şehir|sehir|ilçe|vilayet|stadt|ville|ciudad|cidade|город|城市|市|المدينة/i,
-    zip: /zip|postal|post.?code|posta.?kodu|plz|code.?postal|código.?postal|cep|почтовый.?индекс|邮编|郵便番号|الرمز البريدي/i,
-    company: /company|organization|firm|business|şirket|firma|kurum|unternehmen|société|empresa|companhia|компания|公司|会社|الشركة/i,
-    password: /pass|secret|şifre|parola|kennwort|mot.?de.?passe|contraseña|senha|пароль|密码|パスワード|كلمة المرour/i,
-    date: /date|birth|dob|tarih|doğum|datum|fecha|data|дата|日期|日付|التاريخ/i,
-    number: /number|count|quantity|amount|sayı|miktar|nummer|numéro|número|количество|数量|数|العدد/i,
-    url: /url|link|href|website|web|site|bağlantı|web.?sitesi|webseite|sitio|sítio|ссылка|链接|リンク|الرابط/i,
-    meeting: /meeting|conference|toplantı|görüşme|sitzung|réunion|reunión|reunião|встреча|会议|会議|اجتماع/i,
-    organizer: /organizer|host|arranger|düzenleyen|organizatör|veranstalter|organisateur|organizador|организатор|组织者|主催者|المنظم/i,
-    location: /location|venue|place|yer|mekan|konum|ort|lieu|lugar|local|место|地点|場所|الموقع/i,
-    agenda: /agenda|schedule|plan|gündem|program|tagesordnung|ordre.?du.?jour|agendamento|pauta|повестка|议程|アジェンダ|جدول أعمال/i,
-    position: /position|role|title|job|unvan|pozisyon|görev|rol|titel|poste|cargo|dolžnost|должность|职位|役職|المنصب/i,
-    website: /website|domain|web|site|web.?sitesi|internet|siteweb|sitio.?web|sítio.?web|веб-сайт|网站|ウェブサイト|الموقع الإلكتروني/i
-};
+// Etiketin yalnızca kendi metni: içindeki select/option metinleri (ör. ülke listesi) alan adına karışmaz
+function labelOwnText(label) {
+    const clone = label.cloneNode(true);
+    clone.querySelectorAll('select, input, textarea, option, button, script, style').forEach(n => n.remove());
+    return clone.textContent || '';
+}
+
+// Alanın metin kaynakları (küçük harf, Türkçe noktasız i dahil sadeleştirilmiş)
+function fieldTexts(input) {
+    const doc = input.ownerDocument || document;
+    const raw = [input.name, input.id, input.placeholder, input.title, input.getAttribute("aria-label")];
+    if (input.labels) for (const label of input.labels) raw.push(labelOwnText(label));
+    const labelledby = input.getAttribute("aria-labelledby");
+    if (labelledby) {
+        for (const id of labelledby.split(/\s+/)) {
+            const el = doc.getElementById(id);
+            if (el) raw.push(el.textContent);
+        }
+    }
+    const pair = findPairedHiddenInput(input);
+    if (pair) raw.push(pair.name, pair.id);
+    return raw.map(v => String(v || "").trim()).filter(Boolean);
+}
+
+// Etiket/placeholder yazısı: Latin dışı harf varsa yerel yazı, yalnız Latin harf varsa Latin tercih edilir
+function detectFieldScript(input) {
+    const texts = fieldTexts(input).join(' ');
+    if (/[^\u0000-ɏḀ-ỿ\s\d\p{P}\p{S}]/u.test(texts)) return 'native';
+    if (/[a-z]/i.test(texts)) return 'latin';
+    return undefined;
+}
 
 // State for the current fill session
 let sessionData = {
     firstName: null,
     lastName: null,
-    password: null
+    password: null,
+    person: null
 };
 
 // Snapshot of every field touched by the last fill, used by the undo action
@@ -44,7 +55,7 @@ async function drainTasks() {
             try {
                 await task();
             } catch (e) {
-                console.debug('[Filler Max] görev atlandı:', e);
+                console.debug('[FillHub] görev atlandı:', e);
             }
         }
     } finally {
@@ -143,7 +154,7 @@ function assignFieldValue(input, value) {
         filledCount++;
         return true;
     } catch (e) {
-        console.debug('[Filler Max] alan atlandı:', input, e);
+        console.debug('[FillHub] alan atlandı:', input, e);
         return false;
     }
 }
@@ -187,12 +198,12 @@ function fillNativeTypedInput(input, settings) {
 // Fake payloads used to satisfy client-side accept/MIME/size checks on file inputs
 const FILE_TYPES = {
     pdf: { mime: 'application/pdf', text: '%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n' },
-    docx: { mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', text: 'Filler Max test belgesi.' },
-    doc: { mime: 'application/msword', text: 'Filler Max test belgesi.' },
-    xlsx: { mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', text: 'Filler Max test tablosu.' },
-    txt: { mime: 'text/plain', text: 'Filler Max test metni.' },
+    docx: { mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', text: 'FillHub test belgesi.' },
+    doc: { mime: 'application/msword', text: 'FillHub test belgesi.' },
+    xlsx: { mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', text: 'FillHub test tablosu.' },
+    txt: { mime: 'text/plain', text: 'FillHub test metni.' },
     csv: { mime: 'text/csv', text: 'ad,soyad\nTest,Kullanici\n' },
-    zip: { mime: 'application/zip', text: 'Filler Max test arsivi.' },
+    zip: { mime: 'application/zip', text: 'FillHub test arsivi.' },
     png: { mime: 'image/png', base64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=' },
     jpg: { mime: 'image/jpeg', base64: '/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCAABAAEBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AKp//2Q==' }
 };
@@ -235,8 +246,9 @@ function slugifyName(value) {
 }
 
 function buildFileName(ext, sessionData) {
-    const first = slugifyName(sessionData.firstName);
-    const last = slugifyName(sessionData.lastName);
+    const person = sessionData.person;
+    const first = slugifyName(person ? person.first.l : sessionData.firstName);
+    const last = slugifyName(person ? person.last.l : sessionData.lastName);
     return first && last ? `${first}.${last}.${ext}` : `fake-file.${ext}`;
 }
 
@@ -267,7 +279,7 @@ function fillFileInput(input, sessionData) {
         filledCount++;
         return true;
     } catch (e) {
-        console.debug('[Filler Max] alan atlandı:', input, e);
+        console.debug('[FillHub] alan atlandı:', input, e);
         return false;
     }
 }
@@ -456,10 +468,11 @@ function detectDateFormat(input) {
         input.getAttribute('pattern')
     ].filter(Boolean).join(' ');
     if (!hints) return null;
+    // Yerel jetonlar: yıl (yyyy/aaaa/jjjj/гггг), gün (gg/dd/jj/дд), ay (aa/mm/мм); Latin dışı harfler için \p{L} sınırı
     const normalized = hints
-        .replace(/\bgg\b/gi, 'dd')
-        .replace(/\baa\b/gi, 'mm')
-        .replace(/\byy\b/gi, 'yyyy')
+        .replace(/(?<!\p{L})(yyyy|aaaa|jjjj|гггг|yy)(?!\p{L})/giu, 'yyyy')
+        .replace(/(?<!\p{L})(gg|dd|jj|дд)(?!\p{L})/giu, 'dd')
+        .replace(/(?<!\p{L})(aa|mm|мм)(?!\p{L})/giu, 'mm')
         .toLowerCase();
     const match = /(yyyy|dd|mm)([.\-/\s])(yyyy|dd|mm)\2(yyyy|dd|mm)/.exec(normalized);
     if (!match) return null;
@@ -508,7 +521,7 @@ function fillPairedHiddenInput(hidden, value) {
         filledCount++;
         return true;
     } catch (e) {
-        console.debug('[Filler Max] alan atlandı:', hidden, e);
+        console.debug('[FillHub] alan atlandı:', hidden, e);
         return false;
     }
 }
@@ -521,27 +534,14 @@ function identifyField(input, customRules = []) {
         } catch (e) { }
     }
 
-    // 2. Standard identification
-    const name = input.name || "";
-    const id = input.id || "";
-    const placeholder = input.placeholder || "";
-    const labelText = input.labels?.[0]?.innerText || "";
-    // A "x_date_display" field usually carries the semantics in its paired hidden input instead
-    const pair = findPairedHiddenInput(input);
-    const pairText = pair ? (pair.name || '') + " " + (pair.id || '') : "";
-    const text = (name + " " + id + " " + placeholder + " " + labelText + " " + pairText).toLowerCase();
-
-    if (input.type === 'email') return 'email';
-    if (input.type === 'tel') return 'phone';
-    if (input.type === 'url') return 'url';
-    if (input.type === 'number') return 'number';
-    if (input.type === 'password') return 'password';
-    if (input.type === 'date') return 'date';
-    if (input.type === 'datetime-local') return 'datetime'; // Separate type for time support
-
-    for (const [key, pattern] of Object.entries(fieldPatterns)) {
-        if (pattern.test(text)) return key;
-    }
+    // 2. Standard identification: tür sinyali, autocomplete ve metin kaynakları (field-detect.js)
+    const texts = fieldTexts(input);
+    const text = texts.join(" ").toLowerCase();
+    const detected = FillHubDetect.classify(texts, {
+        inputType: input.type,
+        autocomplete: input.getAttribute("autocomplete")
+    });
+    if (detected) return detected;
 
     // A date-shaped placeholder (e.g. "gg.aa.yyyy") is itself a reliable date signal
     if (detectDateFormat(input)) return 'date';
@@ -580,7 +580,6 @@ function queryFields(root, selector) {
 
 function collectFields(container, settings) {
     const inputs = queryFields(container, FIELD_SELECTOR);
-    const profile = getActiveProfile(settings);
 
     // Pre-scan for names to support Smart Email Linking
     const handledNames = new Set();
@@ -589,7 +588,7 @@ function collectFields(container, settings) {
         if (type !== 'firstName' && type !== 'lastName') return;
         if (!isElementVisible(input)) return;
         handledNames.add(input);
-        fillField(input, settings, profile);
+        fillField(input, settings);
     });
 
     // Radio groups are resolved as a whole: exactly one enabled radio per group
@@ -616,7 +615,7 @@ function collectFields(container, settings) {
         if (handledNames.has(input)) return;
         // Radio groups are resolved as a whole group, not per input
         if (input.type === 'radio') return;
-        fillField(input, settings, profile);
+        fillField(input, settings);
     });
 
     // Captcha widget'ları tetiklenir (reCAPTCHA/Turnstile); DOM checkbox'larına dokunulmaz,
@@ -632,48 +631,65 @@ function collectFields(container, settings) {
     });
 }
 
+// Seçenek, kişinin ülke/il/telefon kodu ile eşleşiyor mu? (ISO kodu, İngilizce veya yerel ad)
+function selectOptionMatches(option, type, person) {
+    if (!person) return false;
+    const text = (option.textContent || '').trim().toLowerCase();
+    const value = (option.value || '').trim().toLowerCase();
+    if (type === 'country') {
+        const entry = FakeDataGenerator.getCountries().find(c => c.code === person.country);
+        const names = [person.country, entry && entry.name].filter(Boolean).map(s => s.toLowerCase());
+        return names.includes(value) || names.includes(text);
+    }
+    if (type === 'state') {
+        const region = String(person.city.region).toLowerCase();
+        return text === region || value === region;
+    }
+    if (type === 'phoneCode') {
+        const cc = FakeDataGenerator.profileOf(person).phone.cc;
+        return value === `+${cc}` || value === cc || text.includes(`+${cc}`);
+    }
+    return false;
+}
+
 // Selects valid options only: no disabled, hidden or empty placeholder options
-function fillSelect(input) {
+function fillSelect(input, type, person) {
     try {
         const candidates = [...input.options].filter(o => !o.disabled && !o.hidden && o.value !== '');
         if (!candidates.length) return false;
         snapshotField(input);
+        const matched = ['country', 'state', 'phoneCode'].includes(type) ? candidates.filter(o => selectOptionMatches(o, type, person)) : [];
         if (input.multiple) {
             const count = Math.min(candidates.length, Math.random() > 0.5 ? 2 : 1);
             const picks = [...candidates].sort(() => Math.random() - 0.5).slice(0, count);
             for (const option of input.options) option.selected = picks.includes(option);
         } else {
-            const pick = candidates[Math.floor(Math.random() * candidates.length)];
+            const pool = matched.length ? matched : candidates;
+            const pick = pool[Math.floor(Math.random() * pool.length)];
             setNativeValue(input, pick.value);
         }
         dispatchFieldEvents(input);
         filledCount++;
         return true;
     } catch (e) {
-        console.debug('[Filler Max] alan atlandı:', input, e);
+        console.debug('[FillHub] alan atlandı:', input, e);
         return false;
     }
 }
 
 // Active persona from settings; only used when it actually carries persona data
-function getActiveProfile(settings) {
-    const list = Array.isArray(settings.profiles) ? settings.profiles : [];
-    const p = list.find(x => x.id === settings.activeProfileId);
-    return (p && typeof p.firstName === 'string' && typeof p.lastName === 'string') ? p : null;
-}
-
-function profileValue(profile, type) {
-    if (!profile) return null;
-    if (type === 'fullName') {
-        const name = [profile.firstName, profile.lastName].filter(Boolean).join(' ').trim();
-        return name || null;
-    }
-    const value = profile[type];
-    return typeof value === 'string' && value !== '' ? value : null;
+// Yeni oturum: sabit kimlik modundaki şablonun kişisi ya da her çağrıda taze bir kişi (rastgele mod)
+function startSession(settings) {
+    sessionData = {
+        firstName: '',
+        lastName: '',
+        password: null,
+        person: FakeDataGenerator.activeIdentity(settings) || FakeDataGenerator.createPerson(settings.preferredLocale)
+    };
 }
 
 // Fills a single field; returns true when a value was written (async picker work included)
-function fillField(input, settings, profile = null, checkVisibility = true) {
+function fillField(input, settings, checkVisibility = true) {
     if (isControlDisabled(input)) return false;
 
     if (input.type === 'file') {
@@ -699,7 +715,7 @@ function fillField(input, settings, profile = null, checkVisibility = true) {
     if (!type) return false;
 
     if (input.tagName === 'SELECT') {
-        return fillSelect(input);
+        return fillSelect(input, type, sessionData.person);
     }
 
     if (input.tagName === 'INPUT' && NATIVE_TYPED_INPUTS.has(input.type)) {
@@ -737,13 +753,10 @@ function fillField(input, settings, profile = null, checkVisibility = true) {
     // Readonly alanlara doğrudan değer yazılmaz
     if (input.readOnly) return false;
 
-    // Smart Password Matching / persona values take precedence over generated data
-    const profileVal = profileValue(profile, type);
+    // Eşleşen parola alanları aynı değeri alır; diğer değerler oturumdaki kişiden üretilir
     let val;
     if (type === 'password' && settings.matchPasswords && sessionData.password) {
         val = sessionData.password;
-    } else if (profileVal !== null) {
-        val = profileVal;
     } else {
         val = FakeDataGenerator.generate(type, settings.preferredLocale, {
             ...sessionData,
@@ -751,6 +764,8 @@ function fillField(input, settings, profile = null, checkVisibility = true) {
             pattern: input.getAttribute('pattern') || '',
             valueShape: detectValueShape(input),
             multiline: input.tagName === 'TEXTAREA',
+            placeholder: input.placeholder || '',
+            script: detectFieldScript(input),
             chaosMode: settings.chaosMode,
             piiSafe: settings.piiSafe,
             smartEmail: settings.smartEmail !== false
@@ -759,9 +774,6 @@ function fillField(input, settings, profile = null, checkVisibility = true) {
         // Cache values for smart linking (password is cached here if not matched)
         if (type === 'password') sessionData.password = val;
     }
-
-    if (type === 'firstName') sessionData.firstName = val;
-    if (type === 'lastName') sessionData.lastName = val;
 
     assignFieldValue(input, val);
     return true;
@@ -787,7 +799,7 @@ async function fillPage(settings) {
     pendingTasks = [];
     filledCount = 0;
     fillSnapshot = new Map();
-    sessionData = { firstName: '', lastName: '', password: null };
+    startSession(settings);
     // Watch for fields rendered while this fill is still running (async picker work included)
     observeDynamicFields(settings);
     collectFields(document, settings);
@@ -813,7 +825,7 @@ function undoFill() {
             dispatchFieldEvents(el);
             restored++;
         } catch (e) {
-            console.debug('[Filler Max] alan atlandı:', el, e);
+            console.debug('[FillHub] alan atlandı:', el, e);
         }
     });
     fillSnapshot = new Map();
@@ -921,23 +933,31 @@ function autoSubmitForm(container) {
     }
 }
 
-function showToast(message) {
+// Bildirim kartı: blog toast'unun açık/koyu yüzeyi (sayfa stillerinden bağımsız, inline)
+const TOAST_THEMES = {
+    dark: { background: 'rgba(24, 24, 27, 0.9)', color: '#f4f4f5', border: '1px solid rgba(255, 255, 255, 0.1)', shadow: '0 24px 48px -32px rgba(0, 0, 0, 0.9)' },
+    light: { background: 'rgba(255, 255, 255, 0.95)', color: '#18181b', border: '1px solid #e4e4e7', shadow: '0 18px 40px -24px rgba(24, 24, 27, 0.35)' }
+};
+
+function showToast(message, theme) {
     let toast = document.getElementById('fake-filler-toast');
     if (!toast) {
         toast = document.createElement('div');
         toast.id = 'fake-filler-toast';
         Object.assign(toast.style, {
-            position: 'fixed', bottom: '30px', right: '30px',
-            padding: '16px 28px', background: 'linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%)',
-            color: 'white', borderRadius: '16px', zIndex: '2147483647',
-            fontFamily: "'Outfit', sans-serif", fontSize: '14px', fontWeight: '600',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)',
-            transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+            position: 'fixed', right: '20px', bottom: '20px', zIndex: '2147483647',
+            display: 'flex', alignItems: 'center', gap: '10px', maxWidth: '360px',
+            padding: '14px 18px', borderRadius: '16px', boxSizing: 'border-box',
+            fontFamily: "Geist, ui-sans-serif, system-ui, sans-serif", fontSize: '13px', fontWeight: '500',
+            transition: 'transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.4s cubic-bezier(0.2, 0.7, 0.2, 1)',
             transform: 'translateY(100px)', opacity: '0'
         });
+        toast.innerHTML = '<span aria-hidden="true" style="flex-shrink: 0; width: 8px; height: 8px; border-radius: 999px; background: #f74a87; box-shadow: 0 0 0 3px rgba(247, 74, 135, 0.22);"></span><span></span>';
         document.body.appendChild(toast);
     }
-    toast.innerText = "✨ " + message;
+    const palette = TOAST_THEMES[theme === 'light' ? 'light' : 'dark'];
+    Object.assign(toast.style, { background: palette.background, color: palette.color, border: palette.border, boxShadow: palette.shadow });
+    toast.lastElementChild.textContent = message;
     toast.style.transform = 'translateY(0)';
     toast.style.opacity = '1';
     setTimeout(() => {
@@ -960,8 +980,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const settings = await chrome.storage.local.get(null);
         // Yeni kurulum varsayılanları: gizlilik öncelikli + tarayıcı dili
         if (settings.piiSafe === undefined) settings.piiSafe = true;
-        if (!settings.preferredLocale) settings.preferredLocale = navigator.language || 'en';
+        if (!settings.preferredLocale) settings.preferredLocale = FakeDataGenerator.canonicalLocale(navigator.language);
         if (request.locale) settings.preferredLocale = request.locale;
+        // Eski şablon kayıtları ayar sayfası açılmadan da yeni modele taşınır (dolu eski şablon sabit kimlik olur)
+        settings.profiles = FakeDataGenerator.migrateProfiles(settings.profiles, settings.preferredLocale).profiles;
 
         if (request.action === 'fill_chaos') settings.chaosMode = true;
 
@@ -979,7 +1001,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             pendingTasks = [];
             filledCount = 0;
             fillSnapshot = new Map();
-            fillField(target, settings, getActiveProfile(settings), false);
+            startSession(settings);
+            fillField(target, settings, false);
             await drainTasks();
             respond({ status: 'success', filled: filledCount });
             return;
@@ -987,14 +1010,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         await fillPage(settings);
         if (window.top === window) {
-            showToast(getLocalizedMessage(settings.preferredLocale, request.action === 'fill_chaos' ? 'chaos' : 'filled'));
+            showToast(getLocalizedMessage(settings.preferredLocale, request.action === 'fill_chaos' ? 'chaos' : 'filled'), settings.theme);
         }
         if (settings.autoSubmit && request.action === 'fill') {
             autoSubmitForm(document);
         }
         respond({ status: 'success', filled: filledCount });
     })().catch((e) => {
-        console.debug('[Filler Max] doldurma hatası:', e);
+        console.debug('[FillHub] doldurma hatası:', e);
         respond({ status: 'error' });
     });
 
@@ -1014,7 +1037,12 @@ function getLocalizedMessage(localeLiteral, key = 'filled') {
             'ru': 'Все поля заполнены с точностью.',
             'zh': '所有字段均已精确填写。',
             'ja': 'すべてのフィールドが正確に入力されました。',
-            'ar': 'تم ملء جميع الحقول بدقة.'
+            'ar': 'تم ملء جميع الحقول بدقة.',
+            'hi': 'सभी फ़ील्ड सटीकता से भर दिए गए।',
+            'bn': 'সব ঘর সঠিকভাবে পূরণ করা হয়েছে।',
+            'ur': 'تمام فیلڈز درستگی سے بھر دیے گئے۔',
+            'id': 'Semua kolom diisi dengan tepat.',
+            'vi': 'Đã điền tất cả các trường một cách chính xác.'
         },
         chaos: {
             'tr': 'CHAOS MODE',
@@ -1030,7 +1058,12 @@ function getLocalizedMessage(localeLiteral, key = 'filled') {
             'ru': 'Форма восстановлена.',
             'zh': '表单已恢复。',
             'ja': 'フォームを元に戻しました。',
-            'ar': 'تمت استعادة النموذج.'
+            'ar': 'تمت استعادة النموذج.',
+            'hi': 'फ़ॉर्म पहले जैसा कर दिया गया।',
+            'bn': 'ফর্ম আগের অবস্থায় ফিরিয়ে আনা হয়েছে।',
+            'ur': 'فارم پہلے جیسا کر دیا گیا۔',
+            'id': 'Formulir dikembalikan ke keadaan semula.',
+            'vi': 'Đã khôi phục biểu mẫu.'
         }
     };
     const table = messages[key] || messages.filled;

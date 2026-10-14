@@ -1,0 +1,29 @@
+{
+  "extName": {
+    "message": "FillHub"
+  },
+  "extDescription": {
+    "message": "Điền biểu mẫu web bằng dữ liệu giả thực tế, nhất quán trong 15 ngôn ngữ. Chế độ an toàn, hoàn tác; không thu thập dữ liệu."
+  },
+  "actionTitle": {
+    "message": "FillHub: điền biểu mẫu bằng dữ liệu giả"
+  },
+  "cmdFill": {
+    "message": "Điền biểu mẫu bằng dữ liệu giả"
+  },
+  "cmdChaos": {
+    "message": "Chế độ hỗn loạn (kiểm thử fuzz)"
+  },
+  "cmdUndo": {
+    "message": "Hoàn tác điền dữ liệu giả"
+  },
+  "menuFillForm": {
+    "message": "Điền biểu mẫu bằng dữ liệu giả"
+  },
+  "menuFillField": {
+    "message": "Điền trường này"
+  },
+  "menuUndo": {
+    "message": "Hoàn tác điền dữ liệu giả"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "extName": {
+    "message": "FillHub"
+  },
+  "extDescription": {
+    "message": "15言語で、現実的で一貫した架空データを使ってウェブフォームを入力します。安全モード、元に戻す機能。データ収集なし。"
+  },
+  "actionTitle": {
+    "message": "FillHub：架空データでフォームを入力"
+  },
+  "cmdFill": {
+    "message": "架空データでフォームを入力"
+  },
+  "cmdChaos": {
+    "message": "カオスモード（ファジング）"
+  },
+  "cmdUndo": {
+    "message": "架空データの入力を元に戻す"
+  },
+  "menuFillForm": {
+    "message": "架空データでフォームを入力"
+  },
+  "menuFillField": {
+    "message": "このフィールドを入力"
+  },
+  "menuUndo": {
+    "message": "架空データの入力を元に戻す"
+  }
+}

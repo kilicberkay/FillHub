@@ -1,17 +1,17 @@
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
         id: "fillForm",
-        title: "Fill Form with Fake Data",
+        title: chrome.i18n.getMessage('menuFillForm'),
         contexts: ["all"]
     });
     chrome.contextMenus.create({
         id: "fillField",
-        title: "Fill This Field",
+        title: chrome.i18n.getMessage('menuFillField'),
         contexts: ["editable"]
     });
     chrome.contextMenus.create({
         id: "undoFill",
-        title: "Undo Fake Fill",
+        title: chrome.i18n.getMessage('menuUndo'),
         contexts: ["all"]
     });
 });

@@ -1,0 +1,29 @@
+{
+  "extName": {
+    "message": "FillHub"
+  },
+  "extDescription": {
+    "message": "Rellena formularios web con datos falsos realistas y coherentes en 15 idiomas. Modo seguro, deshacer y sin recopilar datos."
+  },
+  "actionTitle": {
+    "message": "FillHub: rellenar formulario con datos falsos"
+  },
+  "cmdFill": {
+    "message": "Rellenar formulario con datos falsos"
+  },
+  "cmdChaos": {
+    "message": "Modo caos (pruebas fuzz)"
+  },
+  "cmdUndo": {
+    "message": "Deshacer relleno falso"
+  },
+  "menuFillForm": {
+    "message": "Rellenar formulario con datos falsos"
+  },
+  "menuFillField": {
+    "message": "Rellenar este campo"
+  },
+  "menuUndo": {
+    "message": "Deshacer relleno falso"
+  }
+}

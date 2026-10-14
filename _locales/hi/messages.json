@@ -1,0 +1,29 @@
+{
+  "extName": {
+    "message": "FillHub"
+  },
+  "extDescription": {
+    "message": "15 भाषाओं में यथार्थवादी और सुसंगत नकली डेटा से वेब फ़ॉर्म भरें। सुरक्षित मोड, पूर्ववत करें; कोई डेटा संग्रह नहीं।"
+  },
+  "actionTitle": {
+    "message": "FillHub: नकली डेटा से फ़ॉर्म भरें"
+  },
+  "cmdFill": {
+    "message": "नकली डेटा से फ़ॉर्म भरें"
+  },
+  "cmdChaos": {
+    "message": "कैओस मोड (फ़ज़ टेस्ट)"
+  },
+  "cmdUndo": {
+    "message": "नकली भराई पूर्ववत करें"
+  },
+  "menuFillForm": {
+    "message": "नकली डेटा से फ़ॉर्म भरें"
+  },
+  "menuFillField": {
+    "message": "यह फ़ील्ड भरें"
+  },
+  "menuUndo": {
+    "message": "नकली भराई पूर्ववत करें"
+  }
+}

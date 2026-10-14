@@ -1,0 +1,29 @@
+{
+  "extName": {
+    "message": "FillHub"
+  },
+  "extDescription": {
+    "message": "以15种语言用真实且一致的虚构数据填写网页表单。安全模式、撤销功能，且不收集任何数据。"
+  },
+  "actionTitle": {
+    "message": "FillHub：用虚构数据填写表单"
+  },
+  "cmdFill": {
+    "message": "用虚构数据填写表单"
+  },
+  "cmdChaos": {
+    "message": "混沌模式（模糊测试）"
+  },
+  "cmdUndo": {
+    "message": "撤销虚构数据填写"
+  },
+  "menuFillForm": {
+    "message": "用虚构数据填写表单"
+  },
+  "menuFillField": {
+    "message": "填写此字段"
+  },
+  "menuUndo": {
+    "message": "撤销虚构数据填写"
+  }
+}
