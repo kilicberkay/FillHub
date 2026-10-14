@@ -28,7 +28,7 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: node tools/verify-data.js
-      - run: node --test tests/unit
+      - run: node --test tests/unit/*.test.mjs
       - run: npm run build
       - name: Store archive contents
         run: python3 -m zipfile -t dist/fillhub-*.zip
@@ -51,4 +51,4 @@ jobs:
       - name: Install Chromium for Playwright
         run: npx --yes playwright install --with-deps chromium
       - name: Browser tests
-        run: node --test --test-timeout=400000 tests/e2e
+        run: node --test --test-timeout=400000 tests/e2e/*.test.mjs

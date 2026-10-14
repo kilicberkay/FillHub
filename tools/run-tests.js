@@ -11,10 +11,10 @@ const runE2E = !args.includes('--no-e2e');
 const steps = [
     { name: 'sözdizimi', cmd: [process.execPath, [path.join(ROOT, 'tools/check-syntax.js')]] },
     { name: 'veri doğrulama', cmd: [process.execPath, [path.join(ROOT, 'tools/verify-data.js')]] },
-    { name: 'birim testleri', cmd: [process.execPath, ['--test', path.join(ROOT, 'tests/unit')]] },
+    { name: 'birim testleri', cmd: [process.execPath, ['--test', path.join(ROOT, 'tests/unit', '*.test.mjs')]] },
 ];
 if (runE2E) {
-    steps.push({ name: 'uçtan uca (Chromium)', cmd: [process.execPath, ['--test', '--test-timeout=400000', path.join(ROOT, 'tests/e2e')]] });
+    steps.push({ name: 'uçtan uca (Chromium)', cmd: [process.execPath, ['--test', '--test-timeout=400000', path.join(ROOT, 'tests', 'e2e', '*.test.mjs')]] });
 }
 
 let failed = 0;
