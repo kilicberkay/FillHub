@@ -1,0 +1,39 @@
+# Changelog
+
+All notable changes to FillHub are documented here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+## [1.2.0] - 2026-10-14
+
+### Fixed
+- Every fill now generates a fresh identity. The default persona no longer freezes the same name,
+  e-mail and phone (`Murat` / `murat.kara2@example.com` / `5320478545`). Legacy presets are migrated
+  when the extension runs, even if the settings page was never opened.
+- PII Safe values are now varied and realistic-looking: mixed names, e-mail addresses that match the
+  name and end with an example domain, phone numbers such as `5320000000`, and valid test national
+  IDs such as `11111111110`. With PII Safe off, values are realistic (`5320478545`).
+- `Soyadınız` (surname) is recognised as a last-name field; it was wrongly detected as a first name.
+- Turkish phone numbers are generated with 10 digits (no leading zero).
+- Single-field fill (`fill_field`) creates a new person on every call.
+- The "E-mail repeat" field receives the same value as the e-mail field.
+- Context menu titles are localized.
+
+### Added
+- 15-language locale model with 15 country profiles (US, CN, IN, MX, EG, FR, BD, BR, RU, PK, ID, DE,
+  JP, TR, VN) and checksum-verified identity algorithms (TCKN, CPF, CNPJ, Chinese ID, SNILS, INN-10,
+  My Number, CURP, Aadhaar, IBAN, and others).
+- Field detection rewrite with a priority-ordered rule set, a 100+ label corpus across 15 languages,
+  and autocomplete / input-type signals.
+- Identity presets with random or fixed modes, and a "refresh identity" action.
+- Support section in the settings page with a GitHub Sponsors link (also reachable from the top bar).
+- Unit tests, end-to-end tests in real Chromium, CI workflows, and a Chrome Web Store package build.
+- Open-source release files: MIT license, contribution guide, code of conduct, security policy, privacy
+  policy, architecture notes.
+
+### Changed
+- Renamed from "Filler Max" to FillHub.
+- Settings page rebuilt with a new visual design and a Tailwind CSS build step (`npm run build:css`).
+
+## [1.1.0]
+
+- Earlier development version under the previous name.

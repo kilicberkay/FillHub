@@ -1,0 +1,50 @@
+# Privacy policy
+
+FillHub is an open-source Chrome extension that fills web forms with fake data. It is designed so
+that your data stays on your device.
+
+## What FillHub does with data
+
+- **Collects nothing.** FillHub does not send any data to the author or to third parties. It has no
+  analytics, telemetry, crash reporting, or accounts.
+- **Stores settings locally.** Your preferences (country, language, PII Safe mode, custom rules,
+  identity presets) are kept in `chrome.storage.local` in your browser profile. They never leave
+  your device.
+- **Reads form fields only when you ask it to fill.** FillHub acts when you press a shortcut, click
+  the context menu, or click the toolbar icon. It reads the labels and names of form fields on the
+  page you are viewing in order to choose a fake value for each field, and writes values back to
+  those fields.
+- **Does not read or store the values you type**, except the value it has just written, so the
+  Undo command can restore the previous state within the current page session.
+
+## Permissions and why they are needed
+
+| Permission | Why |
+|---|---|
+| `storage` | Saves your settings locally. |
+| `contextMenus` | Adds the "Fill form" and "Undo" items to the right-click menu. |
+| `<all_urls>` (host access) and content scripts in all frames | Fill forms on any website, including forms inside iframes. Content scripts run only on the page you act on. |
+
+## Fake data
+
+FillHub generates data that is **not meant to belong to real people**:
+
+- In **PII Safe mode** (on by default), personal identifiers use obvious test values: example
+  domains (`example.com`, `example.org`, `test.example.com`), placeholder phone numbers, sentinel
+  identity numbers, and test street and company names.
+- Identity numbers that have a checksum (for example the Turkish national ID or Brazilian CPF) are
+  generated so that they pass the public checksum algorithm. A checksum pass does not mean the
+  number belongs to anyone. Do not use generated numbers for any real purpose.
+
+## Children
+
+FillHub is not directed at children and does not collect personal information from anyone.
+
+## Changes
+
+Changes to this policy are published in this repository with the release notes in
+[CHANGELOG.md](CHANGELOG.md).
+
+## Contact
+
+Questions about privacy: open a GitHub issue in this repository.

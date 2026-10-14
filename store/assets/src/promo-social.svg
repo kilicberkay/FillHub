@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1280" height="640" viewBox="0 0 1280 640">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fb7aa8"/><stop offset="0.45" stop-color="#f74a87"/><stop offset="1" stop-color="#c2185b"/>
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#ffffff" stroke-opacity="0.10" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1280" height="640" fill="url(#g)"/>
+  <rect width="1280" height="640" fill="url(#grid)"/>
+  <image x="565" y="110" width="150" height="150" xlink:href="ICON_HREF"/>
+  <text x="640" y="350" text-anchor="middle" font-family="Geist, DejaVu Sans, sans-serif" font-size="88" font-weight="700" fill="#ffffff" letter-spacing="-2.6">FillHub</text>
+  <text x="640" y="402" text-anchor="middle" font-family="Geist, DejaVu Sans, sans-serif" font-size="30" fill="#ffffff" fill-opacity="0.95">Fake form data that stays realistic and consistent</text>
+  <text x="640" y="458" text-anchor="middle" font-family="Geist Mono, DejaVu Sans Mono, monospace" font-size="16" fill="#ffffff" fill-opacity="0.85" letter-spacing="2.6">GITHUB.COM/KILICBERKAY/FILLHUB</text>
+</svg>
