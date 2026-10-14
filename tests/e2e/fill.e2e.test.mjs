@@ -169,6 +169,81 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
         });
     });
 
+    describe('captcha ve profil yönetimi', () => {
+        it('görünür captcha bildirilir ve vurgulanır, otomatik tıklanmaz', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true });
+            const form = await openForm(env);
+            try {
+                await form.page.eval(`(() => {
+                    const d = document.createElement('div');
+                    d.id = 'captcha-test';
+                    d.className = 'g-recaptcha';
+                    d.setAttribute('data-sitekey', 'test-anahtar');
+                    d.style.cssText = 'width:304px;height:78px;background:#eee';
+                    window.__clicks = 0;
+                    d.addEventListener('click', () => window.__clicks++);
+                    document.body.appendChild(d);
+                })()`);
+                const r = await send(env, form.tabId, { action: 'fill' });
+                assert.equal(r.status, 'success');
+                const toast = await form.page.eval(`document.getElementById('fake-filler-toast')?.textContent || ''`);
+                assert.ok(/captcha/i.test(toast), `captcha bildirimi gösterilmeli: "${toast}"`);
+                const outline = await form.page.eval(`document.getElementById('captcha-test').style.outline`);
+                assert.ok(outline.length > 0, 'captcha vurgulanmalı');
+                assert.equal(await form.page.eval('window.__clicks'), 0, 'captcha otomatik tıklanmamalı');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('yeni sabit profil diyalogla oluşur, kaydedilince aktif olur', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
+            const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/options/options.html`);
+            try {
+                await page.waitFor('!!document.getElementById("newProfileBtn")', 10000);
+                await wait(300);
+                await page.eval('document.getElementById("newProfileBtn").click()');
+                await page.waitFor('!document.getElementById("profileDialog").hidden', 5000);
+                await page.eval(`(() => {
+                    document.getElementById('profileName').value = 'Test Müşteri';
+                    document.getElementById('profileModeFixed').click();
+                })()`);
+                await page.eval('document.getElementById("profileSaveBtn").click()');
+                await page.waitFor('document.getElementById("profileDialog").hidden', 5000);
+
+                const stored = await env.swEval("chrome.storage.local.get(['profiles', 'activeProfileId']).then(r => JSON.stringify(r))")
+                    .then(JSON.parse);
+                const created = (stored.profiles || []).find((p) => p.name === 'Test Müşteri');
+                assert.ok(created, 'profil kaydedilmeli');
+                assert.equal(created.mode, 'fixed');
+                assert.ok(created.identity && created.identity.first && created.identity.emailDomain, 'sabit kimlik kaydedilmeli');
+                assert.equal(stored.activeProfileId, created.id, 'yeni profil aktif olmalı');
+                assert.deepEqual(page.errors, [], `sayfa hatası: ${page.errors.join(' | ')}`);
+            } finally {
+                await page.close();
+            }
+        });
+
+        it('vazgeçilen yeni profil kaydedilmez', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
+            const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/options/options.html`);
+            try {
+                await page.waitFor('!!document.getElementById("newProfileBtn")', 10000);
+                await wait(300);
+                await page.eval('document.getElementById("newProfileBtn").click()');
+                await page.waitFor('!document.getElementById("profileDialog").hidden', 5000);
+                await page.eval(`(() => { document.getElementById('profileName').value = 'Vazgeçilen'; })()`);
+                await page.eval('document.getElementById("profileCancelBtn").click()');
+                await page.waitFor('document.getElementById("profileDialog").hidden', 5000);
+                const stored = await env.swEval("chrome.storage.local.get(['profiles']).then(r => JSON.stringify(r))").then(JSON.parse);
+                const extra = (stored.profiles || []).filter((p) => p.name === 'Vazgeçilen');
+                assert.equal(extra.length, 0, 'vazgeçilen profil oluşmamalı');
+            } finally {
+                await page.close();
+            }
+        });
+    });
+
     describe('ayarlar sayfası', () => {
         it('destek bölümü ve GitHub Sponsors bağlantısı çalışır', async () => {
             const url = `chrome-extension://${env.extId}/options/options.html`;
@@ -184,8 +259,8 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
                 await page.eval('document.getElementById("nav-support").click()');
                 await page.waitFor('document.getElementById("support").classList.contains("active")', 5000);
 
-                assert.ok(await page.eval('!!document.getElementById("personaModeRandom") && !!document.getElementById("personaModeFixed")'),
-                    'kimlik modu seçicileri bulunmalı');
+                assert.ok(await page.eval('!!document.getElementById("profileModeRandom") && !!document.getElementById("profileModeFixed")'),
+                    'profil kipi seçicileri bulunmalı');
                 assert.deepEqual(page.errors, [], `sayfa hatası olmamalı: ${page.errors.join(' | ')}`);
             } finally {
                 await page.close();

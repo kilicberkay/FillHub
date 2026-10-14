@@ -14,12 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const profilesList = document.getElementById('profilesList');
     const newProfileBtn = document.getElementById('newProfileBtn');
-    const profileEditor = document.getElementById('profileEditor');
-    const editProfileName = document.getElementById('editProfileName');
-    const currentProfileNameText = document.getElementById('currentProfileName');
-    const saveProfileBtn = document.getElementById('saveProfileBtn');
-    const deleteProfileBtn = document.getElementById('deleteProfileBtn');
-    const profileDataSummary = document.getElementById('profileDataSummary');
 
     const ruleSelectorInput = document.getElementById('ruleSelector');
     const ruleTypeSelect = document.getElementById('ruleType');
@@ -83,9 +77,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Localization
     const i18n = I18N;
+    // Etkin dilin metinleri; updateUILanguage günceller, dinamik öğeler buradan okur
+    let currentText = i18n.en;
 
     function updateUILanguage(lang) {
         const text = i18n[lang] || i18n.en;
+        currentText = text;
         // Dil ve yön: Arapça ve Urduca sağdan sola (metin yönü; kenar çubuğu düzeni ayrıca ele alınmamıştır)
         document.documentElement.lang = i18n[lang] ? lang : 'en';
         document.documentElement.dir = (lang === 'ar' || lang === 'ur') ? 'rtl' : 'ltr';
@@ -107,6 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (text.navTextProfiles) document.getElementById('navTextProfiles').innerText = text.navTextProfiles;
         if (text.navTextRules) document.getElementById('navTextRules').innerText = text.navTextRules;
         if (text.navTextAbout) document.getElementById('navTextAbout').innerText = text.navTextAbout;
+        // Dinamik profil kartları yeni dilde yeniden çizilir
+        if (typeof renderProfiles === 'function') renderProfiles();
     }
 
     uiLangSelector.addEventListener('change', () => {
@@ -115,63 +114,231 @@ document.addEventListener('DOMContentLoaded', () => {
         saveState();
     });
 
-    // 3. Profiles Logic: rastgele mod (her doldurmada yeni kişi) ya da sabit kimlik (şablondaki kişi)
-    const personaModeRandom = document.getElementById('personaModeRandom');
-    const personaModeFixed = document.getElementById('personaModeFixed');
-    const personaRefresh = document.getElementById('personaRefresh');
-    const personaIdentity = document.getElementById('personaIdentity');
-    const personaLocked = document.getElementById('personaLocked');
+    // 3. Kimlik profilleri. Varsayılan profil her zaman rastgele ve değiştirilemez. Diğer profiller
+    // rastgele (her doldurmada yeni kişi) ya da sabit (kaydedilmiş kişi) olabilir. Kayıt yalnızca
+    // "Kaydet" ile yapılır; vazgeçilen yeni profil oluşmaz.
+    const activeAvatar = document.getElementById('activeAvatar');
+    const activeProfileName = document.getElementById('activeProfileName');
+    const activeProfileMeta = document.getElementById('activeProfileMeta');
+    const activeProfileBadge = document.getElementById('activeProfileBadge');
+    const profileDialog = document.getElementById('profileDialog');
+    const profileForm = document.getElementById('profileForm');
+    const profileDlgTitle = document.getElementById('profileDlgTitle');
+    const profileName = document.getElementById('profileName');
+    const profileNameError = document.getElementById('profileNameError');
+    const profileModeRandom = document.getElementById('profileModeRandom');
+    const profileModeFixed = document.getElementById('profileModeFixed');
+    const profilePreview = document.getElementById('profilePreview');
+    const profilePreviewName = document.getElementById('profilePreviewName');
+    const profilePreviewEmail = document.getElementById('profilePreviewEmail');
+    const profileRefreshBtn = document.getElementById('profileRefreshBtn');
+    const profileActivateRow = document.getElementById('profileActivateRow');
+    const profileActivate = document.getElementById('profileActivate');
+    const profileDeleteBtn = document.getElementById('profileDeleteBtn');
+    const profileCancelBtn = document.getElementById('profileCancelBtn');
+
+    const BTN_SECONDARY = 'inline-flex h-8 cursor-pointer select-none items-center justify-center rounded-lg border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50 focus-ring dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-200 dark:hover:bg-white/[0.06]';
+    const BTN_GHOST = 'inline-flex h-8 cursor-pointer select-none items-center justify-center rounded-lg px-3 text-xs font-medium text-brand-700 transition-colors hover:bg-brand-50 focus-ring dark:text-brand-300 dark:hover:bg-brand-500/10';
+    const TAG_ACTIVE = 'shrink-0 rounded-md bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-700 dark:bg-brand-500/10 dark:text-brand-400';
+
+    let dialogProfileId = null;   // null: yeni profil
+    let dialogDraft = null;       // sabit modda düzenlenen kişi (kaydedilene kadar taslak)
+    let dialogTrigger = null;     // diyaloğu açan öğe; kapanınca odak oraya döner
+    let deleteArmed = false;      // silme iki adımlı: ilk tıklama onay ister
+
+    function profileMode(p) {
+        if (p.id === 'default') return 'default';
+        return p.mode === 'fixed' && p.identity ? 'fixed' : 'random';
+    }
+
+    function profileBadge(p) {
+        const mode = profileMode(p);
+        if (mode === 'default') return currentText.profileBadgeDefault;
+        return mode === 'fixed' ? currentText.profileBadgeFixed : currentText.profileBadgeRandom;
+    }
+
+    // Gösterilen kişi, doldurmanın kullanacağı biçimde: PII Safe açıkken telefon ve e-posta test değerleridir
+    function shownPerson(identity) {
+        if (!state.piiSafe) return identity;
+        return { ...identity, phoneNsn: identity.phonePii || identity.phoneNsn, emailDomain: identity.piiEmailDomain || identity.emailDomain };
+    }
+
+    function profileMeta(p) {
+        const mode = profileMode(p);
+        if (mode === 'default') return currentText.profileMetaDefault;
+        return mode === 'fixed' ? FakeDataGenerator.describePerson(shownPerson(p.identity)) : currentText.profileMetaRandom;
+    }
+
+    function initialsOf(name) {
+        const parts = String(name).trim().split(/\s+/).filter(Boolean).slice(0, 2);
+        return parts.map(w => w.charAt(0).toUpperCase()).join('') || '?';
+    }
+
+    function avatarClass(mode) {
+        return mode === 'fixed'
+            ? 'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 text-sm font-semibold text-white shadow-sm'
+            : 'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-200 text-sm font-semibold text-zinc-700 dark:bg-white/10 dark:text-zinc-200';
+    }
+
+    function actionButton(label, className, onClick) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = className;
+        b.textContent = label;
+        b.addEventListener('click', onClick);
+        return b;
+    }
+
+    function profileCard(p, isActive) {
+        const li = document.createElement('li');
+        li.className = 'flex flex-col rounded-xl border bg-white p-4 shadow-card transition-[box-shadow,border-color] duration-300 hover:shadow-card-hover dark:bg-zinc-900/60 dark:shadow-card-dark dark:hover:shadow-card-dark-hover '
+            + (isActive ? 'border-brand-600/40 ring-1 ring-brand-600/15' : 'border-zinc-200/80 dark:border-white/[0.07]');
+
+        const head = document.createElement('div');
+        head.className = 'flex items-start gap-3';
+        const avatar = document.createElement('span');
+        avatar.className = avatarClass(profileMode(p));
+        avatar.setAttribute('aria-hidden', 'true');
+        avatar.textContent = initialsOf(p.name);
+        const body = document.createElement('div');
+        body.className = 'min-w-0 flex-1';
+        const name = document.createElement('p');
+        name.className = 'truncate text-sm font-semibold text-strong';
+        name.textContent = p.name;
+        const badge = document.createElement('p');
+        badge.className = 'meta-xs mt-0.5';
+        badge.textContent = profileBadge(p);
+        const meta = document.createElement('p');
+        meta.className = 'mt-2 truncate text-xs text-soft';
+        meta.textContent = profileMeta(p);
+        body.append(name, badge, meta);
+        head.append(avatar, body);
+        if (isActive) {
+            const tag = document.createElement('span');
+            tag.className = TAG_ACTIVE;
+            tag.textContent = currentText.profileActiveBadge;
+            head.append(tag);
+        }
+
+        const actions = document.createElement('div');
+        actions.className = 'mt-4 flex gap-2';
+        if (!isActive) {
+            actions.append(actionButton(currentText.profileUseBtn, BTN_SECONDARY, () => {
+                state.activeProfileId = p.id;
+                saveState();
+                renderProfiles();
+            }));
+        }
+        if (profileMode(p) !== 'default') {
+            actions.append(actionButton(currentText.profileEditBtn, BTN_GHOST, (e) => openProfileDialog(p, e.currentTarget)));
+        }
+        li.append(head, actions);
+        return li;
+    }
 
     function renderProfiles() {
-        profilesList.innerHTML = "";
-        state.profiles.forEach(p => {
-            const isActive = state.activeProfileId === p.id;
-            const pill = document.createElement('button');
-            pill.type = 'button';
-            pill.className = isActive ? 'chip-active' : 'chip';
-            pill.setAttribute('aria-pressed', String(isActive));
-            pill.innerText = p.name;
-            pill.onclick = () => {
-                state.activeProfileId = p.id;
-                openProfileEditor(p);
-                renderProfiles();
-                saveState();
-            };
-            profilesList.appendChild(pill);
-        });
+        const active = state.profiles.find(p => p.id === state.activeProfileId) || state.profiles[0];
+        activeAvatar.className = avatarClass(profileMode(active));
+        activeAvatar.textContent = initialsOf(active.name);
+        activeProfileName.textContent = active.name;
+        activeProfileMeta.textContent = profileMeta(active);
+        activeProfileBadge.textContent = profileBadge(active);
+        profilesList.innerHTML = '';
+        state.profiles.forEach(p => profilesList.appendChild(profileCard(p, p.id === active.id)));
     }
 
-    // Kimlik özeti: sabit kimlikte gerçekçi değerler; PII Safe test değerleri ayrı satırda gösterilmez
-    function identityLines(identity) {
-        const real = identity.ids || {};
-        return [
-            'name: ' + identity.first.n + ' ' + identity.last.n,
-            'email: ' + identity.emailLocal + '@' + identity.emailDomain,
-            'city: ' + identity.city.name + ', ' + identity.zip,
-            'phone: +' + identity.phoneNsn,
-            'id: ' + (real.person || '-'),
-            'tax: ' + (real.tax || '-'),
-            'iban: ' + (real.iban || '-')
-        ].join('\n');
+    function renderDialogPreview() {
+        const fixed = profileModeFixed.checked;
+        if (fixed && !dialogDraft) dialogDraft = FakeDataGenerator.createIdentity(state.preferredLocale);
+        profilePreview.hidden = !fixed;
+        if (fixed) {
+            const shown = shownPerson(dialogDraft);
+            profilePreviewName.textContent = FakeDataGenerator.describePerson(shown);
+            profilePreviewEmail.textContent = shown.emailLocal + '@' + shown.emailDomain;
+        }
     }
 
-    function openProfileEditor(p) {
-        profileEditor.style.display = "block";
-        currentProfileNameText.innerText = p.name;
-        editProfileName.value = p.name;
-        const isDefault = p.id === 'default';
-        const fixed = p.mode === 'fixed' && !!p.identity;
-        editProfileName.disabled = isDefault;
-        personaModeRandom.disabled = isDefault;
-        personaModeFixed.disabled = isDefault;
-        personaModeRandom.checked = !fixed;
-        personaModeFixed.checked = fixed;
-        deleteProfileBtn.hidden = isDefault;
-        personaLocked.hidden = !isDefault;
-        personaRefresh.hidden = !fixed || isDefault;
-        personaIdentity.innerText = fixed ? FakeDataGenerator.describePerson(p.identity) : "";
-        profileDataSummary.innerText = fixed ? identityLines(p.identity) : "";
+    function openProfileDialog(p, trigger) {
+        dialogProfileId = p ? p.id : null;
+        dialogTrigger = trigger || null;
+        dialogDraft = p && p.identity ? structuredClone(p.identity) : null;
+        deleteArmed = false;
+        profileDlgTitle.textContent = p ? currentText.profileDlgEdit : currentText.profileDlgNew;
+        profileName.value = p ? p.name : '';
+        profileNameError.hidden = true;
+        const fixed = !!p && profileMode(p) === 'fixed';
+        profileModeRandom.checked = !fixed;
+        profileModeFixed.checked = fixed;
+        // Yeni profil kaydedilince aktif olur; zaten aktif olan profilde seçenek gösterilmez
+        profileActivate.checked = !p;
+        profileActivateRow.hidden = !!p && p.id === state.activeProfileId;
+        profileDeleteBtn.hidden = !p;
+        profileDeleteBtn.textContent = currentText.profileDeleteBtn;
+        renderDialogPreview();
+        profileDialog.hidden = false;
+        profileName.focus();
     }
+
+    function closeProfileDialog() {
+        profileDialog.hidden = true;
+        const back = dialogTrigger && dialogTrigger.isConnected ? dialogTrigger : newProfileBtn;
+        dialogTrigger = null;
+        back.focus();
+    }
+
+    newProfileBtn.addEventListener('click', (e) => openProfileDialog(null, e.currentTarget));
+    profileModeRandom.addEventListener('change', renderDialogPreview);
+    profileModeFixed.addEventListener('change', renderDialogPreview);
+    profileRefreshBtn.addEventListener('click', () => {
+        dialogDraft = FakeDataGenerator.createIdentity(state.preferredLocale);
+        renderDialogPreview();
+    });
+    profileName.addEventListener('input', () => { profileNameError.hidden = true; });
+    profileCancelBtn.addEventListener('click', closeProfileDialog);
+    profileDialog.addEventListener('click', (e) => { if (e.target === profileDialog) closeProfileDialog(); });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !profileDialog.hidden) closeProfileDialog();
+    });
+
+    profileForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = profileName.value.trim();
+        if (!name) {
+            profileNameError.textContent = currentText.profileNameError;
+            profileNameError.hidden = false;
+            profileName.focus();
+            return;
+        }
+        const fixed = profileModeFixed.checked;
+        if (fixed && !dialogDraft) dialogDraft = FakeDataGenerator.createIdentity(state.preferredLocale);
+        let p = state.profiles.find(x => x.id === dialogProfileId);
+        if (!p) {
+            p = { id: Date.now().toString() };
+            state.profiles.push(p);
+        }
+        p.name = name;
+        p.mode = fixed ? 'fixed' : 'random';
+        if (fixed) p.identity = dialogDraft;
+        else delete p.identity;
+        if (profileActivate.checked) state.activeProfileId = p.id;
+        saveState();
+        renderProfiles();
+        closeProfileDialog();
+    });
+
+    profileDeleteBtn.addEventListener('click', () => {
+        if (!dialogProfileId) return;
+        if (!deleteArmed) {
+            deleteArmed = true;
+            profileDeleteBtn.textContent = currentText.profileDeleteConfirm;
+            return;
+        }
+        state.profiles = state.profiles.filter(x => x.id !== dialogProfileId);
+        if (state.activeProfileId === dialogProfileId) state.activeProfileId = 'default';
+        saveState();
+        renderProfiles();
+        closeProfileDialog();
+    });
 
     // Eski sürüm şablonları yeni modele taşınır; varsayılan şablon her zaman rastgele olur
     function ensurePersonaData() {
@@ -181,50 +348,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (res.changed) chrome.storage.local.set(state);
     }
 
-    newProfileBtn.onclick = () => {
-        const id = Date.now().toString();
-        const newP = { id, name: 'New Persona', mode: 'fixed', identity: FakeDataGenerator.createIdentity(state.preferredLocale) };
-        state.profiles.push(newP);
-        state.activeProfileId = id;
-        renderProfiles();
-        openProfileEditor(newP);
-        saveState();
-    };
-
-    saveProfileBtn.onclick = () => {
-        const p = state.profiles.find(x => x.id === state.activeProfileId);
-        if (!p) return;
-        if (p.id !== 'default') {
-            const name = editProfileName.value.trim();
-            if (name) p.name = name;
-            p.mode = personaModeFixed.checked ? 'fixed' : 'random';
-            if (p.mode === 'fixed' && !p.identity) p.identity = FakeDataGenerator.createIdentity(state.preferredLocale);
-            if (p.mode === 'random') delete p.identity;
-        }
-        renderProfiles();
-        openProfileEditor(p);
-        saveState();
-    };
-
-    personaRefresh.onclick = () => {
-        const p = state.profiles.find(x => x.id === state.activeProfileId);
-        if (!p || p.id === 'default') return;
-        p.identity = FakeDataGenerator.createIdentity(state.preferredLocale);
-        openProfileEditor(p);
-        saveState();
-    };
-
-    deleteProfileBtn.onclick = () => {
-        const p = state.profiles.find(x => x.id === state.activeProfileId);
-        if (!p || p.id === 'default') return;
-        state.profiles = state.profiles.filter(x => x.id !== p.id);
-        state.activeProfileId = 'default';
-        profileEditor.style.display = "none";
-        renderProfiles();
-        saveState();
-    };
-
-    // 4. Custom Rules Logic
     function renderRules() {
         rulesList.innerHTML = "";
         if (state.customRules.length === 0) {

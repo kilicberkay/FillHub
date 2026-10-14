@@ -910,6 +910,35 @@ function showToast(message, theme) {
     }, 3000);
 }
 
+// Captcha yalnızca gösterilir: içerik betiği captcha'ya tıklamaz, çözmez ve API'lerini çağırmaz.
+// Görünür bir captcha bulunursa kullanıcı doğrulamayı kendisi tamamlar.
+const CAPTCHA_SELECTORS = [
+    '.g-recaptcha', '.h-captcha', '.cf-turnstile',
+    'iframe[src*="recaptcha"]', 'iframe[src*="hcaptcha"]', 'iframe[src*="challenges.cloudflare.com"]'
+];
+
+function findVisibleCaptcha() {
+    for (const selector of CAPTCHA_SELECTORS) {
+        for (const el of document.querySelectorAll(selector)) {
+            const rect = el.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) return el;
+        }
+    }
+    return null;
+}
+
+function highlightCaptcha(el) {
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    const previous = el.style.outline;
+    const previousOffset = el.style.outlineOffset;
+    el.style.outline = '3px solid #f74a87';
+    el.style.outlineOffset = '4px';
+    setTimeout(() => {
+        el.style.outline = previous;
+        el.style.outlineOffset = previousOffset;
+    }, 8000);
+}
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (!['fill', 'fill_chaos', 'fill_field', 'undo'].includes(request.action)) return;
 
@@ -954,7 +983,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         await fillPage(settings);
         if (window.top === window) {
-            showToast(getLocalizedMessage(settings.preferredLocale, request.action === 'fill_chaos' ? 'chaos' : 'filled'), settings.theme);
+            // Görünür captcha varsa doğrulamayı kullanıcı tamamlar: öğe vurgulanır, otomatik işlem yapılmaz
+            const captcha = findVisibleCaptcha();
+            if (captcha) {
+                highlightCaptcha(captcha);
+                showToast(getLocalizedMessage(settings.preferredLocale, 'captcha'), settings.theme);
+            } else {
+                showToast(getLocalizedMessage(settings.preferredLocale, request.action === 'fill_chaos' ? 'chaos' : 'filled'), settings.theme);
+            }
         }
         if (settings.autoSubmit && request.action === 'fill') {
             autoSubmitForm(document);
@@ -1008,6 +1044,23 @@ function getLocalizedMessage(localeLiteral, key = 'filled') {
             'ur': 'فارم پہلے جیسا کر دیا گیا۔',
             'id': 'Formulir dikembalikan ke keadaan semula.',
             'vi': 'Đã khôi phục biểu mẫu.'
+        },
+        captcha: {
+            "tr": "Doğrulama gerekiyor: captcha'yı kendiniz tamamlayın.",
+            "en": "Verification needed: please complete the captcha yourself.",
+            "es": "Se requiere verificación: complete el captcha usted mismo.",
+            "fr": "Vérification requise : résolvez le captcha vous-même.",
+            "de": "Bestätigung erforderlich: Bitte lösen Sie das Captcha selbst.",
+            "pt": "Verificação necessária: conclua o captcha você mesmo.",
+            "ru": "Нужна проверка: пройдите капчу самостоятельно.",
+            "zh": "需要验证：请自行完成验证码。",
+            "ja": "認証が必要です。キャプチャはご自身で完了してください。",
+            "ar": "مطلوب التحقق: يرجى إكمال الكابتشا بنفسك.",
+            "hi": "सत्यापन आवश्यक है: कैप्चा स्वयं पूरा करें।",
+            "bn": "যাচাই প্রয়োজন: ক্যাপচা নিজে সম্পন্ন করুন।",
+            "ur": "تصدیق درکار ہے: کیپچا خود مکمل کریں۔",
+            "id": "Verifikasi diperlukan: selesaikan captcha sendiri.",
+            "vi": "Cần xác minh: vui lòng tự hoàn thành captcha."
         }
     };
     const table = messages[key] || messages.filled;

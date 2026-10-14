@@ -99,8 +99,13 @@ test('ayar sayfası stil dosyası üretilmiş ve Tailwind sürümünü taşır',
     assert.ok(css.length > 20000);
 });
 
-test('captcha: içerik betiği captcha widget\'larıyla etkileşmez', () => {
+test('captcha: içerik betiği captcha\'ya tıklamaz, çözmez ve doğrulama API\'lerini çağırmaz', () => {
     const src = read('scripts/content.js');
-    const banned = [/grecaptcha/i, /turnstile/i, /hcaptcha/i, /recaptcha-anchor/, /challenges\.cloudflare/];
-    for (const re of banned) assert.ok(!re.test(src), `captcha etkileşimi kaldı: ${re}`);
+    const banned = [
+        /(grecaptcha|turnstile|hcaptcha)\.(execute|render|reset|getResponse)/i,
+        /recaptcha-anchor/,
+        /captcha[^\n]*\.click\(/i,
+        /\.click\(\)[^\n]*captcha/i,
+    ];
+    for (const re of banned) assert.ok(!re.test(src), `captcha etkileşimi var: ${re}`);
 });
