@@ -5,6 +5,8 @@ All notable changes to FillHub are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-10-16
+
 ### Added
 - Identity profiles can pin values: first name, last name, email, phone and password. The pinned values are
   used every time the profile is active, so a profile can hold a fixed test account. Pinned names keep the
