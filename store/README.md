@@ -38,6 +38,6 @@ node tools/make-store-assets.mjs   # needs Chromium, rsvg-convert, and ImageMagi
 ## Before each submission
 
 - `npm test` passes.
-- `manifest.json` version is higher than the published version.
+- `extension/manifest.json` version is higher than the published version.
 - The screenshots match the current UI.
 - The store description and the README describe the same features.

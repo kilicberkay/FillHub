@@ -9,7 +9,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const root = path.join(__dirname, '..');
+const root = path.join(__dirname, '..', 'extension');
 const RULES = require(path.join(root, 'scripts/id-rules.js'));
 const DATA = require(path.join(root, 'scripts/locale-data.js'));
 const G = require(path.join(root, 'scripts/generator.js'));
@@ -98,7 +98,7 @@ for (const cc of Object.keys(DATA.countries)) {
 }
 
 // ---------- 4) Arayüz çevirileri ----------
-console.log('4) Arayüz çevirileri (options/i18n.js)');
+console.log('4) Arayüz çevirileri (extension/options/i18n.js)');
 // Çeviriler modülü doğrudan yüklenir: metin ayrıştırma yerine gerçek nesne karşılaştırılır.
 const I18N = require(path.join(root, 'options/i18n.js'));
 const LANGS = ['en', 'tr', 'es', 'fr', 'de', 'pt', 'ru', 'zh', 'ja', 'ar', 'hi', 'bn', 'ur', 'id', 'vi'];

@@ -14,6 +14,7 @@
 </p>
 
 <p align="center">
+  <a href="https://chromewebstore.google.com/detail/fillhub/chkkiamcnmilalgbokfofnhhlckmaihi"><img src="https://img.shields.io/badge/Chrome%20Web%20Store-y%C3%BCkle-4285F4?logo=googlechrome&logoColor=white" alt="FillHub Chrome Web Store'da"></a>
   <a href="https://github.com/kilicberkay/FillHub/actions/workflows/ci.yml"><img src="https://github.com/kilicberkay/FillHub/actions/workflows/ci.yml/badge.svg" alt="CI durumu"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/lisans-MIT-blue.svg" alt="MIT lisansı"></a>
   <img src="https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4?logo=googlechrome&logoColor=white" alt="Chrome Manifest V3">
@@ -158,16 +159,16 @@ FillHub captcha'ya tıklamaz, çözmez ve captcha API'lerini çağırmaz. Sayfad
 
 ## Kurulum
 
+### Chrome Web Store (önerilen)
+
+**[FillHub'ı Chrome'a ekleyin](https://chromewebstore.google.com/detail/fillhub/chkkiamcnmilalgbokfofnhhlckmaihi)**
+
 ### Kaynaktan (geliştirici modu)
 
-1. Depoyu klonlayın ya da [Sürümler sayfası](https://github.com/kilicberkay/FillHub/releases/tag/v1.2.0) üzerinden `fillhub-1.2.0.zip` dosyasını indirip açın.
+1. Depoyu klonlayın ya da [Sürümler sayfası](https://github.com/kilicberkay/FillHub/releases/tag/v1.3.0) üzerinden `fillhub-1.3.0.zip` dosyasını indirip açın.
 2. `chrome://extensions` adresini açın ve **Geliştirici modu**nu etkinleştirin.
-3. **Paketlenmemiş öğe yükle** düğmesine tıklayın ve `manifest.json` dosyasının bulunduğu klasörü seçin.
+3. **Paketlenmemiş öğe yükle** düğmesine tıklayın ve `extension/` klasörünü (içinde `manifest.json` bulunan klasör) seçin.
 4. Herhangi bir form içeren sayfayı açın ve `Ctrl+Shift+F` tuşlarına basın.
-
-### Chrome Web Store
-
-Yakında. İlan materyali [`store/`](store/) klasöründedir.
 
 Chrome 116 veya üzeri, ya da Manifest V3 destekleyen Chromium tabanlı bir tarayıcı gerekir.
 
@@ -252,16 +253,24 @@ Tarayıcı testleri `CHROME_BIN` ile verilen ya da Playwright önbelleğindeki C
 
 ```
 FillHub/
-├── manifest.json        Manifest V3: ad, izinler, içerik betikleri, kısayollar
-├── _locales/            Yerelleştirilmiş ad, açıklama, kısayol ve menü metinleri (15 dil)
-├── scripts/             Eklenti mantığı: servis çalışanı, içerik betiği, üreteç, tanıma, veri
-├── options/             Ayar sayfası: HTML, JavaScript, çeviriler, Tailwind kaynağı ve çıktısı
-├── icons/               Araç çubuğu ve mağaza simgeleri (vektör kaynak: logo.svg)
-├── docs/                Mimari notları ve README görselleri
-├── store/               Chrome Web Store ilan metinleri, gizlilik metni ve mağaza görselleri
+├── extension/           Eklentinin kendisi; paketlenen klasör budur
+│   ├── manifest.json    Manifest V3: ad, izinler, kısayollar
+│   ├── _locales/        Yerelleştirilmiş ad, açıklama, kısayol ve menü metinleri (15 dil)
+│   ├── scripts/         Servis çalışanı, içerik betikleri, üreteç, tanıma, veri
+│   ├── options/         Ayar sayfası: HTML, JavaScript, çeviriler, Tailwind kaynağı ve çıktısı
+│   ├── popup/           Araç çubuğu açılır penceresi: ülke, profil, Doldur ve Geri al
+│   └── icons/           Araç çubuğu ve mağaza simgeleri (vektör kaynak: logo.svg)
 ├── tests/               Birim testleri (tests/unit) ve tarayıcı testleri (tests/e2e)
 ├── tools/               Sözdizimi denetimi, veri doğrulama, zip derleme, mağaza görseli üreteci
-└── .github/             CI ve yayın iş akışları, sorun ve çekme isteği şablonları
+├── store/               Chrome Web Store ilan metinleri, gizlilik metni ve mağaza görselleri
+├── docs/                Mimari, SSS, çeviri rehberi, üçüncü taraf bildirimleri ve README görselleri
+├── .github/             CI ve yayın iş akışları, şablonlar, katkı rehberi, davranış kuralları, güvenlik politikası
+├── README.md            İngilizce README (Türkçesi README.tr.md)
+├── CHANGELOG.md         Sürüm geçmişi
+├── PRIVACY.md           Gizlilik politikası
+├── LICENSE              MIT lisansı
+├── AGENTS.md            Bu depoda çalışan yapay zekâ kodlama ajanları için notlar
+└── package.json         Geliştirme araçları (npm); eklentinin kendisinin bağımlılığı yoktur
 ```
 
 ## Belgeler
@@ -272,8 +281,8 @@ FillHub/
 
 ## Katkı ve güvenlik
 
-- Katkılar memnuniyetle karşılanır. Önce [CONTRIBUTING.md](CONTRIBUTING.md) dosyasını okuyun ve [Davranış Kuralları](CODE_OF_CONDUCT.md)'na uyun.
-- Güvenlik sorunlarını **Security** sekmesinden (*Report a vulnerability*) özel olarak bildirin. Bkz. [SECURITY.md](SECURITY.md).
+- Katkılar memnuniyetle karşılanır. Önce [CONTRIBUTING.md](.github/CONTRIBUTING.md) dosyasını okuyun ve [Davranış Kuralları](.github/CODE_OF_CONDUCT.md)'na uyun.
+- Güvenlik sorunlarını **Security** sekmesinden (*Report a vulnerability*) özel olarak bildirin. Bkz. [SECURITY.md](.github/SECURITY.md).
 
 ## Destek
 
@@ -281,4 +290,4 @@ FillHub ücretsiz ve açık kaynaktır. Zamanınızı kazandırdıysa geliştirm
 
 ## Lisans
 
-[MIT](LICENSE) © 2025-2026 Berkay Kılıç. Geist yazı tipi (SIL OFL 1.1) dahil üçüncü taraf bildirimleri [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) dosyasındadır.
+[MIT](LICENSE) © 2025-2026 Berkay Kılıç. Geist yazı tipi (SIL OFL 1.1) dahil üçüncü taraf bildirimleri [THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md) dosyasındadır.

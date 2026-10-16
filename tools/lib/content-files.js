@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 
-function contentFiles(root = path.join(__dirname, '..', '..')) {
+function contentFiles(root = path.join(__dirname, '..', '..', 'extension')) {
     const src = fs.readFileSync(path.join(root, 'scripts', 'background.js'), 'utf8');
     const match = src.match(/const CONTENT_FILES = (\[[^\]]*\]);/);
     if (!match) throw new Error('scripts/background.js içinde CONTENT_FILES bulunamadı');

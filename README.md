@@ -14,6 +14,7 @@
 </p>
 
 <p align="center">
+  <a href="https://chromewebstore.google.com/detail/fillhub/chkkiamcnmilalgbokfofnhhlckmaihi"><img src="https://img.shields.io/badge/Chrome%20Web%20Store-install-4285F4?logo=googlechrome&logoColor=white" alt="Get FillHub on the Chrome Web Store"></a>
   <a href="https://github.com/kilicberkay/FillHub/actions/workflows/ci.yml"><img src="https://github.com/kilicberkay/FillHub/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT license"></a>
   <img src="https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4?logo=googlechrome&logoColor=white" alt="Chrome Manifest V3">
@@ -158,16 +159,16 @@ FillHub does not click, solve, or call captcha APIs. When a visible reCAPTCHA, h
 
 ## Install
 
+### Chrome Web Store (recommended)
+
+**[Add FillHub to Chrome](https://chromewebstore.google.com/detail/fillhub/chkkiamcnmilalgbokfofnhhlckmaihi)**
+
 ### From source (developer mode)
 
-1. Clone the repository, or download [`fillhub-1.2.0.zip`](https://github.com/kilicberkay/FillHub/releases/tag/v1.2.0) from the Releases page and unpack it.
+1. Clone the repository, or download [`fillhub-1.3.0.zip`](https://github.com/kilicberkay/FillHub/releases/tag/v1.3.0) from the Releases page and unpack it.
 2. Open `chrome://extensions` and turn on **Developer mode**.
-3. Click **Load unpacked** and select the folder that contains `manifest.json`.
+3. Click **Load unpacked** and select the `extension/` folder (the one that contains `manifest.json`).
 4. Open any page with a form and press `Ctrl+Shift+F`.
-
-### Chrome Web Store
-
-Coming soon. The listing material is in [`store/`](store/).
 
 Requires Chrome 116 or newer, or another Chromium-based browser that supports Manifest V3.
 
@@ -252,16 +253,24 @@ The browser tests use Chromium from `CHROME_BIN` or from the Playwright cache. W
 
 ```
 FillHub/
-├── manifest.json        Manifest V3: name, permissions, content scripts, shortcuts
-├── _locales/            Localized name, description, shortcut and menu texts (15 languages)
-├── scripts/             Extension logic: service worker, content script, generator, detection, data
-├── options/             Settings page: HTML, JavaScript, translations, Tailwind source and output
-├── icons/               Toolbar and store icons (vector source: logo.svg)
-├── docs/                Architecture notes and README images
-├── store/               Chrome Web Store listing text, privacy text, and store images
+├── extension/           The extension itself; this folder is what gets packaged
+│   ├── manifest.json    Manifest V3: name, permissions, shortcuts
+│   ├── _locales/        Localized name, description, shortcut and menu texts (15 languages)
+│   ├── scripts/         Service worker, content scripts, generator, detection, data
+│   ├── options/         Settings page: HTML, JavaScript, translations, Tailwind source and output
+│   ├── popup/           Toolbar popup: country, profile, Fill and Undo
+│   └── icons/           Toolbar and store icons (vector source: logo.svg)
 ├── tests/               Unit tests (tests/unit) and browser tests (tests/e2e)
 ├── tools/               Syntax check, data verification, zip build, store image generator
-└── .github/             CI and release workflows, issue and pull request templates
+├── store/               Chrome Web Store listing text, privacy text, and store images
+├── docs/                Architecture, FAQ, translation guide, third-party notices, README images
+├── .github/             CI and release workflows, templates, contributing guide, code of conduct, security policy
+├── README.md            English README (README.tr.md is the Turkish one)
+├── CHANGELOG.md         Release history
+├── PRIVACY.md           Privacy policy
+├── LICENSE              MIT license
+├── AGENTS.md            Notes for AI coding agents working on this repository
+└── package.json         Development tools (npm); the extension itself has no dependencies
 ```
 
 ## Documentation
@@ -272,8 +281,8 @@ FillHub/
 
 ## Contributing and security
 
-- Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md) and follow the [Code of Conduct](CODE_OF_CONDUCT.md).
-- Report security problems privately, through the **Security** tab (*Report a vulnerability*). See [SECURITY.md](SECURITY.md).
+- Contributions are welcome. Start with [CONTRIBUTING.md](.github/CONTRIBUTING.md) and follow the [Code of Conduct](.github/CODE_OF_CONDUCT.md).
+- Report security problems privately, through the **Security** tab (*Report a vulnerability*). See [SECURITY.md](.github/SECURITY.md).
 
 ## Support
 
@@ -281,4 +290,4 @@ FillHub is free and open source. If it saves you time, you can support its devel
 
 ## License
 
-[MIT](LICENSE) © 2025-2026 Berkay Kılıç. Third-party notices, including the Geist font (SIL OFL 1.1), are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+[MIT](LICENSE) © 2025-2026 Berkay Kılıç. Third-party notices, including the Geist font (SIL OFL 1.1), are in [THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md).

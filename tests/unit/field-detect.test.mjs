@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 import { LABEL_CORPUS } from './field-corpus.mjs';
 
 const require = createRequire(import.meta.url);
-const D = require('../../scripts/field-detect.js');
+const D = require('../../extension/scripts/field-detect.js');
 
 test('etiket korpusu: her etiket beklenen türe düşer', () => {
     const failures = [];

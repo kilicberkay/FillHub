@@ -12,7 +12,7 @@ const SHOTS = join(OUT, 'screenshots');
 
 // Simge: 128 px tuval, 96 px sanat + 16 px şeffaf kenar (Chrome Web Store kuralı)
 function makeIcon() {
-    const svg = join(ROOT, 'icons', 'logo.svg');
+    const svg = join(ROOT, 'extension', 'icons', 'logo.svg');
     if (!existsSync(svg)) return 'icons/logo.svg yok';
     const art = join(OUT, 'store-icon-art.png');
     const icon = join(OUT, 'store-icon-128.png');
@@ -73,7 +73,7 @@ async function captureScreenshots(env, uiLang, dir) {
 
 // Tanıtım kutuları: SVG şablonuna simge gömülür, rsvg-convert ile PNG'ye çevrilir (tarayıcı gerektirmez)
 function renderTile(src, out, width, height) {
-    const icon = `data:image/png;base64,${readFileSync(join(ROOT, 'icons', 'logo128.png')).toString('base64')}`;
+    const icon = `data:image/png;base64,${readFileSync(join(ROOT, 'extension', 'icons', 'logo128.png')).toString('base64')}`;
     const svg = readFileSync(join(OUT, 'src', src), 'utf8').replace('ICON_HREF', icon);
     const tmp = join(OUT, 'src', src.replace('.svg', '.generated.svg'));
     writeFileSync(tmp, svg);

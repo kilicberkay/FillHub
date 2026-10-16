@@ -7,14 +7,14 @@ great first contribution, and this guide explains how the strings are organized.
 
 | What | File |
 |---|---|
-| Settings page text | `options/i18n.js` (one object per language, identical key sets) |
-| Messages shown on the page after a fill (toast) | `scripts/content.js` (`getLocalizedMessage`) |
-| Extension name, description, shortcut and menu titles | `_locales/<language>/messages.json` |
-| Sample sentences used in text fields | `scripts/locale-data.js` (`sampleShort`, `sampleLong`) |
+| Settings page text | `extension/options/i18n.js` (one object per language, identical key sets) |
+| Messages shown on the page after a fill (toast) | `extension/scripts/content.js` (`getLocalizedMessage`) |
+| Extension name, description, shortcut and menu titles | `extension/_locales/<language>/messages.json` |
+| Sample sentences used in text fields | `extension/scripts/locale-data.js` (`sampleShort`, `sampleLong`) |
 
 ## How the settings page strings work
 
-Each key in `options/i18n.js` matches the `id` of an element in `options/options.html`. When the language
+Each key in `extension/options/i18n.js` matches the `id` of an element in `extension/options/options.html`. When the language
 changes, the page sets each element's text to the matching value. A key with no matching element is ignored,
 and an element without a key keeps its English text, so a missing key is visible in the page.
 
@@ -39,6 +39,6 @@ empty. Unit tests check the key sets again. Please do not add or remove a key in
 ## How to submit a translation
 
 1. Open an issue with the **Translation** form, or go straight to a pull request.
-2. Change only the values in `options/i18n.js` (or the other files listed above).
+2. Change only the values in `extension/options/i18n.js` (or the other files listed above).
 3. Run `npm run test:quick`.
 4. Open a pull request with a before-and-after screenshot of the settings page in that language if you can.

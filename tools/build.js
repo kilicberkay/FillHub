@@ -1,19 +1,22 @@
 // Chrome Web Store paketi: dist/fillhub-<sürüm>.zip (harici zip aracı gerekmez, yalnızca Node).
 // Kullanım: node tools/build.js
-// Yalnızca çalışma zamanı dosyaları girer; tools/, tests/, store/, docs/, .github/ ve geliştirme dosyaları hariçtir.
+// Yalnızca extension/ altındaki çalışma zamanı dosyaları girer (zip kökü = extension/); tools/, tests/, store/,
+// docs/, .github/ ve geliştirme dosyaları hariçtir. LICENSE depo kökünden eklenir.
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
 const { contentFiles } = require('./lib/content-files.js');
 
 const ROOT = path.join(__dirname, '..');
-const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'manifest.json'), 'utf8'));
+const EXT = path.join(ROOT, 'extension');
+const manifest = JSON.parse(fs.readFileSync(path.join(EXT, 'manifest.json'), 'utf8'));
 const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
 const OUT_DIR = path.join(ROOT, 'dist');
 const OUT = path.join(OUT_DIR, `fillhub-${manifest.version}.zip`);
 
-// Beyaz liste: kök dosyalar ve dizinler; ayrıca hariç tutulan dosyalar
-const INCLUDE_FILES = ['manifest.json', 'LICENSE'];
+// Beyaz liste: eklenti kökündeki dosyalar ve dizinler; LICENSE depo kökündedir
+const INCLUDE_FILES = ['manifest.json'];
+const ROOT_FILES = ['LICENSE'];
 const INCLUDE_DIRS = ['_locales', 'scripts', 'options', 'popup', 'icons'];
 // logo.svg ayar sayfasında <img> olarak kullanılır; pakette olmazsa kırık görsel çıkar
 const EXCLUDE = new Set(['options/ui.src.css']);
@@ -33,12 +36,20 @@ function walk(dir, out = []) {
 function collect() {
     const files = [];
     for (const f of INCLUDE_FILES) {
+        if (fs.existsSync(path.join(EXT, f))) files.push(f);
+    }
+    for (const f of ROOT_FILES) {
         if (fs.existsSync(path.join(ROOT, f))) files.push(f);
     }
     for (const d of INCLUDE_DIRS) {
-        for (const full of walk(path.join(ROOT, d))) files.push(path.relative(ROOT, full).split(path.sep).join('/'));
+        for (const full of walk(path.join(EXT, d))) files.push(path.relative(EXT, full).split(path.sep).join('/'));
     }
     return files.filter((f) => !EXCLUDE.has(f) && !f.includes('/.'));
+}
+
+// Zip adından kaynak dosyanın yolu: LICENSE depo kökünden, geri kalanı eklenti kökünden okunur
+function sourcePath(name) {
+    return path.join(ROOT_FILES.includes(name) ? ROOT : EXT, name);
 }
 
 const CRC_TABLE = (() => {
@@ -113,7 +124,7 @@ function buildZip(entries) {
 
 function main() {
     const files = collect();
-    const entries = files.map((name) => ({ name, data: fs.readFileSync(path.join(ROOT, name)) }));
+    const entries = files.map((name) => ({ name, data: fs.readFileSync(sourcePath(name)) }));
 
     // Doğrulama: manifest'in referans verdiği her dosya pakette olmalı
     const names = new Set(files);

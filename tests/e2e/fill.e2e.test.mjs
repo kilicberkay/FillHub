@@ -4,10 +4,10 @@ import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { PageSession, wait } from '../../tools/lib/browser.mjs';
-import { chromeAvailable, startEnv, setStorage, openForm, send, readForm, closeForm, ROOT } from './harness.mjs';
+import { chromeAvailable, startEnv, setStorage, openForm, send, readForm, closeForm, EXT } from './harness.mjs';
 
 const require = createRequire(import.meta.url);
-const FakeDataGenerator = require(`${ROOT}/scripts/generator.js`);
+const FakeDataGenerator = require(`${EXT}/scripts/generator.js`);
 
 const SKIP = chromeAvailable() ? false : 'Chromium bulunamadı (CHROME_BIN ayarlayın)';
 const PII_EMAIL = /@(example\.com|example\.org|test\.example\.com)$/;

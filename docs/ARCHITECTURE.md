@@ -7,21 +7,21 @@ files in the repository are loaded as they are. npm is used only for development
 
 | Part | Files | Responsibility |
 |---|---|---|
-| Manifest | `manifest.json` | Name and description via `__MSG_…__`, permissions (`storage`, `contextMenus`, `scripting`), shortcuts; no content scripts are declared |
-| Service worker | `scripts/background.js` | Context menus (localized with `chrome.i18n`), shortcut commands, requests from the toolbar popup; forwards `fill`, `fill_field`, `undo` to the active tab together with its host (used by site exceptions) |
-| Toolbar popup | `popup/popup.html`, `popup/popup.js` | Default country and profile selection (saved to settings), Fill and Undo buttons; shares `options/options.css` and `options/i18n.js` |
-| Backup | `scripts/backup.js` (`FillHubBackup`) | Builds the export file and validates imported files field by field; the options page writes the result to storage |
-| Site exceptions | `scripts/site-rules.js` (`FillHubSiteRules`) | Normalizes host names and matches a page against the list of sites where auto-submit is off (subdomains included) |
-| Diagnostics | `scripts/diagnostics.js` (`FillHubDiagnostics`) | Builds the downloadable report from settings flags, counts and the last fill summary; never includes names, values, labels, profile names or site addresses |
-| Locale data | `scripts/locale-data.js` (`FillHubLocaleData`) | 15 language pools with Latin counterparts, 15 country profiles (cities, postal formats, phone rules, address templates, identity and IBAN specs) |
-| Identity rules | `scripts/id-rules.js` (`FillHubIdRules`) | Generators and validators for identity numbers; test vectors; PII sentinel values |
-| Field detection | `scripts/field-detect.js` (`FillHubDetect`) | Classifies a field from `autocomplete`, `type`, label, `name`/`id`, placeholder; priority-ordered rules; Turkish, Latin and non-Latin token matching |
-| Generator | `scripts/generator.js` (`FakeDataGenerator`) | Locale resolution, `createPerson`, value per field type, PII Safe values, persona migration |
-| Content script | `scripts/content.js` | Walks each frame and shadow root, fills fields, handles checkboxes, radios, selects, dates, files, undo, toast, captcha notice |
-| Settings page | `options/options.html`, `options/options.js`, `options/i18n.js` | Profiles, custom rules, general settings, about, support; 15 interface languages |
-| Styles | `options/ui.src.css` → `options/options.css` | Tailwind CSS 4 build (`npm run build:css`); generated file is not edited by hand |
+| Manifest | `extension/manifest.json` | Name and description via `__MSG_…__`, permissions (`storage`, `contextMenus`, `scripting`), shortcuts; no content scripts are declared |
+| Service worker | `extension/scripts/background.js` | Context menus (localized with `chrome.i18n`), shortcut commands, requests from the toolbar popup; forwards `fill`, `fill_field`, `undo` to the active tab together with its host (used by site exceptions) |
+| Toolbar popup | `extension/popup/popup.html`, `extension/popup/popup.js` | Default country and profile selection (saved to settings), Fill and Undo buttons; shares `extension/options/options.css` and `extension/options/i18n.js` |
+| Backup | `extension/scripts/backup.js` (`FillHubBackup`) | Builds the export file and validates imported files field by field; the options page writes the result to storage |
+| Site exceptions | `extension/scripts/site-rules.js` (`FillHubSiteRules`) | Normalizes host names and matches a page against the list of sites where auto-submit is off (subdomains included) |
+| Diagnostics | `extension/scripts/diagnostics.js` (`FillHubDiagnostics`) | Builds the downloadable report from settings flags, counts and the last fill summary; never includes names, values, labels, profile names or site addresses |
+| Locale data | `extension/scripts/locale-data.js` (`FillHubLocaleData`) | 15 language pools with Latin counterparts, 15 country profiles (cities, postal formats, phone rules, address templates, identity and IBAN specs) |
+| Identity rules | `extension/scripts/id-rules.js` (`FillHubIdRules`) | Generators and validators for identity numbers; test vectors; PII sentinel values |
+| Field detection | `extension/scripts/field-detect.js` (`FillHubDetect`) | Classifies a field from `autocomplete`, `type`, label, `name`/`id`, placeholder; priority-ordered rules; Turkish, Latin and non-Latin token matching |
+| Generator | `extension/scripts/generator.js` (`FakeDataGenerator`) | Locale resolution, `createPerson`, value per field type, PII Safe values, persona migration |
+| Content script | `extension/scripts/content.js` | Walks each frame and shadow root, fills fields, handles checkboxes, radios, selects, dates, files, undo, toast, captcha notice |
+| Settings page | `extension/options/options.html`, `extension/options/options.js`, `extension/options/i18n.js` | Profiles, custom rules, general settings, about, support; 15 interface languages |
+| Styles | `extension/options/ui.src.css` → `extension/options/options.css` | Tailwind CSS 4 build (`npm run build:css`); generated file is not edited by hand |
 
-Load order (`CONTENT_FILES` in `scripts/background.js`; the service worker injects them on demand): locale data → identity rules → field detection →
+Load order (`CONTENT_FILES` in `extension/scripts/background.js`; the service worker injects them on demand): locale data → identity rules → field detection →
 generator → site rules → date picker → content script. Every file also exports to `module.exports`, so the unit tests load the
 same code in Node.
 
@@ -72,7 +72,7 @@ for visible captcha elements after a fill, scrolls to the first one, outlines it
 
 - Settings and profiles live in `chrome.storage.local`. Nothing is synced or sent anywhere.
 - Profile edits are saved only when the user presses **Save profile**.
-- Interface strings: `options/i18n.js` (identical key sets in all 15 languages; checked by tests).
+- Interface strings: `extension/options/i18n.js` (identical key sets in all 15 languages; checked by tests).
   Element ids in `options.html` must match the keys, or the text is not applied.
 
 ## Tests

@@ -1,36 +1,37 @@
 # FillHub — Ajan Notları
 
 ## Proje Özeti
-MV3 Chrome uzantısı (sürüm 1.2.0). Çalışma zamanında bağımlılık yok; kaynak dosyalar doğrudan
-"unpacked extension" olarak yüklenir. Geliştirme araçları npm ile gelir: Tailwind CLI (`npm run build:css`),
+MV3 Chrome uzantısı. Çalışma zamanında bağımlılık yok; eklenti dosyaları `extension/` klasöründedir ve
+doğrudan "unpacked extension" olarak yüklenir (paketlenen tek klasör budur). Geliştirme araçları npm ile gelir: Tailwind CLI (`npm run build:css`),
 testler (`npm test`, `npm run test:quick`) ve mağaza paketi (`npm run build` → `dist/fillhub-<sürüm>.zip`).
 Doldurma mantığı sayfa bağlamında içerik betiği olarak çalışır.
 
 ## Dosya Yapısı
-- `manifest.json` — MV3 tanımı. İçerik betikleri manifestte tanımlı değildir; `background.js` içindeki `CONTENT_FILES` listesi,
+Tüm yollar depo köküne göredir; eklenti dosyaları `extension/` altındadır (ör. `extension/scripts/content.js`).
+- `extension/manifest.json` — MV3 tanımı. İçerik betikleri manifestte tanımlı değildir; `background.js` içindeki `CONTENT_FILES` listesi,
   kullanıcı doldurmayı başlattığında `chrome.scripting` ile her çerçeveye (eksik olanlara) enjekte edilir.
   İzinler `storage`, `contextMenus` ve `scripting` ile sınırlıdır.
-- `scripts/locale-data.js` — `FillHubLocaleData`: 15 dilin havuzları (ad, soyad, Latin karşılıklar,
+- `extension/scripts/locale-data.js` — `FillHubLocaleData`: 15 dilin havuzları (ad, soyad, Latin karşılıklar,
   UI havuzları) ve 15 ülkenin profilleri (şehir+posta öneki, telefon, adres şablonu, kimlik/IBAN belirtimi).
-- `scripts/id-rules.js` — `FillHubIdRules`: kimlik/vergi algoritmaları (sağlama vs. biçim ayrımıyla).
-- `scripts/field-detect.js` — `FillHubDetect`: alan sınıflandırması (`classify`), jeton eşleştirme, öncelikli
+- `extension/scripts/id-rules.js` — `FillHubIdRules`: kimlik/vergi algoritmaları (sağlama vs. biçim ayrımıyla).
+- `extension/scripts/field-detect.js` — `FillHubDetect`: alan sınıflandırması (`classify`), jeton eşleştirme, öncelikli
   kurallar; `input.type` ve `autocomplete` sinyalleri etiketten önce gelir. Korpus: `tests/unit/field-corpus.mjs`.
-- `scripts/generator.js` — `FakeDataGenerator`: yerel çözümleme (`canonicalLocale`, `resolveLocale`),
+- `extension/scripts/generator.js` — `FakeDataGenerator`: yerel çözümleme (`canonicalLocale`, `resolveLocale`),
   `createPerson` (doldurma başına tutarlı kişi), `generate(type, locale, context)`.
   Tarayıcıda global, Node'da `module.exports` olarak kullanılabilir. Yükleme sırası (`CONTENT_FILES`): locale-data → id-rules → field-detect → generator → site-rules → content-dates → content.
-- `scripts/site-rules.js` — `FillHubSiteRules`: alan adı normalizasyonu ve otomatik gönderim istisnası eşleşmesi (alt alan adları dahil).
-- `scripts/backup.js` — `FillHubBackup`: yedek dosyası üretimi ve içe aktarma doğrulaması (alan alan; boyut, biçim, seçici, tür, kimlik yapısı).
-- `scripts/diagnostics.js` — `FillHubDiagnostics`: tanılama raporu; kişisel veri (ad, değer, etiket, profil adı, site adresi) içermez.
-- `scripts/content-dates.js` — tarih alanlarının air-datepicker takvimiyle doldurulması (DOM sözleşmesi, gezinme, yıl atlama).
-- `popup/popup.html`, `popup/popup.js` — araç çubuğu açılır penceresi: ülke ve profil seçimi, Doldur ve Geri al. Stil `options/options.css` ile paylaşılır.
+- `extension/scripts/site-rules.js` — `FillHubSiteRules`: alan adı normalizasyonu ve otomatik gönderim istisnası eşleşmesi (alt alan adları dahil).
+- `extension/scripts/backup.js` — `FillHubBackup`: yedek dosyası üretimi ve içe aktarma doğrulaması (alan alan; boyut, biçim, seçici, tür, kimlik yapısı).
+- `extension/scripts/diagnostics.js` — `FillHubDiagnostics`: tanılama raporu; kişisel veri (ad, değer, etiket, profil adı, site adresi) içermez.
+- `extension/scripts/content-dates.js` — tarih alanlarının air-datepicker takvimiyle doldurulması (DOM sözleşmesi, gezinme, yıl atlama).
+- `extension/popup/popup.html`, `extension/popup/popup.js` — araç çubuğu açılır penceresi: ülke ve profil seçimi, Doldur ve Geri al. Stil `extension/options/options.css` ile paylaşılır.
   Persona göçü (`migrateProfiles`) ve etkin kimlik (`activeIdentity`) burada; içerik betiği de bunları kullanır.
 - `tools/verify-data.js` — bağımlılıksız denetim (`node tools/verify-data.js`): bilinen vektörler, harita
   bütünlüğü, 15 ülkede 300'er kişi, i18n anahtar eşleşmesi.
-- `scripts/content.js` — doldurma motoru (captcha: yalnız vurgulama ve bildirim): alan tespiti (`identifyField`), değer yazma
+- `extension/scripts/content.js` — doldurma motoru (captcha: yalnız vurgulama ve bildirim): alan tespiti (`identifyField`), değer yazma
   (`assignFieldValue`), dosya/select/radio/tarih-picker yolları, geri alma (`undoFill`),
   mesaj dinleyicisi.
-- `scripts/background.js` — servis çalışanı: sağ tık menüleri (`chrome.i18n`), kısayollar, açılır pencere isteklerinin etkin sekmeye iletilmesi.
-- `options/` — ayar sayfası (`generator.js` betik olarak yüklenir); persona/şablon yönetimi burada.
+- `extension/scripts/background.js` — servis çalışanı: sağ tık menüleri (`chrome.i18n`), kısayollar, açılır pencere isteklerinin etkin sekmeye iletilmesi.
+- `extension/options/` — ayar sayfası (`generator.js` betik olarak yüklenir); persona/şablon yönetimi burada.
   - `ui.src.css` — tasarım kaynağı: `@theme` tokenları (marka skalası, gölgeler), `@utility` yardımcıları,
     form taban kuralları, `@font-face`. `@source` ile yalnızca `options.html` ve `options.js` taranır.
   - `options.css` — **üretilmiş**, elle düzenlenmez: `npm run build:css` (Tailwind CLI 4.3.3, küçültülmüş).
@@ -39,19 +40,19 @@ Doldurma mantığı sayfa bağlamında içerik betiği olarak çalışır.
   - `fonts/` — Geist ve Geist Mono `woff2` dosyaları (SIL OFL 1.1; lisans `fonts/OFL.txt`). Google Fonts bağlantısı yoktur.
   - Yeni bileşen eklerken mevcut sınıf sözleşmesini kullanın (`text-muted`, `text-soft`, `text-strong`, `meta`,
     `eyebrow`, `chip`, `chip-active`, `table-head`, `focus-ring`, `ui-checkbox`).
-- `_locales/` — 15 dilde `extName`, `extDescription` (≤132 karakter), `actionTitle`, komut ve bağlam menüsü
-  başlıkları. `manifest.json` bu anahtarları `__MSG_…__` ile kullanır; `background.js` menüleri `chrome.i18n` ile kurar.
-- `icons/` — araç çubuğu/sayfa ikonları: `logo16/48/128.png`. Vektör kaynak `icons/logo.svg`;
+- `extension/_locales/` — 15 dilde `extName`, `extDescription` (≤132 karakter), `actionTitle`, komut ve bağlam menüsü
+  başlıkları. `extension/manifest.json` bu anahtarları `__MSG_…__` ile kullanır; `background.js` menüleri `chrome.i18n` ile kurar.
+- `extension/icons/` — araç çubuğu/sayfa ikonları: `logo16/48/128.png`. Vektör kaynak `extension/icons/logo.svg`;
   PNG'ler `rsvg-convert -w <boy> -h <boy> icons/logo.svg` ile üretilir (marka grafiği: pembe degrade
   `#fb7aa8 → #f74a87 → #c2185b` üstünde beyaz "F" ve merkez düğümü). Sürüm etiketi ayar sayfasında
-  `manifest.json` sürümünden okunur, ayrıca yazılmaz.
+  `extension/manifest.json` sürümünden okunur, ayrıca yazılmaz.
 - `tests/unit/` — `node --test` birim testleri (alan korpusu, kimlik vektörleri, üreteç, persona göçü, statik denetimler).
 - `tests/e2e/` — gerçek Chromium'da uzantı testleri. `harness.mjs` yerel form sunucusu, `fixtures/form.html` (TR) ve
   `form-en.html` (EN) sağlar; uzantının servis çalışanı üzerinden komut gönderir.
 - `tools/` — `check-syntax.js`, `run-tests.js`, `verify-data.js`, `build.js` (zip), `make-store-assets.mjs`
   (mağaza görselleri), `lib/browser.mjs` (CDP istemcisi).
 - `store/` — Chrome Web Store materyali: ilan metinleri (EN/TR), izin gerekçeleri, görseller. Pakete girmez.
-- `docs/ARCHITECTURE.md`, `CONTRIBUTING.md`, `SECURITY.md`, `PRIVACY.md`, `CHANGELOG.md`, `THIRD_PARTY_NOTICES.md`, `LICENSE` (MIT).
+- `docs/ARCHITECTURE.md`, `docs/THIRD_PARTY_NOTICES.md`, `.github/CONTRIBUTING.md`, `.github/SECURITY.md`, `PRIVACY.md`, `CHANGELOG.md`, `LICENSE` (MIT).
 - `.github/` — CI (`ci.yml`), yayın (`release.yml`), şablonlar, `FUNDING.yml`.
 
 ## Değişmez Kurallar
@@ -159,6 +160,6 @@ Doldurma mantığı sayfa bağlamında içerik betiği olarak çalışır.
 5. Gerçek veri havuzu karşılaştırmalarında depolamaya açıkça `piiSafe: false` yazılır; taze kurulumda PII Safe açıktır.
 6. Ayar sayfası görünümü değişince `npm run build:css`, ardından `node tools/make-store-assets.mjs` ile ekran
    görüntüleri yenilenir ve görsel olarak kontrol edilir.
-7. Paket: `npm run build`; zip açılıp `manifest.json`'daki dosyaların hepsinin içinde olduğu doğrulanır.
+7. Paket: `npm run build`; zip açılıp `extension/manifest.json`'daki dosyaların hepsinin içinde olduğu doğrulanır.
 8. Kimlik sağlaması yalnız bilinen vektörlerle doğrulanan algoritmalarda iddia edilir; biçim-only numaralara
    geçerlilik iddiası yazılmaz.

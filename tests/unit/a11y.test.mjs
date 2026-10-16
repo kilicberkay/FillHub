@@ -6,7 +6,8 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const read = (p) => readFileSync(join(ROOT, p), 'utf8');
+const EXT = join(ROOT, 'extension');
+const read = (p) => readFileSync(join(EXT, p), 'utf8');
 const PAGES = ['options/options.html', 'popup/popup.html'];
 
 // Gizli ya da dosya girdileri kullanıcıya görünmez; etiket zorunluluğu yalnızca görünen denetimler için

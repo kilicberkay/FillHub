@@ -6,8 +6,9 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const EXT = join(ROOT, 'extension');
 const require = createRequire(import.meta.url);
-const FillHubDiagnostics = require(join(ROOT, 'scripts', 'diagnostics.js'));
+const FillHubDiagnostics = require(join(EXT, 'scripts', 'diagnostics.js'));
 
 const SECRET_STATE = {
     preferredLocale: 'tr-TR',

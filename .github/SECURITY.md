@@ -7,7 +7,7 @@ reporting instead: go to the repository's **Security** tab and choose **Report a
 
 Include:
 
-- the FillHub version (see `manifest.json` or the settings page footer),
+- the FillHub version (see `extension/manifest.json` or the settings page footer),
 - the browser version and operating system,
 - steps to reproduce, and the impact you expect.
 
@@ -21,7 +21,7 @@ messages between the extension parts.
 
 Out of scope: vulnerabilities in the websites you fill, in Chromium itself, or in third-party
 services. Generated data is fake by design; reports that a generated number passes a checksum are
-expected behavior for the algorithms listed in [PRIVACY.md](PRIVACY.md).
+expected behavior for the algorithms listed in [PRIVACY.md](../PRIVACY.md).
 
 ## Supported versions
 

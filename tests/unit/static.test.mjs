@@ -7,7 +7,8 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const read = (p) => readFileSync(join(ROOT, p), 'utf8');
+const EXT = join(ROOT, 'extension');
+const read = (p) => readFileSync(join(EXT, p), 'utf8');
 const require = createRequire(import.meta.url);
 const manifest = JSON.parse(read('manifest.json'));
 const { contentFiles } = require('../../tools/lib/content-files.js');
@@ -27,10 +28,10 @@ test('manifest: sürüm biçimi ve ad yerelleştirmesi (varsayılan dilde FillHu
 });
 
 test('manifest: içerik betiklerinin tümü, ikonlar ve ayar sayfası diskte var', () => {
-    for (const f of contentFiles()) assert.ok(existsSync(join(ROOT, f)), `eksik: ${f}`);
-    for (const size of Object.values(manifest.icons)) assert.ok(existsSync(join(ROOT, size)), `eksik ikon: ${size}`);
-    assert.ok(existsSync(join(ROOT, manifest.options_page)), 'ayar sayfası yok');
-    assert.ok(existsSync(join(ROOT, manifest.background.service_worker)), 'servis çalışanı yok');
+    for (const f of contentFiles()) assert.ok(existsSync(join(EXT, f)), `eksik: ${f}`);
+    for (const size of Object.values(manifest.icons)) assert.ok(existsSync(join(EXT, size)), `eksik ikon: ${size}`);
+    assert.ok(existsSync(join(EXT, manifest.options_page)), 'ayar sayfası yok');
+    assert.ok(existsSync(join(EXT, manifest.background.service_worker)), 'servis çalışanı yok');
 });
 
 test('manifest: içerik betiği yükleme sırası (veri → kimlik → tespit → üreteç → içerik)', () => {
@@ -46,7 +47,7 @@ test('manifest: üç komut tanımlı', () => {
 });
 
 test('i18n: 15 dil ve her dilde İngilizce ile aynı anahtarlar', () => {
-    const I = require(join(ROOT, 'options/i18n.js'));
+    const I = require(join(EXT, 'options/i18n.js'));
     const langs = Object.keys(I);
     assert.equal(langs.length, 15);
     const enKeys = Object.keys(I.en).sort();

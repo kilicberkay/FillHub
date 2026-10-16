@@ -8,17 +8,20 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
+// Eklenti dosyaları (manifest, _locales, options, popup, scripts, icons) extension/ altındadır
+const EXT = join(ROOT, 'extension');
+const readExt = (p) => readFileSync(join(EXT, p), 'utf8');
 const require = createRequire(import.meta.url);
-const manifest = JSON.parse(read('manifest.json'));
+const manifest = JSON.parse(readExt('manifest.json'));
 const { contentFiles } = require('../../tools/lib/content-files.js');
 const LOCALE_KEYS = ['extName', 'extDescription', 'actionTitle', 'cmdFill', 'cmdChaos', 'cmdUndo', 'menuFillForm', 'menuFillField', 'menuUndo'];
 
 test('_locales: 15 dil, her birinde aynı anahtarlar, açıklama ≤132 karakter', () => {
-    const dirs = readdirSync(join(ROOT, '_locales')).sort();
+    const dirs = readdirSync(join(EXT, '_locales')).sort();
     assert.equal(dirs.length, 15, `dil klasörü sayısı: ${dirs.length}`);
-    const en = JSON.parse(read('_locales/en/messages.json'));
+    const en = JSON.parse(readExt('_locales/en/messages.json'));
     for (const d of dirs) {
-        const msgs = JSON.parse(read(`_locales/${d}/messages.json`));
+        const msgs = JSON.parse(readExt(`_locales/${d}/messages.json`));
         assert.deepEqual(Object.keys(msgs).sort(), [...LOCALE_KEYS].sort(), `${d}: anahtarlar`);
         for (const k of LOCALE_KEYS) assert.ok(msgs[k].message.trim().length > 0, `${d}.${k} boş`);
         assert.ok(msgs.extDescription.message.length <= 132, `${d}: açıklama ${msgs.extDescription.message.length} karakter`);
@@ -27,7 +30,7 @@ test('_locales: 15 dil, her birinde aynı anahtarlar, açıklama ≤132 karakter
 });
 
 test('manifest: her __MSG_ referansı varsayılan dilde tanımlı', () => {
-    const en = JSON.parse(read('_locales/en/messages.json'));
+    const en = JSON.parse(readExt('_locales/en/messages.json'));
     const refs = JSON.stringify(manifest).match(/__MSG_(\w+?)__/g) || [];
     assert.ok(refs.length >= 5, `yerelleştirilmiş alan sayısı: ${refs.length}`);
     for (const r of refs) {
@@ -43,8 +46,8 @@ test('manifest: default_locale, sürüm ve minimum Chrome sürümü', () => {
 });
 
 test('bağıl Markdown bağlantıları var olan dosyalara gider', () => {
-    const docs = ['README.md', 'README.tr.md', 'CONTRIBUTING.md', 'SECURITY.md', 'PRIVACY.md', 'CHANGELOG.md',
-        'THIRD_PARTY_NOTICES.md', 'CODE_OF_CONDUCT.md', 'docs/ARCHITECTURE.md', 'store/README.md', 'store/privacy-policy.md'];
+    const docs = ['README.md', 'README.tr.md', '.github/CONTRIBUTING.md', '.github/SECURITY.md', 'PRIVACY.md', 'CHANGELOG.md',
+        'docs/THIRD_PARTY_NOTICES.md', '.github/CODE_OF_CONDUCT.md', 'docs/ARCHITECTURE.md', 'store/README.md', 'store/privacy-policy.md'];
     for (const doc of docs) {
         assert.ok(existsSync(join(ROOT, doc)), `belge yok: ${doc}`);
         const links = [...read(doc).matchAll(/\]\(([^)\s]+)\)/g)].map((m) => m[1]);
@@ -57,9 +60,9 @@ test('bağıl Markdown bağlantıları var olan dosyalara gider', () => {
 });
 
 test('belgeler: CoC iletişim yer tutucusu kalmadı; zorunlu dosyalar mevcut', () => {
-    assert.ok(!/\[INSERT/.test(read('CODE_OF_CONDUCT.md')), 'CoC yer tutucusu');
-    for (const f of ['LICENSE', 'README.md', 'README.tr.md', 'CONTRIBUTING.md', 'CODE_OF_CONDUCT.md', 'SECURITY.md',
-        'PRIVACY.md', 'CHANGELOG.md', 'THIRD_PARTY_NOTICES.md', '.github/FUNDING.yml', 'options/fonts/OFL.txt']) {
+    assert.ok(!/\[INSERT/.test(read('.github/CODE_OF_CONDUCT.md')), 'CoC yer tutucusu');
+    for (const f of ['LICENSE', 'README.md', 'README.tr.md', '.github/CONTRIBUTING.md', '.github/CODE_OF_CONDUCT.md', '.github/SECURITY.md',
+        'PRIVACY.md', 'CHANGELOG.md', 'docs/THIRD_PARTY_NOTICES.md', '.github/FUNDING.yml', 'extension/options/fonts/OFL.txt']) {
         assert.ok(existsSync(join(ROOT, f)), `eksik: ${f}`);
     }
     assert.match(read('LICENSE'), /MIT License/);
@@ -121,7 +124,7 @@ test('paket: ayar sayfası ve açılır pencerenin yerel img/link/script referan
     const { collect } = require('../../tools/build.js');
     const files = new Set(collect());
     for (const page of ['options/options.html', 'popup/popup.html']) {
-        const html = read(page);
+        const html = readExt(page);
         const refs = [...html.matchAll(/(?:src|href)="([^"]+)"/g)].map((m) => m[1]).filter((s) => !/^(https?:|data:|#|mailto:)/.test(s));
         assert.ok(refs.length >= 3, `${page}: yerel başvuru sayısı ${refs.length}`);
         for (const r of refs) {
@@ -149,7 +152,7 @@ test('build: zip yazıcısı geçerli bir zip üretir (merkezi dizin ve CRC)', (
 
 test('dosya boyutları: içerik betikleri ve ayar sayfası makul sınırda', () => {
     for (const f of ['scripts/content.js', 'scripts/generator.js', 'scripts/locale-data.js', 'options/options.html']) {
-        assert.ok(statSync(join(ROOT, f)).size < 400000, `${f} çok büyük`);
+        assert.ok(statSync(join(EXT, f)).size < 400000, `${f} çok büyük`);
     }
 });
 

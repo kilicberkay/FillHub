@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const R = require('../../scripts/id-rules.js');
+const R = require('../../extension/scripts/id-rules.js');
 
 test('bilinen geçerli vektörler kabul edilir', () => {
     const valid = [

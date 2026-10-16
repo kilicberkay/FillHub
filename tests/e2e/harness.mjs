@@ -6,6 +6,8 @@ import { fileURLToPath } from 'node:url';
 import { launchWithExtension, Cdp, PageSession, wait, findChrome } from '../../tools/lib/browser.mjs';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+// Tarayıcıya yüklenen eklenti klasörü (paketlenen tek kaynak)
+export const EXT = join(ROOT, 'extension');
 const FIXTURES = {
     tr: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form.html')),
     en: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-en.html')),
@@ -35,7 +37,7 @@ export async function startEnv() {
     const base = `http://127.0.0.1:${srv.address().port}/form.html`;
 
     // FILLHUB_EXT_DIR: açılmış paket kopyası (ör. dist/fillhub-*.zip çıktısı) de sınanabilir
-    const browser = await launchWithExtension(process.env.FILLHUB_EXT_DIR || ROOT, {});
+    const browser = await launchWithExtension(process.env.FILLHUB_EXT_DIR || EXT, {});
     const cdp = await new Cdp(browser.browserWs).connect();
 
     // Yalnızca bu uzantının servis çalışanı (Chrome'un kendi bileşenleri hariç)

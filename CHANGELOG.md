@@ -5,6 +5,8 @@ All notable changes to FillHub are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-16
+
 ### Added
 - The notification after a fill has an Undo button when the form was not submitted. It does not take focus.
 - Custom rules can be reordered (first match wins), edited, and tested: "Test on this page" shows how
@@ -26,6 +28,8 @@ All notable changes to FillHub are documented here. The format follows
 - Auto-submit no longer clicks a submit-like button labelled as a captcha check (e.g. "I am not a robot").
 
 ### Changed
+- Repository layout: the extension files now live in `extension/`. To load it unpacked, select that folder.
+  The package is the same as before.
 - Clicking the toolbar icon opens the popup instead of filling the page. The keyboard shortcut and the
   context menu still fill immediately.
 

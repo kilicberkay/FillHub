@@ -4,9 +4,9 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const D = require('../../scripts/field-detect.js');
-const G = require('../../scripts/generator.js');
-const L = require('../../scripts/locale-data.js');
+const D = require('../../extension/scripts/field-detect.js');
+const G = require('../../extension/scripts/generator.js');
+const L = require('../../extension/scripts/locale-data.js');
 
 const CONSENT = [
     'KVKK metnini okudum', 'Kişisel verilerimin işlenmesine açık rıza veriyorum', 'Kullanım koşullarını kabul ediyorum',

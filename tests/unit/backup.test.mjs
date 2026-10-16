@@ -6,10 +6,11 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const EXT = join(ROOT, 'extension');
 const require = createRequire(import.meta.url);
-const FillHubBackup = require(join(ROOT, 'scripts', 'backup.js'));
-const FakeDataGenerator = require(join(ROOT, 'scripts', 'generator.js'));
-const FillHubSiteRules = require(join(ROOT, 'scripts', 'site-rules.js'));
+const FillHubBackup = require(join(EXT, 'scripts', 'backup.js'));
+const FakeDataGenerator = require(join(EXT, 'scripts', 'generator.js'));
+const FillHubSiteRules = require(join(EXT, 'scripts', 'site-rules.js'));
 
 // Tarayıcıdaki document.createDocumentFragment().querySelector sınamasının Node'daki karşılığı: yalnız bilinen biçimler
 const simpleSelector = (s) => /^[#.]?[\w-]+$/.test(s);

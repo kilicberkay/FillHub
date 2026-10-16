@@ -6,8 +6,9 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const EXT = join(ROOT, 'extension');
 const require = createRequire(import.meta.url);
-const { normalizeHost, isValidHost, matchesSite } = require(join(ROOT, 'scripts', 'site-rules.js'));
+const { normalizeHost, isValidHost, matchesSite } = require(join(EXT, 'scripts', 'site-rules.js'));
 
 test('normalizeHost: URL, www ve büyük harf kanonik biçime çevrilir', () => {
     assert.equal(normalizeHost('Bank.com'), 'bank.com');
