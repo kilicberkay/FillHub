@@ -233,6 +233,51 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
             `chrome.storage.local.get('noAutoSubmitSites').then((r) => JSON.stringify(r))`,
         ));
 
+        it('captcha bulunduğunda sayfa kaydırılmaz ve odak captcha’ya geçmez', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true });
+            const form = await openForm(env);
+            try {
+                // Captcha sayfanın altında: eskiden burada sayfa captcha'ya kaydırılıyordu
+                await form.page.eval(`(() => {
+                    const d = document.createElement('div');
+                    d.id = 'uzak-captcha';
+                    d.className = 'g-recaptcha';
+                    d.style.cssText = 'width:304px;height:78px;background:#eee;position:relative;top:3000px';
+                    document.body.appendChild(d);
+                    window.scrollTo(0, 0);
+                })()`);
+                const before = await form.page.eval('window.scrollY');
+                const r = await send(env, form.tabId, { action: 'fill' });
+                assert.equal(r.status, 'success');
+                await wait(900);
+                assert.equal(await form.page.eval('window.scrollY'), before, 'sayfa captcha’ya kaydırılmamalı');
+                assert.notEqual(await form.page.eval('document.activeElement?.id'), 'uzak-captcha', 'captcha odaklanmamalı');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('captcha ile ilgili gönder benzeri düğme otomatik tıklanmaz', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, autoSubmit: true });
+            const form = await openForm(env);
+            try {
+                // Tek gönder düğmesi bir captcha düğmesi: otomatik gönderim onu da tıklamamalı
+                await form.page.eval(`(() => {
+                    document.querySelectorAll('#kayit button').forEach((b) => b.remove());
+                    const b = document.createElement('button');
+                    b.textContent = 'Ben robot değilim';
+                    window.__captchaClicks = 0;
+                    b.addEventListener('click', (e) => { e.preventDefault(); window.__captchaClicks++; });
+                    document.getElementById('kayit').appendChild(b);
+                })()`);
+                await send(env, form.tabId, { action: 'fill' });
+                await wait(900);
+                assert.equal(await form.page.eval('window.__captchaClicks'), 0, 'captcha düğmesi tıklanmamalı');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
         it('alan doldurulunca gönder düğmesine bir kez tıklanır', async () => {
             await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, autoSubmit: true });
             const form = await openForm(env);

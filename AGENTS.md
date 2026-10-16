@@ -104,6 +104,8 @@ Doldurma mantığı sayfa bağlamında içerik betiği olarak çalışır.
 - Captcha'lara otomatik müdahale edilmez: içerik betiği captcha'ya tıklamaz, çözmez ve `grecaptcha` /
   `turnstile` / `hcaptcha` API'lerini çağırmaz. Yalnızca görünür bir captcha (`CAPTCHA_SELECTORS`) varsa öğe
   vurgulanır ve "captcha'yı kendiniz tamamlayın" bildirimi gösterilir; doğrulamayı kullanıcı tamamlar.
+  Vurgulama captcha'ya kaydırma ya da odaklanma yapmaz. Otomatik gönderim captcha ile ilgili düğmeleri
+  (`CAPTCHA_BUTTON_TEXT`, ör. "Ben robot değilim") ve captcha kapsayıcısındaki düğmeleri hiçbir koşulda tıklamaz.
   Captcha kelimesi geçen etiketler dahil her onay kutusu genel onay kutusu politikasına tabidir; etiket
   tıklaması (`label.click()`) kutuyu geri aldığı için kullanılmaz.
 - Otomatik gönderim yalnız gerçek gönderim kontrollerine basar (`button[type=submit]`,

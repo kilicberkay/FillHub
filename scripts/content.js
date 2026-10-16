@@ -899,9 +899,15 @@ function autoSubmitLabel(control) {
     return `${text} ${control.getAttribute('aria-label') || ''} ${control.getAttribute('title') || ''}`;
 }
 
+// Captcha ile ilgili düğmeler ("Ben robot değilim" gibi) hiçbir koşulda otomatik tıklanmaz
+const CAPTCHA_BUTTON_TEXT = /captcha|recaptcha|hcaptcha|turnstile|robot|not a human|insan değil/i;
+
 function autoSubmitForm(container) {
     const usable = [...container.querySelectorAll(SUBMIT_BUTTON_SELECTOR)]
-        .filter(el => !el.disabled && !DESTRUCTIVE_BUTTON_TEXT.test(autoSubmitLabel(el)));
+        .filter(el => !el.disabled
+            && !DESTRUCTIVE_BUTTON_TEXT.test(autoSubmitLabel(el))
+            && !CAPTCHA_BUTTON_TEXT.test(autoSubmitLabel(el))
+            && !CAPTCHA_SELECTORS.some(selector => el.closest(selector)));
     const submitBtn = usable.find(el => (el.getAttribute('type') || 'submit').toLowerCase() === 'submit') || usable[0];
     if (submitBtn) {
         setTimeout(() => {
@@ -960,8 +966,8 @@ function findVisibleCaptcha() {
     return null;
 }
 
+// Captcha'ya kaydırma ya da odaklanma yapılmaz; yalnızca öğe işaretlenir (sayfada zaten görünüyorsa fark edilir)
 function highlightCaptcha(el) {
-    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
     const previous = el.style.outline;
     const previousOffset = el.style.outlineOffset;
     el.style.outline = '3px solid #f74a87';
