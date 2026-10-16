@@ -6,6 +6,7 @@ All notable changes to FillHub are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+- The notification after a fill has an Undo button when the form was not submitted. It does not take focus.
 - Custom rules can be reordered (first match wins), edited, and tested: "Test on this page" shows how
   many fields on the current web page match the selector. Only the count is read.
 - The settings page lists the keyboard shortcuts and where to change them.
@@ -19,6 +20,8 @@ All notable changes to FillHub are documented here. The format follows
   also covers its subdomains.
 
 ### Fixed
+- The settings page controls without visible labels (country search, country list, auto-submit exception
+  input, profile mode options, active profile checkbox) now have accessible names.
 - Showing a captcha no longer scrolls the page to it or moves focus there; the element is only outlined.
 - Auto-submit no longer clicks a submit-like button labelled as a captcha check (e.g. "I am not a robot").
 

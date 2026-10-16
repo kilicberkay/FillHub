@@ -126,9 +126,9 @@
                                     <p id="countryDesc" class="mt-0.5 text-xs leading-relaxed text-soft">The primary data source used for initial filling.</p>
                                 </div>
                                 <div class="space-y-2 pt-3">
-                                    <input type="text" id="countrySearch" placeholder="Filter countries..." class="w-full rounded-lg border transition-colors duration-150 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-zinc-50 dark:disabled:bg-white/[0.02] h-8 text-[13px] px-2.5 border-zinc-500 bg-white text-zinc-800 placeholder:text-zinc-500 hover:border-zinc-600 focus:border-brand-600 focus:ring-2 focus:ring-brand-600 dark:border-zinc-500 dark:bg-white/[0.04] dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:hover:border-zinc-400 dark:focus:border-brand-400 dark:focus:ring-brand-400">
+                                    <input type="text" aria-labelledby="countryTitle" id="countrySearch"placeholder="Filter countries..." class="w-full rounded-lg border transition-colors duration-150 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-zinc-50 dark:disabled:bg-white/[0.02] h-8 text-[13px] px-2.5 border-zinc-500 bg-white text-zinc-800 placeholder:text-zinc-500 hover:border-zinc-600 focus:border-brand-600 focus:ring-2 focus:ring-brand-600 dark:border-zinc-500 dark:bg-white/[0.04] dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:hover:border-zinc-400 dark:focus:border-brand-400 dark:focus:ring-brand-400">
                                     <div class="relative">
-                                        <select id="defaultLocale" class="w-full rounded-lg border transition-colors duration-150 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-zinc-50 dark:disabled:bg-white/[0.02] h-8 text-[13px] px-2.5 border-zinc-500 bg-white text-zinc-800 placeholder:text-zinc-500 hover:border-zinc-600 focus:border-brand-600 focus:ring-2 focus:ring-brand-600 dark:border-zinc-500 dark:bg-white/[0.04] dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:hover:border-zinc-400 dark:focus:border-brand-400 dark:focus:ring-brand-400 cursor-pointer appearance-none pr-8 [&>option]:bg-white [&>option]:text-zinc-800 dark:[&>option]:bg-zinc-900 dark:[&>option]:text-zinc-100"></select>
+                                        <select aria-labelledby="countryTitle" id="defaultLocale"class="w-full rounded-lg border transition-colors duration-150 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-zinc-50 dark:disabled:bg-white/[0.02] h-8 text-[13px] px-2.5 border-zinc-500 bg-white text-zinc-800 placeholder:text-zinc-500 hover:border-zinc-600 focus:border-brand-600 focus:ring-2 focus:ring-brand-600 dark:border-zinc-500 dark:bg-white/[0.04] dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:hover:border-zinc-400 dark:focus:border-brand-400 dark:focus:ring-brand-400 cursor-pointer appearance-none pr-8 [&>option]:bg-white [&>option]:text-zinc-800 dark:[&>option]:bg-zinc-900 dark:[&>option]:text-zinc-100"></select>
                                         <svg class="pointer-events-none absolute top-1/2 right-2 h-3.5 w-3.5 -translate-y-1/2 text-soft" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                                         </svg>
@@ -211,7 +211,7 @@
                                 </div>
                                 <div class="flex flex-wrap items-start gap-2 pt-3">
                                     <div class="min-w-0 flex-1 space-y-1">
-                                        <input type="text" id="siteInput" placeholder="bank.example.com" class="w-full rounded-lg border transition-colors duration-150 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-zinc-50 dark:disabled:bg-white/[0.02] h-8 text-[13px] px-2.5 border-zinc-500 bg-white text-zinc-800 placeholder:text-zinc-500 hover:border-zinc-600 focus:border-brand-600 focus:ring-2 focus:ring-brand-600 dark:border-zinc-500 dark:bg-white/[0.04] dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:hover:border-zinc-400 dark:focus:border-brand-400 dark:focus:ring-brand-400">
+                                        <input type="text" aria-labelledby="siteTitle" id="siteInput"placeholder="bank.example.com" class="w-full rounded-lg border transition-colors duration-150 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-zinc-50 dark:disabled:bg-white/[0.02] h-8 text-[13px] px-2.5 border-zinc-500 bg-white text-zinc-800 placeholder:text-zinc-500 hover:border-zinc-600 focus:border-brand-600 focus:ring-2 focus:ring-brand-600 dark:border-zinc-500 dark:bg-white/[0.04] dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:hover:border-zinc-400 dark:focus:border-brand-400 dark:focus:ring-brand-400">
                                         <p id="siteError" role="alert" class="text-[11px] font-medium text-rose-600 dark:text-rose-400" hidden></p>
                                     </div>
                                     <button type="button" id="siteAddBtn" class="inline-flex h-8 cursor-pointer select-none items-center justify-center rounded-lg border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50 focus-ring dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-200 dark:hover:bg-white/[0.06]">Add</button>
@@ -289,14 +289,14 @@
                                 <fieldset class="space-y-2">
                                     <legend id="profileModeLabel" class="mb-2 text-xs font-medium text-zinc-700 dark:text-zinc-300">How should the person be chosen?</legend>
                                     <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-zinc-200/80 p-3 transition-colors hover:border-zinc-300 has-[:checked]:border-brand-600/50 has-[:checked]:bg-brand-50/70 dark:border-white/[0.07] dark:hover:border-white/[0.14] dark:has-[:checked]:bg-brand-500/10">
-                                        <input type="radio" name="profileMode" id="profileModeRandom" value="random" class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-brand-600">
+                                        <input type="radio" name="profileMode" aria-labelledby="profileModeRandomTitle" id="profileModeRandom"value="random" class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-brand-600">
                                         <span class="min-w-0">
                                             <span id="profileModeRandomTitle" class="block text-[13px] font-medium text-zinc-800 dark:text-zinc-100"></span>
                                             <span id="profileModeRandomDesc" class="mt-0.5 block text-xs text-soft"></span>
                                         </span>
                                     </label>
                                     <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-zinc-200/80 p-3 transition-colors hover:border-zinc-300 has-[:checked]:border-brand-600/50 has-[:checked]:bg-brand-50/70 dark:border-white/[0.07] dark:hover:border-white/[0.14] dark:has-[:checked]:bg-brand-500/10">
-                                        <input type="radio" name="profileMode" id="profileModeFixed" value="fixed" class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-brand-600">
+                                        <input type="radio" name="profileMode" aria-labelledby="profileModeFixedTitle" id="profileModeFixed"value="fixed" class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-brand-600">
                                         <span class="min-w-0">
                                             <span id="profileModeFixedTitle" class="block text-[13px] font-medium text-zinc-800 dark:text-zinc-100"></span>
                                             <span id="profileModeFixedDesc" class="mt-0.5 block text-xs text-soft"></span>
@@ -314,7 +314,7 @@
                                 </div>
 
                                 <label id="profileActivateRow" class="flex cursor-pointer items-center gap-2.5 text-xs text-zinc-700 dark:text-zinc-300">
-                                    <input id="profileActivate" type="checkbox" class="h-4 w-4 cursor-pointer accent-brand-600">
+                                    <input id="profileActivate" aria-labelledby="profileActivateLabel" type="checkbox"class="h-4 w-4 cursor-pointer accent-brand-600">
                                     <span id="profileActivateLabel">Make this the active profile when saved</span>
                                 </label>
 
