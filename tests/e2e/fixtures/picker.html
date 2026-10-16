@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FillHub tarih seçici</title>
+    <style>
+        .air-datepicker { display: none; position: fixed; top: 140px; left: 20px; width: 280px; padding: 8px; background: #fff; border: 1px solid #999; font: 13px sans-serif; color: #111; }
+        .air-datepicker.-active- { display: block; }
+        .air-datepicker-nav--title { margin: 4px 0 6px; font-weight: 600; }
+        .air-datepicker-cell { display: inline-block; width: 32px; height: 26px; line-height: 26px; text-align: center; cursor: pointer; }
+        .air-datepicker-cell.-disabled- { color: #bbb; cursor: default; }
+    </style>
+</head>
+<body>
+    <!-- air-datepicker sözleşmesini taklit eder: konteyner sayfa yüklenince vardır, odakta açılır,
+         gezinme düğmeleri data-action taşır, gün hücreleri data-year/data-month/data-date taşır,
+         Shift+ok ±1 yıl ve Alt+ok ±10 yıl atlar. Her 7. gün devre dışıdır. -->
+    <form id="kayit" action="#">
+        <label for="dogum">Doğum tarihi</label>
+        <input id="dogum" name="dogum" type="text" placeholder="gg.aa.yyyy">
+        <label for="vade">Doğum tarihi (salt okunur)</label>
+        <input id="vade" name="vade" type="text" placeholder="gg.aa.yyyy" readonly>
+        <div id="takvim" class="air-datepicker"></div>
+        <button type="submit">Gönder</button>
+    </form>
+    <script>
+        (() => {
+            const takvim = document.getElementById('takvim');
+            const pad = (n) => String(n).padStart(2, '0');
+            const daysIn = (y, m0) => new Date(y, m0 + 1, 0).getDate();
+            const now = new Date();
+            let open = null; // { input, y, m0 }
+            window.__pickerSelections = 0;
+
+            function close() {
+                takvim.className = 'air-datepicker';
+                takvim.innerHTML = '';
+                open = null;
+            }
+
+            function select(d) {
+                const { input, y, m0 } = open;
+                input.value = `${pad(d)}.${pad(m0 + 1)}.${y}`;
+                window.__pickerSelections++;
+                close();
+            }
+
+            function render() {
+                const { y, m0 } = open;
+                takvim.innerHTML = '';
+                takvim.className = 'air-datepicker -active-';
+                const navButton = (action, glyph, delta) => {
+                    const b = document.createElement('button');
+                    b.type = 'button';
+                    b.setAttribute('data-action', action);
+                    b.textContent = glyph;
+                    b.addEventListener('click', () => {
+                        open.m0 += delta;
+                        if (open.m0 < 0) { open.m0 = 11; open.y--; }
+                        if (open.m0 > 11) { open.m0 = 0; open.y++; }
+                        render();
+                    });
+                    return b;
+                };
+                const title = document.createElement('div');
+                title.className = 'air-datepicker-nav--title';
+                title.textContent = `${y} / ${pad(m0 + 1)}`;
+                takvim.append(navButton('prev', '‹', -1), navButton('next', '›', 1), title);
+                for (let d = 1; d <= daysIn(y, m0); d++) {
+                    const cell = document.createElement('span');
+                    cell.className = 'air-datepicker-cell' + (d % 7 === 0 ? ' -disabled-' : '');
+                    cell.setAttribute('data-year', y);
+                    cell.setAttribute('data-month', m0);
+                    cell.setAttribute('data-date', d);
+                    cell.textContent = d;
+                    cell.addEventListener('click', () => { if (!cell.classList.contains('-disabled-')) select(d); });
+                    takvim.append(cell);
+                }
+            }
+
+            for (const input of document.querySelectorAll('#dogum, #vade')) {
+                input.addEventListener('focus', () => {
+                    open = { input, y: now.getFullYear(), m0: now.getMonth() };
+                    render();
+                });
+                input.addEventListener('keydown', (e) => {
+                    if (!open || open.input !== input) return;
+                    const step = e.shiftKey ? 1 : e.altKey ? 10 : 0;
+                    if (!step || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+                    open.y += e.key === 'ArrowUp' ? step : -step;
+                    render();
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

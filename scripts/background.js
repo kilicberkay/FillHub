@@ -1,6 +1,6 @@
 // Doldurma betikleri sayfalara otomatik enjekte edilmez. FillHub kullanıldığında (kısayol, simge, menü)
 // her çerçeveye bir kez enjekte edilir; böylece kullanılmayan sayfalar bellek harcamaz.
-const CONTENT_FILES = ["scripts/locale-data.js", "scripts/id-rules.js", "scripts/field-detect.js", "scripts/generator.js", "scripts/site-rules.js", "scripts/content.js"];
+const CONTENT_FILES = ["scripts/locale-data.js", "scripts/id-rules.js", "scripts/field-detect.js", "scripts/generator.js", "scripts/site-rules.js", "scripts/content-dates.js", "scripts/content.js"];
 
 // Her çerçevede içerik betiği yoksa enjekte eder; zaten yüklü olanlara dokunmaz
 async function ensureContentScripts(tabId) {

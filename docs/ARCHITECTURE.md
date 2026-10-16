@@ -22,7 +22,7 @@ files in the repository are loaded as they are. npm is used only for development
 | Styles | `options/ui.src.css` → `options/options.css` | Tailwind CSS 4 build (`npm run build:css`); generated file is not edited by hand |
 
 Load order (`CONTENT_FILES` in `scripts/background.js`; the service worker injects them on demand): locale data → identity rules → field detection →
-generator → site rules → content script. Every file also exports to `module.exports`, so the unit tests load the
+generator → site rules → date picker → content script. Every file also exports to `module.exports`, so the unit tests load the
 same code in Node.
 
 ## Fill flow

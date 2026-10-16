@@ -555,6 +555,107 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
         });
     });
 
+    describe('tarih seçici', () => {
+        const DATE_RE = /^\d{2}\.\d{2}\.\d{4}$/;
+        const thisYear = new Date().getFullYear();
+        const yearOf = (v) => +v.slice(6);
+
+        it('yazılabilir tarih alanı takvimden seçilerek doldurulur', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true });
+            const form = await openForm(env, { fixture: 'picker' });
+            try {
+                const r = await send(env, form.tabId, { action: 'fill' });
+                assert.equal(r.status, 'success');
+                const v = await form.page.eval(`({ dogum: document.getElementById('dogum').value, secim: window.__pickerSelections })`);
+                assert.match(v.dogum, DATE_RE, `gg.aa.yyyy biçiminde olmalı: "${v.dogum}"`);
+                assert.ok(yearOf(v.dogum) >= 2000 && yearOf(v.dogum) <= thisYear, `yıl 2000 ile bu yıl arasında: ${v.dogum}`);
+                assert.ok(v.secim >= 1, 'takvim seçimi kullanılmalı');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('salt okunur tarih alanı yalnızca takvimle doldurulur (birkaç doldurmada)', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true });
+            for (let i = 0; i < 3; i++) {
+                const form = await openForm(env, { fixture: 'picker' });
+                try {
+                    await send(env, form.tabId, { action: 'fill' });
+                    const vade = await form.page.eval(`document.getElementById('vade').value`);
+                    assert.match(vade, DATE_RE, `salt okunur alan takvimle dolmalı: "${vade}"`);
+                    assert.ok(yearOf(vade) >= 2000 && yearOf(vade) <= thisYear, `yıl aralığı: ${vade}`);
+                } finally {
+                    await closeForm(form);
+                }
+            }
+        });
+
+        it('takvim yoksa yazılabilir alan doğrudan yazılır, takvim seçimi yapılmaz', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true });
+            const form = await openForm(env, { fixture: 'picker' });
+            try {
+                await form.page.eval(`document.getElementById('takvim').remove()`);
+                await send(env, form.tabId, { action: 'fill' });
+                await wait(300);
+                const v = await form.page.eval(`({ dogum: document.getElementById('dogum').value, secim: window.__pickerSelections })`);
+                assert.match(v.dogum, DATE_RE, `doğrudan yazım yedeği çalışmalı: "${v.dogum}"`);
+                assert.equal(v.secim, 0, 'takvim olmadığında seçim yapılmamalı');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('takvim yoksa salt okunur tarih alanı atlanır', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true });
+            const form = await openForm(env, { fixture: 'picker' });
+            try {
+                await form.page.eval(`document.getElementById('takvim').remove()`);
+                await send(env, form.tabId, { action: 'fill' });
+                await wait(300);
+                assert.equal(await form.page.eval(`document.getElementById('vade').value`), '', 'salt okunur alan doğrudan yazılmamalı');
+            } finally {
+                await closeForm(form);
+            }
+        });
+    });
+
+    describe('bildirim', () => {
+        it('bildirimdeki Geri al düğmesi doldurmayı geri alır, odak almaz', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true });
+            const form = await openForm(env);
+            try {
+                const r = await send(env, form.tabId, { action: 'fill' });
+                assert.equal(r.status, 'success');
+                const buttons = await form.page.eval(`document.querySelectorAll('#fake-filler-toast [data-role="action"]').length`);
+                assert.equal(buttons, 1, 'bildirimde Geri al düğmesi olmalı');
+                assert.equal(await form.page.eval(`!!document.activeElement?.closest('#fake-filler-toast')`), false, 'bildirim odak almamalı');
+
+                await form.page.eval(`document.querySelector('#fake-filler-toast [data-role="action"]').click()`);
+                await wait(300);
+                const restored = await readForm(form.page);
+                assert.ok(Object.values(restored).every((v) => v === '' || v === false), 'alanlar önceki haline dönmeli');
+                assert.equal(await form.page.eval(`document.querySelectorAll('#fake-filler-toast [data-role="action"]').length`), 0, 'geri alındıktan sonra düğme kalkmalı');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('otomatik gönderim istenen doldurmada Geri al düğmesi sunulmaz', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, autoSubmit: true });
+            const form = await openForm(env);
+            try {
+                // Gönderim sayfayı yeniden yüklememeli; olayı engellemek yeterli
+                await form.page.eval(`document.getElementById('kayit').addEventListener('submit', (e) => e.preventDefault())`);
+                await send(env, form.tabId, { action: 'fill' });
+                await wait(900);
+                const buttons = await form.page.eval(`document.querySelectorAll('#fake-filler-toast [data-role="action"]').length`);
+                assert.equal(buttons, 0, 'gönderilmiş bir formu geri almak sunulmamalı');
+            } finally {
+                await closeForm(form);
+            }
+        });
+    });
+
     describe('tanılama', () => {
         it('son doldurma özeti sayı ve tür içerir, alan değeri içermez', async () => {
             await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true });

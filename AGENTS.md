@@ -17,14 +17,19 @@ Doldurma mantığı sayfa bağlamında içerik betiği olarak çalışır.
   kurallar; `input.type` ve `autocomplete` sinyalleri etiketten önce gelir. Korpus: `tests/unit/field-corpus.mjs`.
 - `scripts/generator.js` — `FakeDataGenerator`: yerel çözümleme (`canonicalLocale`, `resolveLocale`),
   `createPerson` (doldurma başına tutarlı kişi), `generate(type, locale, context)`.
-  Tarayıcıda global, Node'da `module.exports` olarak kullanılabilir. Yükleme sırası: locale-data → id-rules → field-detect → generator → content.
+  Tarayıcıda global, Node'da `module.exports` olarak kullanılabilir. Yükleme sırası (`CONTENT_FILES`): locale-data → id-rules → field-detect → generator → site-rules → content-dates → content.
+- `scripts/site-rules.js` — `FillHubSiteRules`: alan adı normalizasyonu ve otomatik gönderim istisnası eşleşmesi (alt alan adları dahil).
+- `scripts/backup.js` — `FillHubBackup`: yedek dosyası üretimi ve içe aktarma doğrulaması (alan alan; boyut, biçim, seçici, tür, kimlik yapısı).
+- `scripts/diagnostics.js` — `FillHubDiagnostics`: tanılama raporu; kişisel veri (ad, değer, etiket, profil adı, site adresi) içermez.
+- `scripts/content-dates.js` — tarih alanlarının air-datepicker takvimiyle doldurulması (DOM sözleşmesi, gezinme, yıl atlama).
+- `popup/popup.html`, `popup/popup.js` — araç çubuğu açılır penceresi: ülke ve profil seçimi, Doldur ve Geri al. Stil `options/options.css` ile paylaşılır.
   Persona göçü (`migrateProfiles`) ve etkin kimlik (`activeIdentity`) burada; içerik betiği de bunları kullanır.
 - `tools/verify-data.js` — bağımlılıksız denetim (`node tools/verify-data.js`): bilinen vektörler, harita
   bütünlüğü, 15 ülkede 300'er kişi, i18n anahtar eşleşmesi.
 - `scripts/content.js` — doldurma motoru (captcha: yalnız vurgulama ve bildirim): alan tespiti (`identifyField`), değer yazma
   (`assignFieldValue`), dosya/select/radio/tarih-picker yolları, geri alma (`undoFill`),
   mesaj dinleyicisi.
-- `scripts/background.js` — servis çalışanı: sağ tık menüleri (`chrome.i18n`), kısayollar, simge tıklaması.
+- `scripts/background.js` — servis çalışanı: sağ tık menüleri (`chrome.i18n`), kısayollar, açılır pencere isteklerinin etkin sekmeye iletilmesi.
 - `options/` — ayar sayfası (`generator.js` betik olarak yüklenir); persona/şablon yönetimi burada.
   - `ui.src.css` — tasarım kaynağı: `@theme` tokenları (marka skalası, gölgeler), `@utility` yardımcıları,
     form taban kuralları, `@font-face`. `@source` ile yalnızca `options.html` ve `options.js` taranır.
