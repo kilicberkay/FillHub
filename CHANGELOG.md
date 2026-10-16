@@ -5,6 +5,15 @@ All notable changes to FillHub are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+- Dropdown lists (country, profile, interface language, data type) are readable in the dark theme.
+- The toolbar popup follows the theme chosen on the settings page.
+- Data types show readable names (for example "First name") in the rule selector and the rule list,
+  instead of identifiers such as `firstName`.
+- The active profile checkbox in the profile dialog is styled like the other checkboxes.
+- The fill notification keeps its message on wider lines and its Undo button on one line.
+- Markup: attributes that were joined without a space in the settings page and the popup are separated.
+
 ## [1.3.0] - 2026-10-16
 
 ### Added

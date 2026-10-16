@@ -50,6 +50,10 @@
         text = I18N[lang];
         applyText(text);
         document.documentElement.lang = lang;
+        // Tema ayar sayfasıyla aynıdır: <html> üzerindeki .dark sınıfı ve data-theme
+        const dark = state.theme !== 'light';
+        document.documentElement.classList.toggle('dark', dark);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
         fillCountries(state.preferredLocale || FakeDataGenerator.canonicalLocale(navigator.language));
         fillProfiles(state.profiles, state.activeProfileId || 'default');
     }

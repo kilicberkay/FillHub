@@ -223,6 +223,17 @@
         border-color: #27272a;
     }
 
+    /* Açılır liste seçenekleri: tarayıcı kendi beyaz zeminini kullanmasın; metin temayla eşleşsin */
+    select option {
+        background-color: #ffffff;
+        color: #18181b;
+    }
+
+    .dark select option {
+        background-color: #18181b;
+        color: #f4f4f5;
+    }
+
     /* WebKit autofill: koyu modda sarı/beyaz dolguyu engeller */
     .dark input:-webkit-autofill,
     .dark input:-webkit-autofill:hover,

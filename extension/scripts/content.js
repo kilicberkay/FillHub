@@ -742,11 +742,12 @@ function showToast(message, theme, action) {
             transition: 'transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.4s cubic-bezier(0.2, 0.7, 0.2, 1)',
             transform: 'translateY(100px)', opacity: '0'
         });
-        toast.innerHTML = '<span aria-hidden="true" style="flex-shrink: 0; width: 8px; height: 8px; border-radius: 999px; background: #f74a87; box-shadow: 0 0 0 3px rgba(247, 74, 135, 0.22);"></span><span data-role="message"></span>';
+        toast.innerHTML = '<span aria-hidden="true" style="flex-shrink: 0; width: 8px; height: 8px; border-radius: 999px; background: #f74a87; box-shadow: 0 0 0 3px rgba(247, 74, 135, 0.22);"></span><span data-role="message" style="flex: 1; min-width: 0;"></span>';
         document.body.appendChild(toast);
     }
     const palette = TOAST_THEMES[theme === 'light' ? 'light' : 'dark'];
     Object.assign(toast.style, { background: palette.background, color: palette.color, border: palette.border, boxShadow: palette.shadow });
+    toast.style.maxWidth = action ? '440px' : '360px';
     toast.querySelector('[data-role="message"]').textContent = message;
     let actionBtn = toast.querySelector('[data-role="action"]');
     if (action) {
@@ -755,7 +756,7 @@ function showToast(message, theme, action) {
             actionBtn.type = 'button';
             actionBtn.setAttribute('data-role', 'action');
             Object.assign(actionBtn.style, {
-                flexShrink: '0', background: 'transparent', border: 'none', color: '#f74a87',
+                flexShrink: '0', whiteSpace: 'nowrap', background: 'transparent', border: 'none', color: '#f74a87',
                 font: 'inherit', fontWeight: '600', cursor: 'pointer', padding: '2px 4px'
             });
             toast.appendChild(actionBtn);

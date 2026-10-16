@@ -363,6 +363,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (res.changed) chrome.storage.local.set(state);
     }
 
+    // Veri tipi adı okunur biçimde gösterilir (firstName → First name); kısaltmalar ayrıca yazılır
+    const TYPE_LABELS = { iban: 'IBAN', taxId: 'Tax ID', idNumber: 'ID number', phoneCode: 'Phone code', zip: 'ZIP code', url: 'URL', email: 'E-mail' };
+    function dataTypeLabel(type) {
+        if (TYPE_LABELS[type]) return TYPE_LABELS[type];
+        const words = type.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
+        return words.charAt(0).toUpperCase() + words.slice(1);
+    }
+
     // Kural sırası önemlidir: bir alanı birden fazla kural eşleştirirse ilk eşleşen kazanır
     let editingRuleIndex = null;
 
@@ -412,7 +420,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const code = document.createElement('code');
             code.className = 'font-mono text-[12px] font-semibold text-brand-700 dark:text-brand-300';
             code.textContent = rule.selector;
-            desc.append(code, ` → ${rule.type}`);
+            desc.append(code, ` → ${dataTypeLabel(rule.type)}`);
 
             const actions = document.createElement('div');
             actions.className = 'flex shrink-0 items-center gap-0.5';
@@ -483,7 +491,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dataTypes.forEach(t => {
         const opt = document.createElement('option');
         opt.value = t;
-        opt.innerText = t.charAt(0).toUpperCase() + t.slice(1);
+        opt.innerText = dataTypeLabel(t);
         ruleTypeSelect.appendChild(opt);
     });
 

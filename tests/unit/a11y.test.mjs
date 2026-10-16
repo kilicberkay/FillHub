@@ -48,4 +48,10 @@ for (const page of PAGES) {
             assert.match(tag, /aria-labelledby="[^"]+"/, `${page}: başlık bağlantısı eksik: ${tag.slice(0, 100)}`);
         }
     });
+
+    test(`biçim ${page}: öznitelikler arasında boşluk var (ör. id="a"class="b" olmamalı)`, () => {
+        const html = read(page);
+        const glued = html.match(/"[a-zA-Z-]+="/g) || [];
+        assert.deepEqual(glued, [], `${page}: boşluksuz öznitelik`);
+    });
 }
