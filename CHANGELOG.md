@@ -5,10 +5,18 @@ All notable changes to FillHub are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-10-16
+
 ### Changed
 - Lower memory use: content scripts are no longer injected into every page. FillHub injects its scripts
   only when you start a fill (shortcut, toolbar icon, or menu), into the frames that need them.
 - Added the `scripting` permission for that injection. No new host access was added.
+
+### Fixed
+- The settings page logo was missing in the store package: `icons/logo.svg` was excluded from the zip.
+- Auto-submit no longer clicks the submit button when a visible captcha is on the page, or in frames
+  where no field was filled.
+- Invalid CSS selectors in custom rules are rejected with a message instead of being saved silently.
 
 ## [1.2.0] - 2026-10-14
 
