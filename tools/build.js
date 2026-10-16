@@ -14,7 +14,7 @@ const OUT = path.join(OUT_DIR, `fillhub-${manifest.version}.zip`);
 
 // Beyaz liste: kök dosyalar ve dizinler; ayrıca hariç tutulan dosyalar
 const INCLUDE_FILES = ['manifest.json', 'LICENSE'];
-const INCLUDE_DIRS = ['_locales', 'scripts', 'options', 'icons'];
+const INCLUDE_DIRS = ['_locales', 'scripts', 'options', 'popup', 'icons'];
 // logo.svg ayar sayfasında <img> olarak kullanılır; pakette olmazsa kırık görsel çıkar
 const EXCLUDE = new Set(['options/ui.src.css']);
 // Zip'in tekrarlanabilir olması için sabit zaman damgası (1 Ocak 2026, DOS biçimi)

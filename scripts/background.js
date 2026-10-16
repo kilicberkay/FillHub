@@ -52,10 +52,21 @@ chrome.runtime.onInstalled.addListener(() => {
     });
 });
 
-// Click on the extension icon
-chrome.action.onClicked.addListener(async (tab) => {
-    const { preferredLocale } = await chrome.storage.local.get(['preferredLocale']);
-    sendToTab(tab, { action: "fill", locale: preferredLocale });
+// Araç çubuğu simgesi açılır pencereyi (popup/) açar; doldur ve geri al istekleri oradan buraya gelir.
+// Yanıt içerik betiğinin sonucudur. Açılır pencere bir sekme olmadığından etkin sekme burada bulunur.
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message?.type !== 'popup-action') return false;
+    (async () => {
+        const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+        if (!tab) {
+            sendResponse({ status: 'skipped' });
+            return;
+        }
+        const { preferredLocale } = await chrome.storage.local.get(['preferredLocale']);
+        const response = await sendToTab(tab, { action: message.action, locale: preferredLocale });
+        sendResponse(response ?? { status: 'error' });
+    })();
+    return true;
 });
 
 const MENU_ACTIONS = {

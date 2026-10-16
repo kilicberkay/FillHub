@@ -117,16 +117,19 @@ test('paket içeriği: çalışma zamanı dosyaları var, geliştirme dosyaları
     }
 });
 
-test('paket: ayar sayfasının yerel img/link referansları pakette var', () => {
+test('paket: ayar sayfası ve açılır pencerenin yerel img/link/script referansları pakette var', () => {
     const { collect } = require('../../tools/build.js');
     const files = new Set(collect());
-    const html = read('options/options.html');
-    const refs = [...html.matchAll(/(?:src|href)="([^"]+)"/g)].map((m) => m[1]).filter((s) => !/^(https?:|data:|#|mailto:)/.test(s));
-    assert.ok(refs.length >= 5, `yerel başvuru sayısı: ${refs.length}`);
-    for (const r of refs) {
-        const rel = posix.normalize(posix.join('options', r));
-        assert.ok(files.has(rel), `ayar sayfası ${r} referansı pakette yok: ${rel}`);
+    for (const page of ['options/options.html', 'popup/popup.html']) {
+        const html = read(page);
+        const refs = [...html.matchAll(/(?:src|href)="([^"]+)"/g)].map((m) => m[1]).filter((s) => !/^(https?:|data:|#|mailto:)/.test(s));
+        assert.ok(refs.length >= 3, `${page}: yerel başvuru sayısı ${refs.length}`);
+        for (const r of refs) {
+            const rel = posix.normalize(posix.join(posix.dirname(page), r));
+            assert.ok(files.has(rel), `${page} ${r} referansı pakette yok: ${rel}`);
+        }
     }
+    assert.ok(files.has('popup/popup.js'), 'açılır pencere betiği pakette olmalı');
 });
 
 test('build: zip yazıcısı geçerli bir zip üretir (merkezi dizin ve CRC)', () => {

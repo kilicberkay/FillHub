@@ -361,6 +361,68 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
         });
     });
 
+    describe('açılır pencere', () => {
+        const openPopup = async () => {
+            const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/popup/popup.html`);
+            await page.waitFor('document.getElementById("popupCountry").options.length > 0', 10000);
+            await wait(200);
+            return page;
+        };
+
+        it('ülke ve profil seçimi ayarlara kalıcı olarak yazılır', async () => {
+            await setStorage(env, {
+                preferredLocale: 'tr-TR', piiSafe: true, activeProfileId: 'default',
+                profiles: [{ id: 'default', name: 'Standard Persona', mode: 'random' }, { id: 'p2', name: 'İkinci', mode: 'random' }],
+            });
+            const page = await openPopup();
+            try {
+                await page.eval(`(() => { const s = document.getElementById('popupCountry'); s.value = 'en-US'; s.dispatchEvent(new Event('change')); })()`);
+                await page.eval(`(() => { const s = document.getElementById('popupProfile'); s.value = 'p2'; s.dispatchEvent(new Event('change')); })()`);
+                await wait(300);
+                const all = JSON.parse(await env.swEval(`chrome.storage.local.get(null).then((r) => JSON.stringify(r))`));
+                assert.equal(all.preferredLocale, 'en-US');
+                assert.equal(all.activeProfileId, 'p2');
+            } finally {
+                await page.close();
+            }
+        });
+
+        it('doldurma ve geri alma etkin sekmede çalışır ve sonucu gösterir', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
+            const form = await openForm(env);
+            // Açılır pencere yeni sekme olarak açılır ve etkinleşir; etkin sekme form olacak şekilde geri alınır
+            const popup = await openPopup();
+            try {
+                await env.swEval(`chrome.tabs.update(${form.tabId}, { active: true })`);
+                await popup.eval(`document.getElementById('popupFillBtn').click()`);
+                await popup.waitFor(`!document.getElementById('popupResult').hidden`, 10000);
+                assert.match(await popup.eval(`document.getElementById('popupResult').textContent`), /\d+/, 'doldurma sonucu sayı göstermeli');
+                const filled = await readForm(form.page);
+                assert.ok(Object.values(filled).some((v) => v === true || (typeof v === 'string' && v.length > 0)), 'form doldurulmalı');
+
+                await popup.eval(`document.getElementById('popupUndoBtn').click()`);
+                await wait(800);
+                const restored = await readForm(form.page);
+                assert.ok(Object.values(restored).every((v) => v === '' || v === false), 'geri alma alanları önceki haline döndürmeli');
+            } finally {
+                await popup.close();
+                await closeForm(form);
+            }
+        });
+
+        it('doldurulamayan sayfada açılır pencere bildirim gösterir', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
+            const popup = await openPopup();
+            try {
+                await popup.eval(`document.getElementById('popupFillBtn').click()`);
+                await popup.waitFor(`!document.getElementById('popupResult').hidden`, 10000);
+                assert.match(await popup.eval(`document.getElementById('popupResult').textContent`), /not available/i);
+            } finally {
+                await popup.close();
+            }
+        });
+    });
+
     describe('yedekleme', () => {
         const openOptions = async () => {
             const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/options/options.html`);

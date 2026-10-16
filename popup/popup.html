@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" class="dark" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FillHub</title>
+    <link rel="stylesheet" href="../options/options.css">
+</head>
+
+<body class="w-80 bg-zinc-100 font-sans text-zinc-900 antialiased dark:bg-canvas-dark dark:text-zinc-100">
+    <main class="space-y-3 p-3">
+        <header class="flex items-center gap-2.5">
+            <img src="../icons/logo.svg" alt="" class="h-8 w-8 rounded-lg">
+            <div class="min-w-0">
+                <div class="text-sm font-semibold tracking-tight text-strong">FillHub</div>
+                <div id="brandTag" class="eyebrow">Open source</div>
+            </div>
+        </header>
+
+        <div class="space-y-1">
+            <label for="popupCountry" id="countryTitle" class="block text-xs font-medium text-zinc-700 dark:text-zinc-300">Default Country</label>
+            <select id="popupCountry" class="w-full cursor-pointer rounded-lg border border-zinc-500 bg-white px-2.5 text-[13px] text-zinc-800 h-8 focus-ring dark:border-zinc-500 dark:bg-white/[0.04] dark:text-zinc-100"></select>
+        </div>
+
+        <div class="space-y-1">
+            <label for="popupProfile" id="profilesTitle" class="block text-xs font-medium text-zinc-700 dark:text-zinc-300">Profiles</label>
+            <select id="popupProfile" class="w-full cursor-pointer rounded-lg border border-zinc-500 bg-white px-2.5 text-[13px] text-zinc-800 h-8 focus-ring dark:border-zinc-500 dark:bg-white/[0.04] dark:text-zinc-100"></select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 pt-1">
+            <button type="button" id="popupFillBtn" class="inline-flex h-9 cursor-pointer select-none items-center justify-center rounded-lg bg-brand-600 px-3 text-[13px] font-medium text-white shadow-[0_1px_2px_rgb(194_24_91/0.35)] transition-colors hover:bg-brand-700 focus-ring disabled:pointer-events-none disabled:opacity-50">Fill</button>
+            <button type="button" id="popupUndoBtn" class="inline-flex h-9 cursor-pointer select-none items-center justify-center rounded-lg border border-zinc-200 bg-white px-3 text-[13px] font-medium text-zinc-700 transition-colors hover:bg-zinc-50 focus-ring dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-200 dark:hover:bg-white/[0.06]">Undo</button>
+        </div>
+
+        <p id="popupResult" role="status" class="text-[11px] font-medium text-soft" hidden></p>
+
+        <footer class="flex items-center justify-end border-t border-zinc-200/70 pt-2.5 dark:border-white/[0.06]">
+            <button type="button" id="popupSettingsBtn" class="inline-flex h-7 cursor-pointer select-none items-center justify-center rounded-lg px-2.5 text-xs font-medium text-brand-700 transition-colors hover:bg-brand-50 focus-ring dark:text-brand-300 dark:hover:bg-brand-500/10">Settings</button>
+        </footer>
+    </main>
+
+    <script src="../scripts/locale-data.js"></script>
+    <script src="../scripts/id-rules.js"></script>
+    <script src="../scripts/generator.js"></script>
+    <script src="../options/i18n.js"></script>
+    <script src="popup.js"></script>
+</body>
+
+</html>

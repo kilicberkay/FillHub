@@ -54,7 +54,7 @@ Her doldurma **tutarlı tek bir kişi** üretir. Ad, soyad, e-posta, "e-postayı
 
 ### Tek işlemle form doldurma
 
-`Ctrl+Shift+F` (macOS'ta `Command+Shift+F`) tuşlarına basın, araç çubuğundaki simgeye tıklayın ya da sağ tık menüsünden **Formu sahte verilerle doldur** seçeneğini kullanın. Tek bir alan için **Bu alanı doldur** seçeneği vardır. **Geri al**, son doldurmadan önceki hâli geri yükler.
+`Ctrl+Shift+F` (macOS'ta `Command+Shift+F`) tuşlarına basın, araç çubuğundaki simgeyi açıp **Doldur** düğmesine basın ya da sağ tık menüsünden **Formu sahte verilerle doldur** seçeneğini kullanın. Açılır pencerede varsayılan ülke ve profili de seçebilirsiniz. Tek bir alan için **Bu alanı doldur** seçeneği vardır. **Geri al**, son doldurmadan önceki hâli geri yükler.
 
 ### 15 dil, 15 ülke
 
@@ -175,7 +175,7 @@ Chrome 116 veya üzeri, ya da Manifest V3 destekleyen Chromium tabanlı bir tara
 
 | İşlem | Kısayol | Menü veya araç çubuğu |
 |---|---|---|
-| Tüm formu doldur | `Ctrl+Shift+F` (macOS: `Command+Shift+F`) | Araç çubuğu simgesi veya sağ tık → *Formu sahte verilerle doldur* |
+| Tüm formu doldur | `Ctrl+Shift+F` (macOS: `Command+Shift+F`) | Araç çubuğu açılır penceresi → *Doldur* veya sağ tık → *Formu sahte verilerle doldur* |
 | Odaklanılan alanı doldur | yok | Alana sağ tık → *Bu alanı doldur* |
 | Kaos modu (fuzz testleri için olağandışı değerler) | `Ctrl+Shift+D` | yok |
 | Son doldurmayı geri al | `Ctrl+Shift+U` | Sağ tık → *Sahte doldurmayı geri al* |
@@ -224,7 +224,7 @@ Tam politika: [PRIVACY.md](PRIVACY.md).
 
 ```mermaid
 flowchart LR
-    A["Kısayol, araç çubuğu simgesi<br/>veya sağ tık menüsü"] --> B["Servis çalışanı<br/>scripts/background.js"]
+    A["Kısayol, araç çubuğu açılır penceresi<br/>veya sağ tık menüsü"] --> B["Servis çalışanı<br/>scripts/background.js"]
     B -->|"fill · fill_field · undo"| C["Kullanıldığında enjekte edilen içerik betiği<br/>scripts/content.js"]
     S[("chrome.storage.local<br/>ayarlar ve profiller")] --> C
     C --> D["Alan tanıma<br/>scripts/field-detect.js"]

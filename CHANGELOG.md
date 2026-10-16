@@ -6,10 +6,15 @@ All notable changes to FillHub are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+- Toolbar popup: choose the default country and profile, then Fill or Undo from the popup. Your choices are saved.
 - Settings backup: export profiles, custom rules and settings to a JSON file, and import one back. Importing
   replaces the current settings after you confirm. Imported files are checked field by field and nothing is sent anywhere.
 - Auto-submit exceptions: a list of sites where FillHub fills the fields but never clicks submit. An entry
   also covers its subdomains.
+
+### Changed
+- Clicking the toolbar icon opens the popup instead of filling the page. The keyboard shortcut and the
+  context menu still fill immediately.
 
 ## [1.2.1] - 2026-10-16
 

@@ -8,7 +8,10 @@ files in the repository are loaded as they are. npm is used only for development
 | Part | Files | Responsibility |
 |---|---|---|
 | Manifest | `manifest.json` | Name and description via `__MSG_…__`, permissions (`storage`, `contextMenus`, `scripting`), shortcuts; no content scripts are declared |
-| Service worker | `scripts/background.js` | Context menus (localized with `chrome.i18n`), shortcut commands, toolbar click; forwards `fill`, `fill_field`, `undo` to the active tab |
+| Service worker | `scripts/background.js` | Context menus (localized with `chrome.i18n`), shortcut commands, requests from the toolbar popup; forwards `fill`, `fill_field`, `undo` to the active tab together with its host (used by site exceptions) |
+| Toolbar popup | `popup/popup.html`, `popup/popup.js` | Default country and profile selection (saved to settings), Fill and Undo buttons; shares `options/options.css` and `options/i18n.js` |
+| Backup | `scripts/backup.js` (`FillHubBackup`) | Builds the export file and validates imported files field by field; the options page writes the result to storage |
+| Site exceptions | `scripts/site-rules.js` (`FillHubSiteRules`) | Normalizes host names and matches a page against the list of sites where auto-submit is off (subdomains included) |
 | Locale data | `scripts/locale-data.js` (`FillHubLocaleData`) | 15 language pools with Latin counterparts, 15 country profiles (cities, postal formats, phone rules, address templates, identity and IBAN specs) |
 | Identity rules | `scripts/id-rules.js` (`FillHubIdRules`) | Generators and validators for identity numbers; test vectors; PII sentinel values |
 | Field detection | `scripts/field-detect.js` (`FillHubDetect`) | Classifies a field from `autocomplete`, `type`, label, `name`/`id`, placeholder; priority-ordered rules; Turkish, Latin and non-Latin token matching |
@@ -18,7 +21,7 @@ files in the repository are loaded as they are. npm is used only for development
 | Styles | `options/ui.src.css` → `options/options.css` | Tailwind CSS 4 build (`npm run build:css`); generated file is not edited by hand |
 
 Load order (`CONTENT_FILES` in `scripts/background.js`; the service worker injects them on demand): locale data → identity rules → field detection →
-generator → content script. Every file also exports to `module.exports`, so the unit tests load the
+generator → site rules → content script. Every file also exports to `module.exports`, so the unit tests load the
 same code in Node.
 
 ## Fill flow
@@ -30,7 +33,7 @@ sequenceDiagram
     participant CS as Content script (per frame)
     participant G as Generator
     participant P as Page
-    U->>SW: shortcut, toolbar click or menu
+    U->>SW: shortcut, toolbar popup or menu
     SW->>CS: fill / fill_field / undo (tabs.sendMessage)
     CS->>CS: read settings, migrate legacy profiles
     CS->>G: createPerson (or fixed profile identity)

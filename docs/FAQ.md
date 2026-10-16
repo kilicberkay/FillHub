@@ -62,7 +62,7 @@ current page.
 ## A shortcut does not work.
 
 Another extension or the operating system may already use it. Change it at `chrome://extensions/shortcuts`.
-You can always use the toolbar icon or the right-click menu instead.
+You can always use the toolbar popup or the right-click menu instead.
 
 ## How do I reset the settings?
 

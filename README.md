@@ -54,7 +54,7 @@ Every fill creates **one consistent person**. The first name, last name, e-mail,
 
 ### One-action form filling
 
-Press `Ctrl+Shift+F` (`Command+Shift+F` on macOS), click the toolbar icon, or choose **Fill form with fake data** from the right-click menu. A single field can be filled with **Fill this field**, and **Undo** restores the form to the state it had before the last fill.
+Press `Ctrl+Shift+F` (`Command+Shift+F` on macOS), open the toolbar popup and press **Fill**, or choose **Fill form with fake data** from the right-click menu. The popup also lets you pick the default country and profile. A single field can be filled with **Fill this field**, and **Undo** restores the form to the state it had before the last fill.
 
 ### Fifteen languages, fifteen countries
 
@@ -175,7 +175,7 @@ Requires Chrome 116 or newer, or another Chromium-based browser that supports Ma
 
 | Action | Shortcut | Menu or toolbar |
 |---|---|---|
-| Fill the whole form | `Ctrl+Shift+F` (macOS: `Command+Shift+F`) | Toolbar icon, or right-click → *Fill form with fake data* |
+| Fill the whole form | `Ctrl+Shift+F` (macOS: `Command+Shift+F`) | Toolbar popup → *Fill*, or right-click → *Fill form with fake data* |
 | Fill the focused field | none | Right-click a field → *Fill this field* |
 | Chaos mode (unusual values for fuzz tests) | `Ctrl+Shift+D` | none |
 | Undo the last fill | `Ctrl+Shift+U` | Right-click → *Undo fake fill* |
@@ -224,7 +224,7 @@ Full policy: [PRIVACY.md](PRIVACY.md).
 
 ```mermaid
 flowchart LR
-    A["Shortcut, toolbar icon<br/>or context menu"] --> B["Service worker<br/>scripts/background.js"]
+    A["Shortcut, toolbar popup<br/>or context menu"] --> B["Service worker<br/>scripts/background.js"]
     B -->|"fill · fill_field · undo"| C["Content script, injected on demand<br/>scripts/content.js"]
     S[("chrome.storage.local<br/>settings and profiles")] --> C
     C --> D["Field detection<br/>scripts/field-detect.js"]
