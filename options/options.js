@@ -582,17 +582,41 @@ document.addEventListener('DOMContentLoaded', () => {
         backupStatus.hidden = false;
     }
 
-    exportBtn.addEventListener('click', () => {
-        const backup = FillHubBackup.createBackup(state);
-        const url = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' }));
+    // Veriyi yerel bir JSON dosyası olarak indirir; ağ isteği yapılmaz
+    function downloadJson(filename, data) {
+        const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
         const link = document.createElement('a');
         link.href = url;
-        link.download = `fillhub-yedek-${backup.exportedAt.slice(0, 10)}.json`;
+        link.download = filename;
         document.body.appendChild(link);
         link.click();
         link.remove();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    exportBtn.addEventListener('click', () => {
+        const backup = FillHubBackup.createBackup(state);
+        downloadJson(`fillhub-yedek-${backup.exportedAt.slice(0, 10)}.json`, backup);
         showBackupStatus(currentText.backupExported, false);
+    });
+
+    // Tanılama: yalnızca sayılar ve ayar bayrakları; son doldurma özeti depolamadan okunur
+    const diagBtn = document.getElementById('diagBtn');
+    const diagStatus = document.getElementById('diagStatus');
+    diagBtn.addEventListener('click', () => {
+        chrome.storage.local.get(['lastFillReport'], (res) => {
+            const report = FillHubDiagnostics.createReport({
+                state,
+                lastFillReport: res.lastFillReport,
+                extensionVersion: chrome.runtime.getManifest().version,
+                userAgent: navigator.userAgent
+            });
+            downloadJson(`fillhub-tanilama-${report.generatedAt.slice(0, 10)}.json`, report);
+            diagStatus.textContent = currentText.diagExported;
+            diagStatus.classList.remove('text-rose-600', 'dark:text-rose-400');
+            diagStatus.classList.add('text-soft');
+            diagStatus.hidden = false;
+        });
     });
 
     importBtn.addEventListener('click', () => importFile.click());

@@ -6,6 +6,8 @@ All notable changes to FillHub are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+- Diagnostics report: the settings page can download a summary for bug reports. It contains counts and
+  settings flags only (no names, field values, labels, profile names or site addresses).
 - Rich text fields (`contenteditable` editors) are filled, and Undo restores their previous text.
 - Toolbar popup: choose the default country and profile, then Fill or Undo from the popup. Your choices are saved.
 - Settings backup: export profiles, custom rules and settings to a JSON file, and import one back. Importing

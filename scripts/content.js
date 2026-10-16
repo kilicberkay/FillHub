@@ -42,6 +42,8 @@ let sessionData = {
 // Snapshot of every field touched by the last fill, used by the undo action
 let fillSnapshot = new Map();
 let filledCount = 0;
+// Son doldurmanın özeti (tanılama için): yalnızca tespit edilen alan türlerinin sayısı; değer, etiket ya da adres tutulmaz
+let fillStats = { detected: {} };
 
 // Async work queue (date-picker interaction); drained serially so fills stay deterministic
 let pendingTasks = [];
@@ -735,6 +737,7 @@ function fillField(input, settings, checkVisibility = true) {
 
     const type = identifyField(input, settings.customRules);
     if (!type) return false;
+    fillStats.detected[type] = (fillStats.detected[type] || 0) + 1;
 
     if (input.tagName === 'SELECT') {
         return fillSelect(input, type, sessionData.person);
@@ -823,6 +826,7 @@ async function fillPage(settings) {
     filledCount = 0;
     fillSnapshot = new Map();
     startSession(settings);
+    fillStats = { detected: {} };
     // Watch for fields rendered while this fill is still running (async picker work included)
     observeDynamicFields(settings);
     collectFields(document, settings);
@@ -979,6 +983,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     };
 
     (async () => {
+        const startedAt = Date.now();
         const settings = await chrome.storage.local.get(null);
         // Yeni kurulum varsayılanları: gizlilik öncelikli + tarayıcı dili
         if (settings.piiSafe === undefined) settings.piiSafe = true;
@@ -1024,8 +1029,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         // Gönderim yalnız bu çerçevede alan doldurulduysa, captcha yoksa ve sayfa site istisnası listesinde değilse
         // (sayfa alan adı arka plandan gelir; iframe'ler üst sayfanın kuralına tabidir)
         const siteExcluded = FillHubSiteRules.matchesSite(request.pageHost || location.hostname, settings.noAutoSubmitSites);
-        if (settings.autoSubmit && request.action === 'fill' && filledCount > 0 && !captcha && !siteExcluded) {
-            autoSubmitForm(document);
+        const submitRequested = !!(settings.autoSubmit && request.action === 'fill' && filledCount > 0 && !captcha && !siteExcluded);
+        if (submitRequested) autoSubmitForm(document);
+        // Tanılama özeti yalnızca üst çerçeveden yazılır; sayılar ve bayraklar içerir, değer ya da adres içermez
+        if (window.top === window && request.action === 'fill') {
+            chrome.storage.local.set({
+                lastFillReport: {
+                    at: new Date().toISOString(),
+                    filled: filledCount,
+                    detected: fillStats.detected,
+                    captchaVisible: !!captcha,
+                    siteExcluded,
+                    submitRequested,
+                    durationMs: Date.now() - startedAt
+                }
+            });
         }
         respond({ status: 'success', filled: filledCount });
     })().catch((e) => {

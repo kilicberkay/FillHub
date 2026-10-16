@@ -8,8 +8,12 @@ that your data stays on your device.
 - **Collects nothing.** FillHub does not send any data to the author or to third parties. It has no
   analytics, telemetry, crash reporting, or accounts.
 - **Stores settings locally.** Your preferences (country, language, PII Safe mode, custom rules,
-  identity presets) are kept in `chrome.storage.local` in your browser profile. They never leave
-  your device.
+  identity presets, auto-submit exceptions) are kept in `chrome.storage.local` in your browser profile.
+  They never leave your device. The summary of the last fill (counts of detected field types and
+  flags, never values or labels) is stored the same way and is only shared if you download a
+  diagnostics report and send it yourself.
+- **Backups are files you control.** Exporting settings writes a JSON file to your computer; importing
+  reads a file you choose. Nothing is uploaded.
 - **Reads form fields only when you ask it to fill.** FillHub acts when you press a shortcut, click
   the context menu, or click the toolbar icon. It reads the labels and names of form fields on the
   page you are viewing in order to choose a fake value for each field, and writes values back to

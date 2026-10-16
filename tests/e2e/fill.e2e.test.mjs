@@ -361,6 +361,48 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
         });
     });
 
+    describe('çok dilli formlar', () => {
+        const CJK = /[぀-ヿ一-鿿]/;
+        const ARABIC = /[؀-ۿ]/;
+
+        // Yerel yazılı etiketler; gerçek veri havuzu için piiSafe kapalı
+        async function fillFixture(fixture, locale) {
+            await setStorage(env, { preferredLocale: locale, piiSafe: false });
+            const form = await openForm(env, { fixture });
+            try {
+                const r = await send(env, form.tabId, { action: 'fill' });
+                assert.equal(r.status, 'success');
+                assert.ok(r.filled >= 3, `en az üç alan doldurulmalı (${r.filled})`);
+                return await readForm(form.page);
+            } finally {
+                await closeForm(form);
+            }
+        }
+
+        it('Japonca etiketli form: ad ve soyad Japonca yazılır, e-posta ve telefon biçimi doğrudur', async () => {
+            const v = await fillFixture('ja', 'ja-JP');
+            assert.match(v.ad, CJK, `ad Japonca olmalı: "${v.ad}"`);
+            assert.match(v.soyad, CJK, `soyad Japonca olmalı: "${v.soyad}"`);
+            assert.match(v.eposta, /^[^\s@]+@[^\s@]+\.[a-z]+$/i, `e-posta biçimi: "${v.eposta}"`);
+            assert.match(v.tel, /\d{6,}/, `telefon rakam içermeli: "${v.tel}"`);
+            assert.ok(v.sehir.length > 0 && v.adres.length > 0, 'adres alanları dolu olmalı');
+        });
+
+        it('Çince etiketli form: ad ve soyad Çince yazılır, telefon rakamlardan oluşur', async () => {
+            const v = await fillFixture('zh', 'zh-CN');
+            assert.match(v.ad, CJK, `ad Çince olmalı: "${v.ad}"`);
+            assert.match(v.soyad, CJK, `soyad Çince olmalı: "${v.soyad}"`);
+            assert.match(v.eposta, /@/, `e-posta içermeli: "${v.eposta}"`);
+            assert.match(v.tel, /^\d{8,}$/, `telefon rakamlardan oluşmalı: "${v.tel}"`);
+        });
+
+        it('Arapça etiketli form (RTL): ad Arapça yazılır, e-posta yerel kısmı Latin harfle', async () => {
+            const v = await fillFixture('ar', 'ar-EG');
+            assert.match(v.ad, ARABIC, `ad Arapça olmalı: "${v.ad}"`);
+            assert.match(v.eposta, /^[a-z0-9._-]+@/i, `e-posta yerel kısmı Latin olmalı: "${v.eposta}"`);
+        });
+    });
+
     describe('zengin metin alanları (contenteditable)', () => {
         const editorText = (page) => page.eval(`document.getElementById('aciklama').textContent`);
 
@@ -391,6 +433,78 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
                 const r = await send(env, form.tabId, { action: 'fill_field' });
                 assert.equal(r.status, 'success');
                 assert.notEqual(await editorText(form.page), 'Eski metin', 'odaklanan alan doldurulmalı');
+            } finally {
+                await closeForm(form);
+            }
+        });
+    });
+
+    describe('tanılama', () => {
+        it('son doldurma özeti sayı ve tür içerir, alan değeri içermez', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true });
+            const form = await openForm(env);
+            try {
+                const r = await send(env, form.tabId, { action: 'fill' });
+                assert.equal(r.status, 'success');
+                const values = await readForm(form.page);
+                // Depolama yazımı yanıttan sonra tamamlanır; okumadan önce kısa bir bekleme
+                await wait(300);
+                const report = JSON.parse(await env.swEval(
+                    `chrome.storage.local.get('lastFillReport').then((r) => JSON.stringify(r.lastFillReport))`,
+                ));
+                assert.equal(report.filled, r.filled);
+                assert.ok(Object.values(report.detected).some((n) => n > 0), 'tespit edilen alan türleri sayılmalı');
+                assert.equal(report.submitRequested, false, 'otomatik gönder kapalıyken istenmemeli');
+                const text = JSON.stringify(report);
+                for (const v of [values.ad, values.soyad, values.eposta, values.tel]) {
+                    if (typeof v === 'string' && v.length > 2) assert.equal(text.includes(v), false, `rapor alan değeri içermemeli: ${v}`);
+                }
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('ayar sayfasındaki tanılama düğmesi raporu indirir ve durum gösterir', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
+            const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/options/options.html`);
+            try {
+                await page.waitFor('!!document.getElementById("diagBtn")', 10000);
+                await wait(300);
+                await page.eval(`document.getElementById('diagBtn').click()`);
+                await page.waitFor(`!document.getElementById('diagStatus').hidden`, 10000);
+                assert.ok((await page.eval(`document.getElementById('diagStatus').textContent`)).trim().length > 0, 'durum metni boş olmamalı');
+            } finally {
+                await page.close();
+            }
+        });
+    });
+
+    describe('performans', () => {
+        it('500 alanlı formu bütçe içinde doldurur', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true });
+            const form = await openForm(env);
+            try {
+                // Büyük formu simüle eder: 500 etiketli metin alanı form içine eklenir
+                await form.page.eval(`(() => {
+                    const kayit = document.getElementById('kayit');
+                    for (let i = 0; i < 500; i++) {
+                        const label = document.createElement('label');
+                        label.htmlFor = 'ek' + i;
+                        label.textContent = 'Ek alan ' + i;
+                        const input = document.createElement('input');
+                        input.id = 'ek' + i;
+                        input.name = 'ek' + i;
+                        input.type = 'text';
+                        kayit.append(label, input);
+                    }
+                })()`);
+                const started = Date.now();
+                const r = await send(env, form.tabId, { action: 'fill' });
+                const ms = Date.now() - started;
+                assert.equal(r.status, 'success');
+                assert.ok(r.filled >= 500, `500 eklenen alan doldurulmalı: ${r.filled}`);
+                // Bütçe geniş tutulur: yalnızca belirgin bir yavaşlama (ör. alan başına gecikme) yakalanır
+                assert.ok(ms < 20000, `doldurma bütçeyi aştı: ${ms} ms`);
             } finally {
                 await closeForm(form);
             }

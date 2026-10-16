@@ -12,6 +12,7 @@ files in the repository are loaded as they are. npm is used only for development
 | Toolbar popup | `popup/popup.html`, `popup/popup.js` | Default country and profile selection (saved to settings), Fill and Undo buttons; shares `options/options.css` and `options/i18n.js` |
 | Backup | `scripts/backup.js` (`FillHubBackup`) | Builds the export file and validates imported files field by field; the options page writes the result to storage |
 | Site exceptions | `scripts/site-rules.js` (`FillHubSiteRules`) | Normalizes host names and matches a page against the list of sites where auto-submit is off (subdomains included) |
+| Diagnostics | `scripts/diagnostics.js` (`FillHubDiagnostics`) | Builds the downloadable report from settings flags, counts and the last fill summary; never includes names, values, labels, profile names or site addresses |
 | Locale data | `scripts/locale-data.js` (`FillHubLocaleData`) | 15 language pools with Latin counterparts, 15 country profiles (cities, postal formats, phone rules, address templates, identity and IBAN specs) |
 | Identity rules | `scripts/id-rules.js` (`FillHubIdRules`) | Generators and validators for identity numbers; test vectors; PII sentinel values |
 | Field detection | `scripts/field-detect.js` (`FillHubDetect`) | Classifies a field from `autocomplete`, `type`, label, `name`/`id`, placeholder; priority-ordered rules; Turkish, Latin and non-Latin token matching |

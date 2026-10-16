@@ -11,7 +11,12 @@ const FIXTURES = {
     en: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-en.html')),
     consent: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'consent.html')),
     rich: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'rich.html')),
+    ja: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-ja.html')),
+    zh: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-zh.html')),
+    ar: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-ar.html')),
 };
+// ?page=<anahtar> ile seçilen sayfalar; diğer istekler dile göre TR ya da EN formunu alır
+const NAMED_PAGES = ['consent', 'rich', 'ja', 'zh', 'ar'];
 
 export const chromeAvailable = () => Boolean(findChrome());
 
@@ -20,8 +25,8 @@ export async function startEnv() {
     const srv = createServer((req, res) => {
         // ?lang=en → İngilizce etiketli form; varsayılan Türkçe
         // ?page=consent → onay kutuları ve metin alanları formu; ?lang=en → İngilizce etiketli form
-        // ?page=rich → düzenlenebilir (contenteditable) alanlar
-        const key = req.url.includes('page=consent') ? 'consent' : req.url.includes('page=rich') ? 'rich' : req.url.includes('lang=en') ? 'en' : 'tr';
+        const named = NAMED_PAGES.find((p) => req.url.includes(`page=${p}`));
+        const key = named ?? (req.url.includes('lang=en') ? 'en' : 'tr');
         res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
         res.end(FIXTURES[key]);
     });

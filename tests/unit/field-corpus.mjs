@@ -30,7 +30,7 @@ export const LABEL_CORPUS = [
     // 中文
     ['名', 'firstName'], ['姓', 'lastName'], ['手机号', 'phone'], ['邮箱', 'email'], ['城市', 'city'],
     // 日本語
-    ['電話番号', 'phone'], ['メールアドレス', 'email'],
+    ['電話番号', 'phone'], ['メールアドレス', 'email'], ['市区町村', 'city'],
     // العربية
     ['الاسم الأول', 'firstName'], ['البريد الإلكتروني', 'email'], ['الهاتف', 'phone'],
     // हिन्दी
