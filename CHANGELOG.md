@@ -6,6 +6,7 @@ All notable changes to FillHub are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+- Rich text fields (`contenteditable` editors) are filled, and Undo restores their previous text.
 - Toolbar popup: choose the default country and profile, then Fill or Undo from the popup. Your choices are saved.
 - Settings backup: export profiles, custom rules and settings to a JSON file, and import one back. Importing
   replaces the current settings after you confirm. Imported files are checked field by field and nothing is sent anywhere.

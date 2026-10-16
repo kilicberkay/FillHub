@@ -10,6 +10,7 @@ const FIXTURES = {
     tr: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form.html')),
     en: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-en.html')),
     consent: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'consent.html')),
+    rich: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'rich.html')),
 };
 
 export const chromeAvailable = () => Boolean(findChrome());
@@ -19,7 +20,8 @@ export async function startEnv() {
     const srv = createServer((req, res) => {
         // ?lang=en → İngilizce etiketli form; varsayılan Türkçe
         // ?page=consent → onay kutuları ve metin alanları formu; ?lang=en → İngilizce etiketli form
-        const key = req.url.includes('page=consent') ? 'consent' : req.url.includes('lang=en') ? 'en' : 'tr';
+        // ?page=rich → düzenlenebilir (contenteditable) alanlar
+        const key = req.url.includes('page=consent') ? 'consent' : req.url.includes('page=rich') ? 'rich' : req.url.includes('lang=en') ? 'en' : 'tr';
         res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
         res.end(FIXTURES[key]);
     });

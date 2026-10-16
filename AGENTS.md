@@ -52,6 +52,9 @@ Doldurma mantığı sayfa bağlamında içerik betiği olarak çalışır.
 ## Değişmez Kurallar
 - Değer yazımı tek noktadan yapılır: `setNativeValue` / `assignFieldValue`. Doğrudan
   `input.value = ...` ataması yapılmaz (React/Vue senkronizasyonu ve dosya alanı hataları).
+  Zengin metin alanları (`contenteditable`, `isRichEditable`) da `assignFieldValue` içinden geçer ve
+  `setRichText` ile yazılır: önce editörün `execCommand('insertText')` yolu, yoksa doğrudan metin.
+  Geri alma bu alanlarda `snapshotField` içindeki `text` değerini kullanır.
 - Dosya alanları `DataTransfer` + `File` ile doldurulur; `webkitdirectory` alanları atlanır.
   `multiple` alanlara iki dosya yazılır (`ad.pdf`, `ad-2.pdf`).
 - Dosya alanlarında görünürlük kontrolü uygulanmaz (gizli dosya alanı standarttır).

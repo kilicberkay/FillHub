@@ -9,7 +9,7 @@ function labelOwnText(label) {
 // Alanın metin kaynakları (küçük harf, Türkçe noktasız i dahil sadeleştirilmiş)
 function fieldTexts(input) {
     const doc = input.ownerDocument || document;
-    const raw = [input.name, input.id, input.placeholder, input.title, input.getAttribute("aria-label")];
+    const raw = [input.name, input.id, input.placeholder, input.title, input.getAttribute("aria-label"), input.getAttribute("data-placeholder")];
     if (input.labels) for (const label of input.labels) raw.push(labelOwnText(label));
     const labelledby = input.getAttribute("aria-labelledby");
     if (labelledby) {
@@ -68,7 +68,26 @@ const NATIVE_EVENTS = ['input', 'change', 'blur'];
 const NATIVE_DATE_TYPES = new Set(['date', 'datetime-local', 'time', 'month', 'week']);
 const NATIVE_TYPED_INPUTS = new Set([...NATIVE_DATE_TYPES, 'color', 'range']);
 const TEXT_INPUT_TYPES = new Set(['text', 'search', 'email', 'tel', 'url', 'password']);
-const FIELD_SELECTOR = 'input:not([type="hidden"]):not([type="submit"]):not([type="button"]), textarea, select';
+const FIELD_SELECTOR = 'input:not([type="hidden"]):not([type="submit"]):not([type="button"]), textarea, select, [contenteditable]:not([contenteditable="false"])';
+
+// Zengin metin alanı: düzenlenebilir kök öğe (içindeki düzenlenebilir çocuklar ayrı alan sayılmaz)
+function isRichEditable(el) {
+    return el.hasAttribute?.('contenteditable') === true && el.isContentEditable === true && !el.parentElement?.isContentEditable;
+}
+
+// Editörün kendi giriş yoluyla yazar (iç durumu güncellenir); bu yol yoksa metin doğrudan yazılır ve olay gönderilir
+function setRichText(el, text) {
+    el.focus();
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    if (!document.execCommand('insertText', false, text)) {
+        el.textContent = text;
+        el.dispatchEvent(new InputEvent('input', { bubbles: true, composed: true, inputType: 'insertText', data: text }));
+    }
+}
 
 function setNativeValue(el, value) {
     const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype
@@ -93,7 +112,8 @@ function snapshotField(el) {
         value: el.value,
         checked: el.checked,
         selectedIndex: el.selectedIndex,
-        files: el.files ? Array.from(el.files) : null
+        files: el.files ? Array.from(el.files) : null,
+        text: isRichEditable(el) ? el.textContent : undefined
     });
 }
 
@@ -150,7 +170,8 @@ function assignFieldValue(input, value) {
         } else {
             out = clampTextValue(input, out);
         }
-        setNativeValue(input, out);
+        if (isRichEditable(input)) setRichText(input, out);
+        else setNativeValue(input, out);
         dispatchFieldEvents(input);
         filledCount++;
         return true;
@@ -580,7 +601,7 @@ function queryFields(root, selector) {
 }
 
 function collectFields(container, settings) {
-    const inputs = queryFields(container, FIELD_SELECTOR);
+    const inputs = queryFields(container, FIELD_SELECTOR).filter(el => !el.hasAttribute?.('contenteditable') || isRichEditable(el));
 
     // Pre-scan for names to support Smart Email Linking
     const handledNames = new Set();
@@ -764,7 +785,7 @@ function fillField(input, settings, checkVisibility = true) {
             fieldName: input.name || input.id || '',
             pattern: input.getAttribute('pattern') || '',
             valueShape: detectValueShape(input),
-            multiline: input.tagName === 'TEXTAREA',
+            multiline: input.tagName === 'TEXTAREA' || isRichEditable(input),
             maxLength: input.maxLength > 0 ? input.maxLength : 0,
             placeholder: input.placeholder || '',
             script: detectFieldScript(input),
@@ -821,6 +842,8 @@ function undoFill() {
                 el.selectedIndex = typeof snap.selectedIndex === 'number' ? snap.selectedIndex : -1;
             } else if (el.tagName === 'INPUT' && (el.type === 'checkbox' || el.type === 'radio')) {
                 setNativeChecked(el, !!snap.checked);
+            } else if (snap.text !== undefined) {
+                setRichText(el, snap.text);
             } else {
                 setNativeValue(el, snap.value);
             }
@@ -973,7 +996,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         if (request.action === 'fill_field') {
             const target = document.activeElement;
-            if (!target || !['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) {
+            if (!target || (!['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) && !isRichEditable(target))) {
                 respond({ status: 'skipped' });
                 return;
             }

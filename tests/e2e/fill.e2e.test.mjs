@@ -361,6 +361,42 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
         });
     });
 
+    describe('zengin metin alanları (contenteditable)', () => {
+        const editorText = (page) => page.eval(`document.getElementById('aciklama').textContent`);
+
+        it('düzenlenebilir alan doldurulur, salt okunur alana dokunulmaz, geri alma eski metni döndürür', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true });
+            const form = await openForm(env, { fixture: 'rich' });
+            try {
+                const r = await send(env, form.tabId, { action: 'fill' });
+                assert.equal(r.status, 'success');
+                const filled = await editorText(form.page);
+                assert.notEqual(filled, 'Eski metin', 'düzenlenebilir alan doldurulmalı');
+                assert.ok(filled.trim().length > 3, `anlamlı metin beklenir: "${filled}"`);
+                assert.equal(await form.page.eval(`document.getElementById('salt').textContent`), 'Dokunma', 'salt okunur alan değişmemeli');
+
+                const u = await send(env, form.tabId, { action: 'undo' });
+                assert.equal(u.status, 'success');
+                assert.equal(await editorText(form.page), 'Eski metin', 'geri alma eski metni döndürmeli');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('tek alan doldurma (fill_field) odaklanan düzenlenebilir alanda çalışır', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true });
+            const form = await openForm(env, { fixture: 'rich' });
+            try {
+                await form.page.eval(`document.getElementById('aciklama').focus()`);
+                const r = await send(env, form.tabId, { action: 'fill_field' });
+                assert.equal(r.status, 'success');
+                assert.notEqual(await editorText(form.page), 'Eski metin', 'odaklanan alan doldurulmalı');
+            } finally {
+                await closeForm(form);
+            }
+        });
+    });
+
     describe('açılır pencere', () => {
         const openPopup = async () => {
             const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/popup/popup.html`);
