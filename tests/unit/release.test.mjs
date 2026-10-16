@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { join, dirname, resolve } from 'node:path';
+import { join, dirname, resolve, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -114,6 +114,18 @@ test('paket içeriği: çalışma zamanı dosyaları var, geliştirme dosyaları
         assert.ok(!/^(tools|tests|store|docs|\.github|node_modules|dist)\//.test(f), `geliştirme dosyası pakette: ${f}`);
         assert.ok(!/^(AGENTS\.md|package|README|CHANGELOG|CONTRIBUTING)/.test(f), `belge pakette: ${f}`);
         assert.ok(!f.endsWith('ui.src.css'), 'tasarım kaynağı pakette');
+    }
+});
+
+test('paket: ayar sayfasının yerel img/link referansları pakette var', () => {
+    const { collect } = require('../../tools/build.js');
+    const files = new Set(collect());
+    const html = read('options/options.html');
+    const refs = [...html.matchAll(/(?:src|href)="([^"]+)"/g)].map((m) => m[1]).filter((s) => !/^(https?:|data:|#|mailto:)/.test(s));
+    assert.ok(refs.length >= 5, `yerel başvuru sayısı: ${refs.length}`);
+    for (const r of refs) {
+        const rel = posix.normalize(posix.join('options', r));
+        assert.ok(files.has(rel), `ayar sayfası ${r} referansı pakette yok: ${rel}`);
     }
 });
 
