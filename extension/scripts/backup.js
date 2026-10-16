@@ -12,6 +12,13 @@ const FillHubBackup = (() => {
     const LOCALE_RE = /^[a-z]{2}-[A-Z]{2}$/;
     const UI_LANG_RE = /^[a-z]{2}$/;
     const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+    const PIN_KEYS = new Set(['firstName', 'lastName', 'email', 'phone', 'password']);
+
+    // Profilin sabit değerleri: yalnızca bilinen alanlar, boş olmayan kısa metinler
+    function isPinnedValues(v) {
+        if (!v || typeof v !== 'object' || Array.isArray(v)) return false;
+        return Object.keys(v).every((k) => PIN_KEYS.has(k) && typeof v[k] === 'string' && v[k].trim().length > 0 && v[k].length <= 200);
+    }
 
     function createBackup(state, now = new Date()) {
         return {
@@ -98,6 +105,10 @@ const FillHubBackup = (() => {
                 if (p.mode === 'fixed') {
                     if (!p.identity || typeof p.identity !== 'object' || Array.isArray(p.identity) || !isPlainData(p.identity)) return null;
                     item.identity = copyData(p.identity);
+                }
+                if (p.values !== undefined) {
+                    if (!isPinnedValues(p.values)) return null;
+                    item.values = copyData(p.values);
                 }
                 return item;
             });

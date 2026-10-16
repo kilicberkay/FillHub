@@ -34,6 +34,21 @@ async function sendToTab(tab, message) {
     });
 }
 
+// Sonucu olan istekler (popup) her çerçeveye ayrı gönderilir ve yanıtlar toplanır.
+// tabs.sendMessage tek yanıt döndürür: iframe'in (ör. alanı olmayan bir reklam) yanıtı önce gelirse sonuç 0 görünürdü.
+async function sendToAllFrames(tab, message) {
+    await ensureContentScripts(tab.id);
+    const probes = await chrome.scripting.executeScript({
+        target: { tabId: tab.id, allFrames: true },
+        func: () => window.__fillhubInjected === true
+    }).catch(() => []);
+    const frameIds = probes.filter((p) => p.result === true).map((p) => p.frameId);
+    const payload = { ...message, pageHost: hostOf(tab.url) };
+    const replies = await Promise.all(frameIds.map((frameId) =>
+        chrome.tabs.sendMessage(tab.id, payload, { frameId }).catch(() => null)));
+    return replies.filter(Boolean);
+}
+
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
         id: "fillForm",
@@ -63,8 +78,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             return;
         }
         const { preferredLocale } = await chrome.storage.local.get(['preferredLocale']);
-        const response = await sendToTab(tab, { action: message.action, locale: preferredLocale });
-        sendResponse(response ?? { status: 'error' });
+        const replies = await sendToAllFrames(tab, { action: message.action, locale: preferredLocale });
+        if (replies.length === 0) {
+            sendResponse({ status: 'error' });
+            return;
+        }
+        // Sayılar çerçeveler arasında toplanır: her çerçeve kendi alanlarını doldurur ve geri alır
+        const sum = (key) => replies.reduce((total, r) => total + (Number.isFinite(r[key]) ? r[key] : 0), 0);
+        sendResponse({ status: 'success', filled: sum('filled'), restored: sum('restored') });
     })();
     return true;
 });

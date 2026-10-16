@@ -350,6 +350,30 @@ const FakeDataGenerator = (() => {
         return p && p.mode === 'fixed' && p.identity ? p.identity : null;
     }
 
+    // Sabit değerler: aktif profilde kullanıcının belirlediği alanlar (boş olanlar yok sayılır). Her iki modda geçerlidir.
+    const PIN_KEYS = ['firstName', 'lastName', 'email', 'phone', 'password'];
+    function activeValues(settings) {
+        const list = Array.isArray(settings && settings.profiles) ? settings.profiles : [];
+        const p = list.find(x => x && x.id === (settings && settings.activeProfileId));
+        const out = {};
+        if (!p || !p.values || typeof p.values !== 'object') return out;
+        for (const key of PIN_KEYS) {
+            const v = p.values[key];
+            if (typeof v === 'string' && v.trim()) out[key] = v.trim().slice(0, 200);
+        }
+        return out;
+    }
+
+    // Kişinin adını ve soyadını değiştirir; tam ad ve e-posta yerel kısmı bu adlarla tutarlı kalır
+    function withNames(person, firstName, lastName) {
+        const out = { ...person, first: { n: firstName, l: firstName }, last: { n: lastName, l: lastName } };
+        out.fullNative = `${firstName} ${lastName}`;
+        out.fullLatin = out.fullNative;
+        const digits = /(\d{2})$/.exec(person.emailLocal || '');
+        out.emailLocal = `${slugOf(firstName)}.${slugOf(lastName)}${digits ? digits[1] : randomInt(10, 99)}`;
+        return out;
+    }
+
     // Eski sürüm şablonlarını yeni modele taşır. "default" her zaman rastgele; eski dolu şablon sabit kimlik olur.
     function migrateProfiles(profiles, locale) {
         const list = Array.isArray(profiles) ? profiles : [];
@@ -498,6 +522,8 @@ const FakeDataGenerator = (() => {
         createPerson,
         createIdentity: (input) => createPerson(input, {}),
         activeIdentity,
+        activeValues,
+        withNames,
         migrateProfiles,
         describePerson,
         getDataTypes() {

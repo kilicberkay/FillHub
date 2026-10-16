@@ -5,7 +5,14 @@ All notable changes to FillHub are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+- Identity profiles can pin values: first name, last name, email, phone and password. The pinned values are
+  used every time the profile is active, so a profile can hold a fixed test account. Pinned names keep the
+  generated email consistent with them.
+
 ### Fixed
+- The popup's fill count was taken from the first frame that answered, so a frame without fields could show 0.
+  The popup now adds up the counts of all frames, and the same applies to Undo.
 - Dropdown lists (country, profile, interface language, data type) are readable in the dark theme.
 - The toolbar popup follows the theme chosen on the settings page.
 - Data types show readable names (for example "First name") in the rule selector and the rule list,

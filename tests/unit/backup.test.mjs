@@ -143,3 +143,14 @@ test('site istisnaları: doğrulayıcı verilmezse hiçbir alan adı kabul edilm
     const r = FillHubBackup.validateBackup(wrap({ noAutoSubmitSites: ['bank.com'] }), { isValidSelector: simpleSelector });
     assert.equal(r.field, 'noAutoSubmitSites');
 });
+
+test('profil sabit değerleri: bilinen alanlar geri gelir; bilinmeyen ya da boş değerler reddedilir', () => {
+    const v = (values) => FillHubBackup.validateBackup(wrap({ profiles: [{ id: 'a', name: 'A', mode: 'random', values }] }), { isValidSelector: simpleSelector });
+    const ok = v({ email: 'qa@test.example.com', password: 'Test123!' });
+    assert.equal(ok.ok, true, JSON.stringify(ok));
+    assert.deepEqual(ok.data.profiles[0].values, { email: 'qa@test.example.com', password: 'Test123!' });
+    assert.equal(v({ gizli: 'x' }).field, 'profiles', 'bilinmeyen alan reddedilir');
+    assert.equal(v({ email: '   ' }).field, 'profiles', 'boş değer reddedilir');
+    assert.equal(v({ email: 'x'.repeat(201) }).field, 'profiles', 'uzun değer reddedilir');
+    assert.equal(v('e-posta').field, 'profiles', 'nesne olmayan değer reddedilir');
+});

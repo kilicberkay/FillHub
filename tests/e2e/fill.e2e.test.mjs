@@ -742,6 +742,58 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
         });
     });
 
+    describe('profil sabit değerleri', () => {
+        it('aktif profilin sabit ad, soyad, e-posta ve telefonu her doldurmada kullanılır', async () => {
+            await setStorage(env, {
+                preferredLocale: 'tr-TR', piiSafe: true, activeProfileId: 'qa',
+                profiles: [
+                    { id: 'default', name: 'Standard Persona', mode: 'random' },
+                    { id: 'qa', name: 'QA hesabı', mode: 'random', values: { firstName: 'Ayşe', lastName: 'Demir', email: 'qa@test.example.com', phone: '5551112233' } },
+                ],
+            });
+            const form = await openForm(env);
+            try {
+                const r = await send(env, form.tabId, { action: 'fill' });
+                assert.equal(r.status, 'success');
+                const v = await readForm(form.page);
+                assert.equal(v.ad, 'Ayşe');
+                assert.equal(v.soyad, 'Demir');
+                assert.equal(v.eposta, 'qa@test.example.com', 'e-posta sabit olmalı');
+                assert.equal(v.eposta2, 'qa@test.example.com', 'onay alanı aynı e-postayı almalı');
+                assert.equal(v.tel, '5551112233', 'telefon sabit olmalı');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('diyalogda girilen sabit değerler profile kaydedilir ve kartta görünür', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, uiLang: 'tr', onboardingComplete: true });
+            const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/options/options.html`);
+            try {
+                await page.waitFor('!!document.getElementById("newProfileBtn")', 10000);
+                await page.eval(`document.getElementById('nav-profiles').click()`);
+                await wait(300);
+                await page.eval(`document.getElementById('newProfileBtn').click()`);
+                await wait(300);
+                await page.eval(`(() => {
+                    document.getElementById('profileName').value = 'Test kullanıcı';
+                    document.getElementById('profileValueEmailInput').value = 'kullanici@test.example.com';
+                    document.getElementById('profileValuePasswordInput').value = 'Gizli123!';
+                    document.getElementById('profileForm').requestSubmit();
+                })()`);
+                await wait(500);
+                const all = JSON.parse(await env.swEval(`chrome.storage.local.get('profiles').then((r) => JSON.stringify(r))`));
+                const saved = all.profiles.find((p) => p.name === 'Test kullanıcı');
+                assert.ok(saved, 'profil kaydedilmeli');
+                assert.deepEqual(saved.values, { email: 'kullanici@test.example.com', password: 'Gizli123!' }, 'boş alanlar kaydedilmez');
+                const cards = await page.eval(`document.getElementById('profilesList').textContent`);
+                assert.match(cards, /Sabit:.*E-posta/, 'kartta sabit alanların adları görünmeli');
+            } finally {
+                await page.close();
+            }
+        });
+    });
+
     describe('açılır pencere', () => {
         const openPopup = async () => {
             const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/popup/popup.html`);
@@ -768,6 +820,27 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
             }
         });
 
+        it('iframe içindeki alanlar da doldurulur ve sonuç tüm çerçevelerin toplamıdır', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
+            const form = await openForm(env, { fixture: 'frames' });
+            const popup = await openPopup();
+            try {
+                await env.swEval(`chrome.tabs.update(${form.tabId}, { active: true })`);
+                await popup.eval(`document.getElementById('popupFillBtn').click()`);
+                await popup.waitFor(`!document.getElementById('popupResult').hidden`, 10000);
+                const shown = await popup.eval(`document.getElementById('popupResult').textContent`);
+                const count = Number((shown.match(/(\d+)\s*$/) || [])[1]);
+                const filledIn = (doc) => `[...${doc}.querySelectorAll('#kayit input')].filter((i) => (i.type === 'checkbox' ? i.checked : i.value)).length`;
+                const topFilled = await form.page.eval(filledIn('document'));
+                const frameFilled = await form.page.eval(`(() => { const d = document.getElementById('cerceve').contentDocument; return ${filledIn('d')}; })()`);
+                assert.ok(frameFilled > 0, 'iframe içindeki alanlar dolmalı');
+                assert.ok(count >= topFilled + frameFilled, `sonuç tüm çerçevelerin toplamı olmalı (üst ${topFilled}, iframe ${frameFilled}): "${shown}"`);
+            } finally {
+                await popup.close();
+                await closeForm(form);
+            }
+        });
+
         it('doldurma ve geri alma etkin sekmede çalışır ve sonucu gösterir', async () => {
             await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
             const form = await openForm(env);
@@ -777,7 +850,9 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
                 await env.swEval(`chrome.tabs.update(${form.tabId}, { active: true })`);
                 await popup.eval(`document.getElementById('popupFillBtn').click()`);
                 await popup.waitFor(`!document.getElementById('popupResult').hidden`, 10000);
-                assert.match(await popup.eval(`document.getElementById('popupResult').textContent`), /\d+/, 'doldurma sonucu sayı göstermeli');
+                // "0" de bir sayıdır; sonucun gerçekten doldurulmuş alan sayısı olduğunu pozitiflikle denetle
+                const shownFill = await popup.eval(`document.getElementById('popupResult').textContent`);
+                assert.ok(Number((shownFill.match(/(\d+)\s*$/) || [])[1]) > 0, `doldurulan alan sayısı pozitif olmalı: "${shownFill}"`);
                 const filled = await readForm(form.page);
                 assert.ok(Object.values(filled).some((v) => v === true || (typeof v === 'string' && v.length > 0)), 'form doldurulmalı');
 

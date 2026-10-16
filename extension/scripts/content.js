@@ -506,11 +506,18 @@ function fillSelect(input, type, person) {
 // Active persona from settings; only used when it actually carries persona data
 // Yeni oturum: sabit kimlik modundaki şablonun kişisi ya da her çağrıda taze bir kişi (rastgele mod)
 function startSession(settings) {
+    let person = FakeDataGenerator.activeIdentity(settings) || FakeDataGenerator.createPerson(settings.preferredLocale);
+    // Profilde sabit ad ya da soyad varsa kişi onunla tutarlı kılınır (e-posta ve tam ad dahil)
+    const pinned = FakeDataGenerator.activeValues(settings);
+    if (pinned.firstName || pinned.lastName) {
+        person = FakeDataGenerator.withNames(person, pinned.firstName || person.first.n, pinned.lastName || person.last.n);
+    }
     sessionData = {
         firstName: '',
         lastName: '',
         password: null,
-        person: FakeDataGenerator.activeIdentity(settings) || FakeDataGenerator.createPerson(settings.preferredLocale)
+        pinned,
+        person
     };
 }
 
@@ -584,9 +591,13 @@ function fillField(input, settings, checkVisibility = true) {
     // Readonly alanlara doğrudan değer yazılmaz
     if (input.readOnly) return false;
 
-    // Eşleşen parola alanları aynı değeri alır; diğer değerler oturumdaki kişiden üretilir
+    // Sabit değer (aktif profil) varsa önceliklidir; eşleşen parola alanları aynı değeri alır;
+    // diğer değerler oturumdaki kişiden üretilir
     let val;
-    if (type === 'password' && settings.matchPasswords && sessionData.password) {
+    const pinnedValue = sessionData.pinned && sessionData.pinned[type];
+    if (pinnedValue) {
+        val = pinnedValue;
+    } else if (type === 'password' && settings.matchPasswords && sessionData.password) {
         val = sessionData.password;
     } else {
         val = FakeDataGenerator.generate(type, settings.preferredLocale, {
@@ -602,10 +613,10 @@ function fillField(input, settings, checkVisibility = true) {
             piiSafe: settings.piiSafe,
             smartEmail: settings.smartEmail !== false
         });
-
-        // Cache values for smart linking (password is cached here if not matched)
-        if (type === 'password') sessionData.password = val;
     }
+
+    // Parola, eşleşen onay alanı için oturumda tutulur
+    if (type === 'password') sessionData.password = val;
 
     assignFieldValue(input, val);
     return true;

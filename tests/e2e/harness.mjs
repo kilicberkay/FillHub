@@ -17,9 +17,10 @@ const FIXTURES = {
     zh: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-zh.html')),
     ar: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-ar.html')),
     picker: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'picker.html')),
+    frames: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'frames.html')),
 };
 // ?page=<anahtar> ile seçilen sayfalar; diğer istekler dile göre TR ya da EN formunu alır
-const NAMED_PAGES = ['consent', 'rich', 'ja', 'zh', 'ar', 'picker'];
+const NAMED_PAGES = ['consent', 'rich', 'ja', 'zh', 'ar', 'picker', 'frames'];
 
 export const chromeAvailable = () => Boolean(findChrome());
 

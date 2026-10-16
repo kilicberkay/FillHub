@@ -125,6 +125,9 @@ Tüm yollar depo köküne göredir; eklenti dosyaları `extension/` altındadır
   varsayılan ülke profilini kullanır; ülkeye özgü veri yoktur.
 - Kişi modeli: doldurma başına tek `createPerson` kaydı; ad, soyad, şehir, posta, telefon, kimlik ve IBAN
   birbiriyle tutarlıdır. Rusça soyadı cinsiyete göre çekimlenir; soyadı/baba adı `patronymicsM` ile eşlenir.
+- Profil sabit değerleri (`profile.values`: firstName, lastName, email, phone, password): aktif profilde doldurulur,
+  her iki modda da geçerlidir. Sabit ad/soyad `withNames` ile kişiye işlenir (tam ad ve e-posta yerel kısmı tutarlı kalır);
+  e-posta, telefon ve şifre alan bazında doğrudan kullanılır. Parola alanları aynı sabit değeri alır.
 - Yazı tercihi: dil Latin ise Latin; değilse etiket yazısına (`detectFieldScript`) göre yerel veya Latin,
   etiket yoksa ülkenin `defaultScript`'i. E-posta yerel kısmı her zaman Latin karşılıktan (`person.first.l`)
   üretilir; `slug` ı/đ/ß/ø/ł harflerini de açar.

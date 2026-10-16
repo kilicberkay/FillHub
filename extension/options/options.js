@@ -117,6 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (text.navTextProfiles) document.getElementById('navTextProfiles').innerText = text.navTextProfiles;
         if (text.navTextRules) document.getElementById('navTextRules').innerText = text.navTextRules;
         if (text.navTextAbout) document.getElementById('navTextAbout').innerText = text.navTextAbout;
+        // Sabit değer alanlarının yer tutucusu da arayüz diline uyar
+        Object.values(pinnedInputs).forEach(el => { el.placeholder = text.profileValuePlaceholder || ''; });
         // Dinamik profil kartları yeni dilde yeniden çizilir
         if (typeof renderProfiles === 'function') renderProfiles();
         if (typeof renderSites === 'function') renderSites();
@@ -140,6 +142,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const profileForm = document.getElementById('profileForm');
     const profileDlgTitle = document.getElementById('profileDlgTitle');
     const profileName = document.getElementById('profileName');
+    // Profilin sabit değerleri: boş bırakılan alanlar rastgele üretilir
+    const pinnedInputs = {
+        firstName: document.getElementById('profileValueFirstInput'),
+        lastName: document.getElementById('profileValueLastInput'),
+        email: document.getElementById('profileValueEmailInput'),
+        phone: document.getElementById('profileValuePhoneInput'),
+        password: document.getElementById('profileValuePasswordInput')
+    };
     const profileNameError = document.getElementById('profileNameError');
     const profileModeRandom = document.getElementById('profileModeRandom');
     const profileModeFixed = document.getElementById('profileModeFixed');
@@ -178,10 +188,22 @@ document.addEventListener('DOMContentLoaded', () => {
         return { ...identity, phoneNsn: identity.phonePii || identity.phoneNsn, emailDomain: identity.piiEmailDomain || identity.emailDomain };
     }
 
+    // Sabit değer alanlarının adları, kartta "Sabit: E-posta, Şifre" biçiminde gösterilir
+    function pinnedSummary(p) {
+        const labels = {
+            firstName: currentText.profileValueFirst, lastName: currentText.profileValueLast,
+            email: currentText.profileValueEmail, phone: currentText.profileValuePhone, password: currentText.profileValuePassword
+        };
+        const names = Object.keys(p.values || {}).filter(k => labels[k]).map(k => labels[k]);
+        return names.length ? `${currentText.profileMetaPinned} ${names.join(', ')}` : '';
+    }
+
     function profileMeta(p) {
         const mode = profileMode(p);
         if (mode === 'default') return currentText.profileMetaDefault;
-        return mode === 'fixed' ? FakeDataGenerator.describePerson(shownPerson(p.identity)) : currentText.profileMetaRandom;
+        const base = mode === 'fixed' ? FakeDataGenerator.describePerson(shownPerson(p.identity)) : currentText.profileMetaRandom;
+        const pinned = pinnedSummary(p);
+        return pinned ? `${base} · ${pinned}` : base;
     }
 
     function initialsOf(name) {
@@ -262,14 +284,29 @@ document.addEventListener('DOMContentLoaded', () => {
         state.profiles.forEach(p => profilesList.appendChild(profileCard(p, p.id === active.id)));
     }
 
+    // Dialogdaki sabit değerleri okur; boş alanlar kayda girmez
+    function collectPinnedValues() {
+        const out = {};
+        for (const [key, el] of Object.entries(pinnedInputs)) {
+            const v = el.value.trim();
+            if (v) out[key] = v.slice(0, 200);
+        }
+        return out;
+    }
+
     function renderDialogPreview() {
         const fixed = profileModeFixed.checked;
         if (fixed && !dialogDraft) dialogDraft = FakeDataGenerator.createIdentity(state.preferredLocale);
         profilePreview.hidden = !fixed;
         if (fixed) {
-            const shown = shownPerson(dialogDraft);
+            // Önizleme, doldurmanın göstereceği kişidir: sabit ad ve e-posta buraya da yansır
+            const pinned = collectPinnedValues();
+            let shown = shownPerson(dialogDraft);
+            if (pinned.firstName || pinned.lastName) {
+                shown = FakeDataGenerator.withNames(shown, pinned.firstName || shown.first.n, pinned.lastName || shown.last.n);
+            }
             profilePreviewName.textContent = FakeDataGenerator.describePerson(shown);
-            profilePreviewEmail.textContent = shown.emailLocal + '@' + shown.emailDomain;
+            profilePreviewEmail.textContent = pinned.email || (shown.emailLocal + '@' + shown.emailDomain);
         }
     }
 
@@ -280,6 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteArmed = false;
         profileDlgTitle.textContent = p ? currentText.profileDlgEdit : currentText.profileDlgNew;
         profileName.value = p ? p.name : '';
+        for (const [key, el] of Object.entries(pinnedInputs)) el.value = (p && p.values && p.values[key]) || '';
         profileNameError.hidden = true;
         const fixed = !!p && profileMode(p) === 'fixed';
         profileModeRandom.checked = !fixed;
@@ -304,6 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
     newProfileBtn.addEventListener('click', (e) => openProfileDialog(null, e.currentTarget));
     profileModeRandom.addEventListener('change', renderDialogPreview);
     profileModeFixed.addEventListener('change', renderDialogPreview);
+    Object.values(pinnedInputs).forEach(el => el.addEventListener('input', renderDialogPreview));
     profileRefreshBtn.addEventListener('click', () => {
         dialogDraft = FakeDataGenerator.createIdentity(state.preferredLocale);
         renderDialogPreview();
@@ -333,6 +372,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         p.name = name;
         p.mode = fixed ? 'fixed' : 'random';
+        const pinned = collectPinnedValues();
+        if (Object.keys(pinned).length) p.values = pinned;
+        else delete p.values;
         if (fixed) p.identity = dialogDraft;
         else delete p.identity;
         if (profileActivate.checked) state.activeProfileId = p.id;
