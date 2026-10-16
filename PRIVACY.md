@@ -14,8 +14,8 @@ that your data stays on your device.
   diagnostics report and send it yourself.
 - **Backups are files you control.** Exporting settings writes a JSON file to your computer; importing
   reads a file you choose. Nothing is uploaded.
-- **Reads form fields only when you ask it to fill.** FillHub acts when you press a shortcut, click
-  the context menu, or click the toolbar icon. It reads the labels and names of form fields on the
+- **Reads form fields only when you ask it to fill.** FillHub acts when you press a shortcut, use
+  the context menu, or press Fill in the toolbar popup. It reads the labels and names of form fields on the
   page you are viewing in order to choose a fake value for each field, and writes values back to
   those fields.
 - **Does not read or store the values you type**, except the value it has just written, so the

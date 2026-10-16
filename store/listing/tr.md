@@ -35,7 +35,7 @@ kullanmadan deneyebilir.
 Nasıl kullanılır
 
 1. Formu içeren bir sayfayı açın.
-2. Ctrl+Shift+F (macOS'ta Command+Shift+F) tuşlarına basın ya da FillHub simgesine tıklayın.
+2. Ctrl+Shift+F (macOS'ta Command+Shift+F) tuşlarına basın ya da FillHub simgesine tıklayıp açılan pencerede Doldur düğmesine basın.
 3. Geri almak için Ctrl+Shift+U tuşlarına basın.
 Tek bir alanı doldurmak için alana sağ tıklayıp "Bu alanı doldur" seçeneğini kullanın.
 
@@ -67,7 +67,7 @@ bu nedenle üretilen verileri gerçek başvurularda, satın almalarda ya da kiml
   öğelerini ekler.
 - **Tüm sitelere erişim (`<all_urls>`) ve tüm çerçevelerde içerik betikleri:** FillHub, kullanıcının
   doldurmayı seçtiği her sitede (iframe içindeki formlar dahil) çalışır. Yalnızca kullanıcı bir kısayola
-  basınca, simgeye tıklayınca ya da bağlam menüsünü kullanınca işlem yapar; arka planda sayfa okumaz.
+  basınca, simgedeki Doldur düğmesine basınca ya da bağlam menüsünü kullanınca işlem yapar; arka planda sayfa okumaz.
 
 Uzaktan kod: yok. Uzantı tüm kodunu paketin içinde taşır ve ağ isteği yapmaz. Veri toplama: yok.
 

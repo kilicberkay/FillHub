@@ -37,7 +37,7 @@ Highlights
 How to use
 
 1. Open a page with a form.
-2. Press Ctrl+Shift+F (Command+Shift+F on macOS), or click the FillHub icon.
+2. Press Ctrl+Shift+F (Command+Shift+F on macOS), or click the FillHub icon and press Fill in the popup.
 3. Press Ctrl+Shift+U to undo.
 Right-click a single field and choose "Fill this field" to fill only that field.
 
@@ -69,7 +69,7 @@ do not use generated data for real applications, purchases, or identity claims.
 - **scripting:** injects the fill scripts into the page you are filling, only after you start a fill (shortcut, toolbar icon, or menu). No FillHub code runs on pages you do not fill.
 - **Host access to all sites (`<all_urls>`) and content scripts in all frames:** FillHub fills forms on
   any website the user chooses to fill, including forms inside iframes. It only acts after the user
-  presses a shortcut, clicks the icon, or uses the context menu. It does not read pages in the
+  presses a shortcut, presses Fill in the toolbar popup, or uses the context menu. It does not read pages in the
   background.
 
 Remote code: none. The extension ships all its code in the package and makes no network requests.

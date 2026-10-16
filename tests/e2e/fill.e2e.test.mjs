@@ -464,6 +464,20 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
             }
         });
 
+        it('ayar sayfası kısayol kartında varsayılan tuşları ve değiştirme yolunu gösterir', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
+            const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/options/options.html`);
+            try {
+                await page.waitFor('!!document.getElementById("shortcutFill")', 10000);
+                const keys = await page.eval(`[...document.querySelectorAll('dl kbd')].map((k) => k.textContent)`);
+                assert.deepEqual(keys, ['Ctrl+Shift+F', 'Ctrl+Shift+D', 'Ctrl+Shift+U'], 'kısayol tuşları manifest ile eşleşmeli');
+                const desc = await page.eval(`document.getElementById('shortcutDesc').innerText`);
+                assert.match(desc, /chrome:\/\/extensions\/shortcuts/, 'değiştirme yolu açıklamada olmalı');
+            } finally {
+                await page.close();
+            }
+        });
+
         it('ayar sayfasındaki tanılama düğmesi raporu indirir ve durum gösterir', async () => {
             await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
             const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/options/options.html`);

@@ -6,6 +6,7 @@ All notable changes to FillHub are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+- The settings page lists the keyboard shortcuts and where to change them.
 - Diagnostics report: the settings page can download a summary for bug reports. It contains counts and
   settings flags only (no names, field values, labels, profile names or site addresses).
 - Rich text fields (`contenteditable` editors) are filled, and Undo restores their previous text.
