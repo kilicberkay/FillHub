@@ -988,9 +988,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
 
         await fillPage(settings);
+        // Görünür captcha varsa doğrulamayı kullanıcı tamamlar: öğe vurgulanır, otomatik işlem yapılmaz
+        const captcha = findVisibleCaptcha();
         if (window.top === window) {
-            // Görünür captcha varsa doğrulamayı kullanıcı tamamlar: öğe vurgulanır, otomatik işlem yapılmaz
-            const captcha = findVisibleCaptcha();
             if (captcha) {
                 highlightCaptcha(captcha);
                 showToast(getLocalizedMessage(settings.preferredLocale, 'captcha'), settings.theme);
@@ -998,7 +998,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 showToast(getLocalizedMessage(settings.preferredLocale, request.action === 'fill_chaos' ? 'chaos' : 'filled'), settings.theme);
             }
         }
-        if (settings.autoSubmit && request.action === 'fill') {
+        // Gönderim yalnız bu çerçevede alan doldurulduysa ve captcha yoksa; doldurulmayan iframe'lerdeki düğmelere tıklanmaz
+        if (settings.autoSubmit && request.action === 'fill' && filledCount > 0 && !captcha) {
             autoSubmitForm(document);
         }
         respond({ status: 'success', filled: filledCount });

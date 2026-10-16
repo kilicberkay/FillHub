@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const newProfileBtn = document.getElementById('newProfileBtn');
 
     const ruleSelectorInput = document.getElementById('ruleSelector');
+    const ruleSelectorError = document.getElementById('ruleSelectorError');
     const ruleTypeSelect = document.getElementById('ruleType');
     const addRuleBtn = document.getElementById('addRuleBtn');
     const rulesList = document.getElementById('rulesList');
@@ -485,10 +486,29 @@ document.addEventListener('DOMContentLoaded', () => {
     piiSafe.onchange = saveState;
     autoSubmit.onchange = saveState;
 
+    // Sözdizimi, sayfaya dokunmadan boş bir belge parçasında denenir; geçersiz seçici kuralı reddedilir
+    function isValidSelector(selector) {
+        try {
+            document.createDocumentFragment().querySelector(selector);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    ruleSelectorInput.addEventListener('input', () => { ruleSelectorError.hidden = true; });
+
     addRuleBtn.onclick = () => {
-        if (!ruleSelectorInput.value) return;
-        state.customRules.push({ selector: ruleSelectorInput.value, type: ruleTypeSelect.value });
+        const selector = ruleSelectorInput.value.trim();
+        if (!selector) return;
+        if (!isValidSelector(selector)) {
+            ruleSelectorError.textContent = currentText.ruleSelectorError;
+            ruleSelectorError.hidden = false;
+            return;
+        }
+        state.customRules.push({ selector, type: ruleTypeSelect.value });
         ruleSelectorInput.value = "";
+        ruleSelectorError.hidden = true;
         renderRules();
         saveState();
     };

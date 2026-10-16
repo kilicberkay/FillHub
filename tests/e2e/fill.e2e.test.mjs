@@ -216,6 +216,96 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
         });
     });
 
+    describe('otomatik gönder ve özel kurallar', () => {
+        // Gönderimi sayar ve engeller; fixture formunun action="#" olduğu için sayfa yeniden yüklenmez
+        async function countSubmits(page) {
+            await page.eval(`(() => {
+                window.__submits = 0;
+                document.getElementById('kayit').addEventListener('submit', (e) => { e.preventDefault(); window.__submits++; });
+            })()`);
+        }
+
+        const storedRules = async () => JSON.parse(await env.swEval(
+            `chrome.storage.local.get('customRules').then((r) => JSON.stringify(r.customRules || []))`,
+        ));
+
+        it('alan doldurulunca gönder düğmesine bir kez tıklanır', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, autoSubmit: true });
+            const form = await openForm(env);
+            try {
+                await countSubmits(form.page);
+                const r = await send(env, form.tabId, { action: 'fill' });
+                assert.equal(r.status, 'success');
+                await wait(900);
+                assert.equal(await form.page.eval('window.__submits'), 1, 'gönder bir kez tetiklenmeli');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('görünür captcha varken form gönderilmez', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, autoSubmit: true });
+            const form = await openForm(env);
+            try {
+                await countSubmits(form.page);
+                await form.page.eval(`(() => {
+                    const d = document.createElement('div');
+                    d.className = 'g-recaptcha';
+                    d.style.cssText = 'width:304px;height:78px;background:#eee';
+                    document.body.appendChild(d);
+                })()`);
+                const r = await send(env, form.tabId, { action: 'fill' });
+                assert.equal(r.status, 'success');
+                await wait(900);
+                assert.equal(await form.page.eval('window.__submits'), 0, 'captcha varken gönderilmemeli');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('hiç alan doldurulmadıysa gönder düğmesine tıklanmaz', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, autoSubmit: true });
+            const form = await openForm(env);
+            try {
+                await countSubmits(form.page);
+                // Doldurulacak alan kalmaz; sayfada yalnızca gönder düğmesi görünür
+                await form.page.eval(`document.querySelectorAll('input, textarea, select').forEach((e) => e.remove())`);
+                const r = await send(env, form.tabId, { action: 'fill' });
+                assert.equal(r.status, 'success');
+                assert.equal(r.filled, 0, 'doldurulacak alan olmamalı');
+                await wait(900);
+                assert.equal(await form.page.eval('window.__submits'), 0, 'doldurulmayan çerçevede gönderilmemeli');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('geçersiz CSS seçici reddedilir, geçerli olan kaydedilir', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
+            const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/options/options.html`);
+            try {
+                await page.waitFor('!!document.getElementById("addRuleBtn")', 10000);
+                await wait(300);
+                const addRule = (selector) => page.eval(`(() => {
+                    document.getElementById('ruleSelector').value = ${JSON.stringify(selector)};
+                    document.getElementById('addRuleBtn').click();
+                })()`);
+
+                await addRule('div[');
+                assert.equal(await page.eval(`!document.getElementById('ruleSelectorError').hidden`), true, 'geçersiz seçici için hata gösterilmeli');
+                await wait(200);
+                assert.deepEqual(await storedRules(), [], 'geçersiz seçici kaydedilmemeli');
+
+                await addRule('#ad');
+                assert.equal(await page.eval(`document.getElementById('ruleSelectorError').hidden`), true, 'geçerli seçicide hata gizlenmeli');
+                await wait(200);
+                assert.deepEqual((await storedRules()).map((r) => r.selector), ['#ad'], 'geçerli seçici kaydedilmeli');
+            } finally {
+                await page.close();
+            }
+        });
+    });
+
     describe('captcha ve profil yönetimi', () => {
         it('görünür captcha bildirilir ve vurgulanır, otomatik tıklanmaz', async () => {
             await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true });
