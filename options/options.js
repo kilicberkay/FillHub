@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const ruleSelectorInput = document.getElementById('ruleSelector');
     const ruleSelectorError = document.getElementById('ruleSelectorError');
+    const ruleTestBtn = document.getElementById('ruleTestBtn');
+    const ruleCancelBtn = document.getElementById('ruleCancelBtn');
+    const ruleTestResult = document.getElementById('ruleTestResult');
     const ruleTypeSelect = document.getElementById('ruleType');
     const addRuleBtn = document.getElementById('addRuleBtn');
     const rulesList = document.getElementById('rulesList');
@@ -117,6 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Dinamik profil kartları yeni dilde yeniden çizilir
         if (typeof renderProfiles === 'function') renderProfiles();
         if (typeof renderSites === 'function') renderSites();
+        if (typeof renderRules === 'function') renderRules();
     }
 
     uiLangSelector.addEventListener('change', () => {
@@ -359,6 +363,38 @@ document.addEventListener('DOMContentLoaded', () => {
         if (res.changed) chrome.storage.local.set(state);
     }
 
+    // Kural sırası önemlidir: bir alanı birden fazla kural eşleştirirse ilk eşleşen kazanır
+    let editingRuleIndex = null;
+
+    function exitRuleEditMode() {
+        editingRuleIndex = null;
+        addRuleBtn.textContent = currentText.addRuleBtn;
+        ruleCancelBtn.hidden = true;
+        ruleSelectorInput.value = "";
+        ruleSelectorError.hidden = true;
+    }
+
+    function moveRule(idx, delta) {
+        const target = idx + delta;
+        if (target < 0 || target >= state.customRules.length) return;
+        [state.customRules[idx], state.customRules[target]] = [state.customRules[target], state.customRules[idx]];
+        exitRuleEditMode();
+        renderRules();
+        saveState();
+    }
+
+    function ruleIconButton(label, glyph, onClick, disabled) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'inline-flex h-7 w-7 cursor-pointer select-none items-center justify-center rounded-lg text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-100 focus-ring disabled:pointer-events-none disabled:opacity-40 dark:text-zinc-300 dark:hover:bg-white/[0.06]';
+        btn.textContent = glyph;
+        btn.title = label;
+        btn.setAttribute('aria-label', label);
+        btn.disabled = disabled;
+        btn.onclick = onClick;
+        return btn;
+    }
+
     function renderRules() {
         rulesList.innerHTML = "";
         if (state.customRules.length === 0) {
@@ -378,17 +414,42 @@ document.addEventListener('DOMContentLoaded', () => {
             code.textContent = rule.selector;
             desc.append(code, ` → ${rule.type}`);
 
+            const actions = document.createElement('div');
+            actions.className = 'flex shrink-0 items-center gap-0.5';
+
+            const editBtn = document.createElement('button');
+            editBtn.type = 'button';
+            editBtn.className = 'inline-flex h-7 shrink-0 cursor-pointer select-none items-center justify-center rounded-lg px-2 text-xs font-medium text-brand-700 transition-colors hover:bg-brand-50 focus-ring dark:text-brand-300 dark:hover:bg-brand-500/10';
+            editBtn.textContent = currentText.ruleEdit;
+            editBtn.onclick = () => {
+                editingRuleIndex = idx;
+                ruleSelectorInput.value = rule.selector;
+                ruleTypeSelect.value = rule.type;
+                ruleSelectorError.hidden = true;
+                ruleTestResult.hidden = true;
+                addRuleBtn.textContent = currentText.ruleUpdateBtn;
+                ruleCancelBtn.hidden = false;
+                ruleSelectorInput.focus();
+            };
+
             const removeBtn = document.createElement('button');
             removeBtn.type = 'button';
             removeBtn.className = 'inline-flex h-7 shrink-0 cursor-pointer select-none items-center justify-center rounded-lg px-2 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-50 focus-ring dark:text-rose-400 dark:hover:bg-rose-500/10';
             removeBtn.textContent = currentText.removeRuleBtn;
-
-            row.append(desc, removeBtn);
             removeBtn.onclick = () => {
+                if (editingRuleIndex !== null) exitRuleEditMode();
                 state.customRules.splice(idx, 1);
                 renderRules();
                 saveState();
             };
+
+            actions.append(
+                ruleIconButton(currentText.ruleUp, '↑', () => moveRule(idx, -1), idx === 0),
+                ruleIconButton(currentText.ruleDown, '↓', () => moveRule(idx, 1), idx === state.customRules.length - 1),
+                editBtn,
+                removeBtn
+            );
+            row.append(desc, actions);
             rulesList.appendChild(row);
         });
     }
@@ -505,7 +566,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    ruleSelectorInput.addEventListener('input', () => { ruleSelectorError.hidden = true; });
+    ruleSelectorInput.addEventListener('input', () => {
+        ruleSelectorError.hidden = true;
+        ruleTestResult.hidden = true;
+    });
 
     addRuleBtn.onclick = () => {
         const selector = ruleSelectorInput.value.trim();
@@ -515,12 +579,56 @@ document.addEventListener('DOMContentLoaded', () => {
             ruleSelectorError.hidden = false;
             return;
         }
-        state.customRules.push({ selector, type: ruleTypeSelect.value });
-        ruleSelectorInput.value = "";
-        ruleSelectorError.hidden = true;
+        const rule = { selector, type: ruleTypeSelect.value };
+        if (editingRuleIndex !== null) state.customRules[editingRuleIndex] = rule;
+        else state.customRules.push(rule);
+        exitRuleEditMode();
         renderRules();
         saveState();
     };
+
+    ruleCancelBtn.addEventListener('click', exitRuleEditMode);
+
+    // Test: etkin web sayfasında seçicinin eşleştiği alan sayısı. Yalnızca bir sayı okunur; sayfa içeriği saklanmaz.
+    async function findWebTab() {
+        const tabs = await chrome.tabs.query({ lastFocusedWindow: true });
+        const web = tabs.filter(t => /^https?:\/\//.test(t.url || ''));
+        web.sort((a, b) => (b.lastAccessed || 0) - (a.lastAccessed || 0));
+        return web[0] || null;
+    }
+
+    function showRuleTest(message, isError) {
+        ruleTestResult.textContent = message;
+        ruleTestResult.classList.toggle('text-rose-600', isError);
+        ruleTestResult.classList.toggle('dark:text-rose-400', isError);
+        ruleTestResult.classList.toggle('text-soft', !isError);
+        ruleTestResult.hidden = false;
+    }
+
+    ruleTestBtn.addEventListener('click', async () => {
+        const selector = ruleSelectorInput.value.trim();
+        if (!selector || !isValidSelector(selector)) {
+            ruleSelectorError.textContent = currentText.ruleSelectorError;
+            ruleSelectorError.hidden = false;
+            return;
+        }
+        const tab = await findWebTab();
+        const [injection] = tab
+            ? await chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                func: (sel) => { try { return document.querySelectorAll(sel).length; } catch (e) { return -1; } },
+                args: [selector]
+            }).catch(() => [])
+            : [];
+        if (!injection || typeof injection.result !== 'number') {
+            showRuleTest(currentText.ruleNoPage, true);
+        } else if (injection.result < 0) {
+            ruleSelectorError.textContent = currentText.ruleSelectorError;
+            ruleSelectorError.hidden = false;
+        } else {
+            showRuleTest(injection.result === 0 ? currentText.ruleMatchNone : `${currentText.ruleMatchCount} ${injection.result}`, false);
+        }
+    });
 
     // Site istisnaları: bu sitelerde otomatik gönderim yapılmaz; alanlar yine doldurulur
     function renderSites() {

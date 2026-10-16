@@ -6,6 +6,8 @@ All notable changes to FillHub are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+- Custom rules can be reordered (first match wins), edited, and tested: "Test on this page" shows how
+  many fields on the current web page match the selector. Only the count is read.
 - The settings page lists the keyboard shortcuts and where to change them.
 - Diagnostics report: the settings page can download a summary for bug reports. It contains counts and
   settings flags only (no names, field values, labels, profile names or site addresses).
@@ -15,6 +17,10 @@ All notable changes to FillHub are documented here. The format follows
   replaces the current settings after you confirm. Imported files are checked field by field and nothing is sent anywhere.
 - Auto-submit exceptions: a list of sites where FillHub fills the fields but never clicks submit. An entry
   also covers its subdomains.
+
+### Fixed
+- Showing a captcha no longer scrolls the page to it or moves focus there; the element is only outlined.
+- Auto-submit no longer clicks a submit-like button labelled as a captcha check (e.g. "I am not a robot").
 
 ### Changed
 - Clicking the toolbar icon opens the popup instead of filling the page. The keyboard shortcut and the

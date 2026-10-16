@@ -380,6 +380,77 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
             }
         });
 
+        // Satırdaki düğmeyi metnine göre bulur (↑, ↓ ya da düzenleme metni)
+        const rowButton = (page, rowIndex, text) => page.eval(`(() => {
+            const row = document.querySelectorAll('#rulesList > div')[${rowIndex}];
+            const btn = [...row.querySelectorAll('button')].find((b) => b.textContent.trim() === ${JSON.stringify(text)});
+            btn.click();
+        })()`);
+
+        it('kurallar yukarı ve aşağı taşınır, sıra kaydedilir', async () => {
+            await setStorage(env, {
+                preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true,
+                customRules: [{ selector: '#ad', type: 'firstName' }, { selector: '#eposta', type: 'email' }],
+            });
+            const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/options/options.html`);
+            try {
+                await page.waitFor('document.querySelectorAll("#rulesList > div").length === 2', 10000);
+                await rowButton(page, 1, '↑');
+                await wait(300);
+                assert.deepEqual((await storedRules()).map((r) => r.selector), ['#eposta', '#ad'], 'ikinci kural yukarı taşınmalı');
+            } finally {
+                await page.close();
+            }
+        });
+
+        it('kural düzenlenir, güncellenir ve iptal edilebilir', async () => {
+            await setStorage(env, {
+                preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true,
+                customRules: [{ selector: '#ad', type: 'firstName' }],
+            });
+            const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/options/options.html`);
+            try {
+                await page.waitFor('document.querySelectorAll("#rulesList > div").length === 1', 10000);
+                await rowButton(page, 0, 'Edit');
+                assert.equal(await page.eval(`document.getElementById('ruleSelector').value`), '#ad', 'düzenleme seçiciyi forma yüklemeli');
+                await page.eval(`document.getElementById('ruleSelector').value = '#soyad'`);
+                await page.eval(`document.getElementById('addRuleBtn').click()`);
+                await wait(300);
+                assert.deepEqual((await storedRules()).map((r) => r.selector), ['#soyad'], 'kural güncellenmeli, çoğaltılmamalı');
+                assert.equal(await page.eval(`document.getElementById('ruleCancelBtn').hidden`), true, 'güncellemeden sonra düzenleme modu kapanmalı');
+
+                await rowButton(page, 0, 'Edit');
+                await page.eval(`document.getElementById('ruleSelector').value = '#eposta'`);
+                await page.eval(`document.getElementById('ruleCancelBtn').click()`);
+                assert.equal(await page.eval(`document.getElementById('ruleSelector').value`), '', 'iptal girişi temizlemeli');
+                await wait(200);
+                assert.deepEqual((await storedRules()).map((r) => r.selector), ['#soyad'], 'iptal kaydı değiştirmemeli');
+            } finally {
+                await page.close();
+            }
+        });
+
+        it('seçici bu sayfada kaç alanla eşleştiğini gösterir', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
+            const form = await openForm(env);
+            await send(env, form.tabId, { action: 'fill' });
+            const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/options/options.html`);
+            try {
+                await page.waitFor('!!document.getElementById("ruleTestBtn")', 10000);
+                await page.eval(`document.getElementById('ruleSelector').value = '#ad'`);
+                await page.eval(`document.getElementById('ruleTestBtn').click()`);
+                await page.waitFor(`!document.getElementById('ruleTestResult').hidden`, 10000);
+                const shown = await page.eval(`document.getElementById('ruleTestResult').textContent`);
+                assert.match(shown, /:\s*1$/, `tek bir alan eşleşmeli: "${shown}"`);
+                // Sayfa içeriği okunmaz: sonuç yalnızca eşleşme sayısını taşır, alan değerini değil
+                const values = await readForm(form.page);
+                if (typeof values.ad === 'string' && values.ad.length > 0) assert.equal(shown.includes(values.ad), false, 'alan değeri gösterilmemeli');
+            } finally {
+                await page.close();
+                await closeForm(form);
+            }
+        });
+
         it('geçersiz CSS seçici reddedilir, geçerli olan kaydedilir', async () => {
             await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
             const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/options/options.html`);
