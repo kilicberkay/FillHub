@@ -23,6 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const rulesList = document.getElementById('rulesList');
     const noRulesState = document.getElementById('noRulesState');
 
+    const siteInput = document.getElementById('siteInput');
+    const siteError = document.getElementById('siteError');
+    const siteAddBtn = document.getElementById('siteAddBtn');
+    const siteEmpty = document.getElementById('siteEmpty');
+    const siteList = document.getElementById('siteList');
+
     const uiLangSelector = document.getElementById('uiLangSelector');
 
     const sidebar = document.getElementById('sidebar');
@@ -46,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
         profiles: [{ id: 'default', name: 'Standard Persona', mode: 'random' }],
         activeProfileId: 'default',
         customRules: [],
+        noAutoSubmitSites: [],
         onboardingComplete: false
     };
 
@@ -109,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (text.navTextAbout) document.getElementById('navTextAbout').innerText = text.navTextAbout;
         // Dinamik profil kartları yeni dilde yeniden çizilir
         if (typeof renderProfiles === 'function') renderProfiles();
+        if (typeof renderSites === 'function') renderSites();
     }
 
     uiLangSelector.addEventListener('change', () => {
@@ -443,6 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.uiLang = detectDefaultUiLang();
             }
             ensurePersonaData();
+            if (!Array.isArray(state.noAutoSubmitSites)) state.noAutoSubmitSites = [];
 
             if (hasState) {
                 applyTheme(state.theme);
@@ -512,6 +521,110 @@ document.addEventListener('DOMContentLoaded', () => {
         renderRules();
         saveState();
     };
+
+    // Site istisnaları: bu sitelerde otomatik gönderim yapılmaz; alanlar yine doldurulur
+    function renderSites() {
+        siteList.innerHTML = "";
+        siteEmpty.hidden = state.noAutoSubmitSites.length > 0;
+        state.noAutoSubmitSites.forEach((host, idx) => {
+            const row = document.createElement('div');
+            row.className = 'flex items-center justify-between gap-3 py-2.5';
+
+            // Alan adı kullanıcı girdisidir: metin olarak eklenir (innerHTML yok)
+            const code = document.createElement('code');
+            code.className = 'min-w-0 truncate font-mono text-[12px] font-semibold text-brand-700 dark:text-brand-300';
+            code.textContent = host;
+
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'inline-flex h-7 shrink-0 cursor-pointer select-none items-center justify-center rounded-lg px-2 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-50 focus-ring dark:text-rose-400 dark:hover:bg-rose-500/10';
+            removeBtn.textContent = currentText.removeRuleBtn;
+            removeBtn.onclick = () => {
+                state.noAutoSubmitSites.splice(idx, 1);
+                renderSites();
+                saveState();
+            };
+
+            row.append(code, removeBtn);
+            siteList.appendChild(row);
+        });
+    }
+
+    function addSite() {
+        const host = FillHubSiteRules.normalizeHost(siteInput.value);
+        if (!host) {
+            siteError.textContent = currentText.siteErrInvalid;
+            siteError.hidden = false;
+            return;
+        }
+        if (!state.noAutoSubmitSites.includes(host)) state.noAutoSubmitSites.push(host);
+        siteInput.value = "";
+        siteError.hidden = true;
+        renderSites();
+        saveState();
+    }
+
+    siteAddBtn.addEventListener('click', addSite);
+    siteInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addSite(); });
+    siteInput.addEventListener('input', () => { siteError.hidden = true; });
+
+    // Yedekleme: dışa aktarma indirilir; içe aktarma doğrulanır, onaydan sonra depolamaya yazılır ve sayfa yenilenir
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const importFile = document.getElementById('importFile');
+    const backupStatus = document.getElementById('backupStatus');
+
+    function showBackupStatus(message, isError) {
+        backupStatus.textContent = message;
+        backupStatus.classList.toggle('text-rose-600', isError);
+        backupStatus.classList.toggle('dark:text-rose-400', isError);
+        backupStatus.classList.toggle('text-soft', !isError);
+        backupStatus.hidden = false;
+    }
+
+    exportBtn.addEventListener('click', () => {
+        const backup = FillHubBackup.createBackup(state);
+        const url = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `fillhub-yedek-${backup.exportedAt.slice(0, 10)}.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showBackupStatus(currentText.backupExported, false);
+    });
+
+    importBtn.addEventListener('click', () => importFile.click());
+
+    importFile.addEventListener('change', async () => {
+        const file = importFile.files[0];
+        importFile.value = '';
+        if (!file) return;
+        if (file.size > FillHubBackup.MAX_BYTES) {
+            showBackupStatus(currentText.backupErrSize, true);
+            return;
+        }
+        let parsed;
+        try {
+            parsed = JSON.parse(await file.text());
+        } catch (e) {
+            showBackupStatus(currentText.backupErrParse, true);
+            return;
+        }
+        const result = FillHubBackup.validateBackup(parsed, {
+            isValidSelector,
+            knownTypes: FakeDataGenerator.getDataTypes(),
+            isValidHost: FillHubSiteRules.isValidHost
+        });
+        if (!result.ok) {
+            showBackupStatus(result.reason === 'format' ? currentText.backupErrFormat : `${currentText.backupErrField} ${result.field}`, true);
+            return;
+        }
+        if (!confirm(currentText.backupImportConfirm)) return;
+        // Mevcut ayarların yerine yazılır; sayfa yenilenince tüm arayüz yeni durumdan kurulur
+        chrome.storage.local.set(result.data, () => location.reload());
+    });
 
     closeOnboarding.onclick = () => {
         state.onboardingComplete = true;

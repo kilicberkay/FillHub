@@ -229,6 +229,10 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
             `chrome.storage.local.get('customRules').then((r) => JSON.stringify(r.customRules || []))`,
         ));
 
+        const storedSites = async () => JSON.parse(await env.swEval(
+            `chrome.storage.local.get('noAutoSubmitSites').then((r) => JSON.stringify(r))`,
+        ));
+
         it('alan doldurulunca gönder düğmesine bir kez tıklanır', async () => {
             await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, autoSubmit: true });
             const form = await openForm(env);
@@ -280,6 +284,57 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
             }
         });
 
+        it('site istisnasındaki sayfada gönder yapılmaz, diğer sayfalarda yapılır', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, autoSubmit: true, noAutoSubmitSites: ['example.com'] });
+            const excluded = await openForm(env);
+            try {
+                await countSubmits(excluded.page);
+                // Sayfa alan adı arka plandan gelir; alt alan adı da istisnanın kapsamındadır
+                const r = await send(env, excluded.tabId, { action: 'fill', pageHost: 'pay.example.com' });
+                assert.equal(r.status, 'success');
+                await wait(900);
+                assert.equal(await excluded.page.eval('window.__submits'), 0, 'istisna listesindeki sitede gönderilmemeli');
+            } finally {
+                await closeForm(excluded);
+            }
+
+            const open = await openForm(env);
+            try {
+                await countSubmits(open.page);
+                await send(env, open.tabId, { action: 'fill', pageHost: 'other.org' });
+                await wait(900);
+                assert.equal(await open.page.eval('window.__submits'), 1, 'listede olmayan sitede gönderilmeli');
+            } finally {
+                await closeForm(open);
+            }
+        });
+
+        it('ayar sayfasında alan adı eklenir, geçersiz giriş reddedilir', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
+            const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/options/options.html`);
+            try {
+                await page.waitFor('!!document.getElementById("siteAddBtn")', 10000);
+                await wait(300);
+                const add = (text) => page.eval(`(() => {
+                    const input = document.getElementById('siteInput');
+                    input.value = ${JSON.stringify(text)};
+                    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+                })()`);
+
+                await add('bu olmaz');
+                assert.equal(await page.eval(`!document.getElementById('siteError').hidden`), true, 'geçersiz alan adı için hata gösterilmeli');
+                await wait(200);
+                assert.deepEqual((await storedSites()).noAutoSubmitSites ?? [], [], 'geçersiz alan adı kaydedilmemeli');
+
+                await add('https://www.Bank.com/giris');
+                await wait(200);
+                assert.deepEqual((await storedSites()).noAutoSubmitSites, ['bank.com'], 'URL alan adına çevrilip kaydedilmeli');
+                assert.equal(await page.eval(`document.getElementById('siteList').textContent.includes('bank.com')`), true, 'liste güncellenmeli');
+            } finally {
+                await page.close();
+            }
+        });
+
         it('geçersiz CSS seçici reddedilir, geçerli olan kaydedilir', async () => {
             await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
             const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/options/options.html`);
@@ -300,6 +355,62 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
                 assert.equal(await page.eval(`document.getElementById('ruleSelectorError').hidden`), true, 'geçerli seçicide hata gizlenmeli');
                 await wait(200);
                 assert.deepEqual((await storedRules()).map((r) => r.selector), ['#ad'], 'geçerli seçici kaydedilmeli');
+            } finally {
+                await page.close();
+            }
+        });
+    });
+
+    describe('yedekleme', () => {
+        const openOptions = async () => {
+            const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/options/options.html`);
+            await page.waitFor('!!document.getElementById("importFile")', 10000);
+            await wait(300);
+            return page;
+        };
+
+        // Dosya seçici yerine girişe dosya bırakır ve değişiklik olayını tetikler; onay penceresi otomatik kabul edilir
+        const uploadFile = (page, text) => page.eval(`(() => {
+            window.confirm = () => true;
+            const dt = new DataTransfer();
+            dt.items.add(new File([${JSON.stringify(text)}], 'yedek.json', { type: 'application/json' }));
+            const input = document.getElementById('importFile');
+            input.files = dt.files;
+            input.dispatchEvent(new Event('change'));
+        })()`);
+
+        const stored = async (key) => JSON.parse(await env.swEval(
+            `chrome.storage.local.get(${JSON.stringify(key)}).then((r) => JSON.stringify(r))`,
+        ));
+
+        it('geçerli yedek içe aktarılır: ayarlar ve kurallar yazılır', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
+            const page = await openOptions();
+            try {
+                const backup = {
+                    format: 'fillhub-backup', version: 1, exportedAt: '2026-10-16T00:00:00.000Z',
+                    data: { theme: 'light', preferredLocale: 'en-US', autoSubmit: true, customRules: [{ selector: '#ad', type: 'firstName' }] },
+                };
+                await uploadFile(page, JSON.stringify(backup));
+                await wait(1500);
+                const r = await env.swEval(`chrome.storage.local.get(null).then((r) => JSON.stringify(r))`);
+                const all = JSON.parse(r);
+                assert.equal(all.preferredLocale, 'en-US');
+                assert.equal(all.autoSubmit, true);
+                assert.deepEqual(all.customRules, [{ selector: '#ad', type: 'firstName' }]);
+            } finally {
+                await page.close();
+            }
+        });
+
+        it('bozuk dosya reddedilir ve mevcut ayarlar değişmez', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
+            const page = await openOptions();
+            try {
+                await uploadFile(page, JSON.stringify({ format: 'baska', version: 1, data: {} }));
+                await wait(300);
+                assert.equal(await page.eval(`!document.getElementById('backupStatus').hidden`), true, 'hata durumu gösterilmeli');
+                assert.equal((await stored('preferredLocale')).preferredLocale, 'tr-TR', 'ayar değişmemeli');
             } finally {
                 await page.close();
             }

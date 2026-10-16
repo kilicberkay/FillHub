@@ -998,8 +998,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 showToast(getLocalizedMessage(settings.preferredLocale, request.action === 'fill_chaos' ? 'chaos' : 'filled'), settings.theme);
             }
         }
-        // Gönderim yalnız bu çerçevede alan doldurulduysa ve captcha yoksa; doldurulmayan iframe'lerdeki düğmelere tıklanmaz
-        if (settings.autoSubmit && request.action === 'fill' && filledCount > 0 && !captcha) {
+        // Gönderim yalnız bu çerçevede alan doldurulduysa, captcha yoksa ve sayfa site istisnası listesinde değilse
+        // (sayfa alan adı arka plandan gelir; iframe'ler üst sayfanın kuralına tabidir)
+        const siteExcluded = FillHubSiteRules.matchesSite(request.pageHost || location.hostname, settings.noAutoSubmitSites);
+        if (settings.autoSubmit && request.action === 'fill' && filledCount > 0 && !captcha && !siteExcluded) {
             autoSubmitForm(document);
         }
         respond({ status: 'success', filled: filledCount });

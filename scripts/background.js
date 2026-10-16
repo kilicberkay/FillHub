@@ -1,6 +1,6 @@
 // Doldurma betikleri sayfalara otomatik enjekte edilmez. FillHub kullanıldığında (kısayol, simge, menü)
 // her çerçeveye bir kez enjekte edilir; böylece kullanılmayan sayfalar bellek harcamaz.
-const CONTENT_FILES = ["scripts/locale-data.js", "scripts/id-rules.js", "scripts/field-detect.js", "scripts/generator.js", "scripts/content.js"];
+const CONTENT_FILES = ["scripts/locale-data.js", "scripts/id-rules.js", "scripts/field-detect.js", "scripts/generator.js", "scripts/site-rules.js", "scripts/content.js"];
 
 // Her çerçevede içerik betiği yoksa enjekte eder; zaten yüklü olanlara dokunmaz
 async function ensureContentScripts(tabId) {
@@ -17,9 +17,19 @@ async function ensureContentScripts(tabId) {
     }
 }
 
-async function sendToTab(tabId, message) {
-    await ensureContentScripts(tabId);
-    return chrome.tabs.sendMessage(tabId, message).catch(() => {
+// Sayfanın üst düzey alan adı, site istisnalarının karar verebilmesi için her mesajla birlikte gönderilir;
+// iframe'ler de bu alan adına göre değerlendirilir
+function hostOf(url) {
+    try {
+        return new URL(url).hostname;
+    } catch (e) {
+        return '';
+    }
+}
+
+async function sendToTab(tab, message) {
+    await ensureContentScripts(tab.id);
+    return chrome.tabs.sendMessage(tab.id, { ...message, pageHost: hostOf(tab.url) }).catch(() => {
         // Sayfa kısıtlıysa ya da içerik betiği yanıt vermiyorsa yoksay
     });
 }
@@ -45,7 +55,7 @@ chrome.runtime.onInstalled.addListener(() => {
 // Click on the extension icon
 chrome.action.onClicked.addListener(async (tab) => {
     const { preferredLocale } = await chrome.storage.local.get(['preferredLocale']);
-    sendToTab(tab.id, { action: "fill", locale: preferredLocale });
+    sendToTab(tab, { action: "fill", locale: preferredLocale });
 });
 
 const MENU_ACTIONS = {
@@ -58,7 +68,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     const action = MENU_ACTIONS[info.menuItemId];
     if (!action) return;
     const { preferredLocale } = await chrome.storage.local.get(['preferredLocale']);
-    sendToTab(tab.id, { action, locale: preferredLocale });
+    sendToTab(tab, { action, locale: preferredLocale });
 });
 
 const COMMAND_ACTIONS = {
@@ -71,5 +81,5 @@ chrome.commands.onCommand.addListener(async (command) => {
     if (!tab) return;
     const action = COMMAND_ACTIONS[command] || 'fill';
     const { preferredLocale } = await chrome.storage.local.get(['preferredLocale']);
-    sendToTab(tab.id, { action, locale: preferredLocale });
+    sendToTab(tab, { action, locale: preferredLocale });
 });

@@ -5,6 +5,12 @@ All notable changes to FillHub are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+- Settings backup: export profiles, custom rules and settings to a JSON file, and import one back. Importing
+  replaces the current settings after you confirm. Imported files are checked field by field and nothing is sent anywhere.
+- Auto-submit exceptions: a list of sites where FillHub fills the fields but never clicks submit. An entry
+  also covers its subdomains.
+
 ## [1.2.1] - 2026-10-16
 
 ### Changed
