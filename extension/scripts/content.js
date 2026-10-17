@@ -733,7 +733,7 @@ function autoSubmitForm(container) {
     }
 }
 
-// Bildirim kartı: blog toast'unun açık/koyu yüzeyi (sayfa stillerinden bağımsız, inline)
+// Bildirim kartı (toast) açık/koyu yüzeyi: sayfa stillerinden bağımsız, inline
 const TOAST_THEMES = {
     dark: { background: 'rgba(24, 24, 27, 0.9)', color: '#f4f4f5', border: '1px solid rgba(255, 255, 255, 0.1)', shadow: '0 24px 48px -32px rgba(0, 0, 0, 0.9)' },
     light: { background: 'rgba(255, 255, 255, 0.95)', color: '#18181b', border: '1px solid #e4e4e7', shadow: '0 18px 40px -24px rgba(24, 24, 27, 0.35)' }
@@ -741,10 +741,10 @@ const TOAST_THEMES = {
 
 // action: isteğe bağlı { label, onClick } düğmesi. Odak almaz; yalnızca kullanıcı tıklarsa çalışır.
 function showToast(message, theme, action) {
-    let toast = document.getElementById('fake-filler-toast');
+    let toast = document.getElementById('fillhub-toast');
     if (!toast) {
         toast = document.createElement('div');
-        toast.id = 'fake-filler-toast';
+        toast.id = 'fillhub-toast';
         Object.assign(toast.style, {
             position: 'fixed', right: '20px', bottom: '20px', zIndex: '2147483647',
             display: 'flex', alignItems: 'center', gap: '10px', maxWidth: '360px',
