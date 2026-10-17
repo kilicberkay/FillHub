@@ -1,7 +1,7 @@
 // Statik denetimler: manifest, dosya varlığı, arayüz kimlikleri, çeviri paritesi, gizlilik (ağ/kod enjeksiyonu yok)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -111,4 +111,17 @@ test('captcha: içerik betiği captcha\'ya tıklamaz, çözmez ve doğrulama API
         /\.click\(\)[^\n]*captcha/i,
     ];
     for (const re of banned) assert.ok(!re.test(src), `captcha etkileşimi var: ${re}`);
+});
+
+test('toast: geri al düğmesi etiketi tarayıcı dilinden değil, ayarlardaki dilden gelir; 15 dilde menuUndo ile aynı', () => {
+    const src = read('scripts/content.js');
+    assert.ok(!/chrome\.i18n\.getMessage\('menuUndo'\)/.test(src), 'düğme etiketi tarayıcı dilinden alınıyor');
+    assert.match(src, /getLocalizedMessage\(settings\.preferredLocale, 'undoLabel'\)/);
+    const dirs = readdirSync(join(EXT, '_locales'));
+    assert.equal(dirs.length, 15);
+    for (const dir of dirs) {
+        const msg = JSON.parse(read(`_locales/${dir}/messages.json`)).menuUndo.message;
+        const lang = dir.split('_')[0];
+        assert.ok(src.includes(`'${lang}': '${msg}'`), `${dir}: undoLabel çevirisi content.js içinde yok`);
+    }
 });

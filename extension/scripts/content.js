@@ -871,7 +871,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             } else {
                 // Gönderim istenmediyse bildirimde "Geri al" sunulur; gönderilmiş bir formu geri almak mümkün değildir
                 const undoAction = submitRequested ? undefined : {
-                    label: chrome.i18n.getMessage('menuUndo'),
+                    label: getLocalizedMessage(settings.preferredLocale, 'undoLabel'),
                     onClick: () => {
                         undoFill();
                         showToast(getLocalizedMessage(settings.preferredLocale, 'undo'), settings.theme);
@@ -944,6 +944,24 @@ function getLocalizedMessage(localeLiteral, key = 'filled') {
             'ur': 'فارم پہلے جیسا کر دیا گیا۔',
             'id': 'Formulir dikembalikan ke keadaan semula.',
             'vi': 'Đã khôi phục biểu mẫu.'
+        },
+        // Bildirimdeki geri al düğmesi; metin _locales/*/messages.json içindeki menuUndo ile aynıdır (static.test.mjs denetler)
+        undoLabel: {
+            'ar': 'التراجع عن الملء الوهمي',
+            'bn': 'নকল পূরণ পূর্বাবস্থায় ফেরান',
+            'de': 'Testdaten-Füllung rückgängig machen',
+            'en': 'Undo fake fill',
+            'es': 'Deshacer relleno falso',
+            'fr': 'Annuler le remplissage fictif',
+            'hi': 'नकली भराई पूर्ववत करें',
+            'id': 'Batalkan pengisian data palsu',
+            'ja': '架空データの入力を元に戻す',
+            'pt': 'Desfazer preenchimento fictício',
+            'ru': 'Отменить заполнение тестовыми данными',
+            'tr': 'Sahte doldurmayı geri al',
+            'ur': 'جعلی بھرائی واپس کریں',
+            'vi': 'Hoàn tác điền dữ liệu giả',
+            'zh': '撤销虚构数据填写'
         },
         captcha: {
             "tr": "Doğrulama gerekiyor: captcha'yı kendiniz tamamlayın.",
