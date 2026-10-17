@@ -857,6 +857,22 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
             }
         });
 
+        it('geri alınacak bir doldurma yoksa açılır pencere "0 alan" yerine açıklama gösterir', async () => {
+            await setStorage(env, { uiLang: 'tr', preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
+            const form = await openForm(env);
+            const popup = await openPopup();
+            try {
+                await env.swEval(`chrome.tabs.update(${form.tabId}, { active: true })`);
+                await popup.eval(`document.getElementById('popupUndoBtn').click()`);
+                await popup.waitFor(`!document.getElementById('popupResult').hidden`, 10000);
+                const shown = await popup.eval(`document.getElementById('popupResult').textContent`);
+                assert.equal(shown, 'Bu sayfada geri alınacak bir şey yok.', `beklenmeyen sonuç: "${shown}"`);
+            } finally {
+                await popup.close();
+                await closeForm(form);
+            }
+        });
+
         it('doldurma ve geri alma etkin sekmede çalışır ve sonucu gösterir', async () => {
             await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
             const form = await openForm(env);
