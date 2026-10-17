@@ -11,15 +11,18 @@ that your data stays on your device.
   identity presets, auto-submit exceptions) are kept in `chrome.storage.local` in your browser profile.
   They never leave your device. The summary of the last fill (counts of detected field types and
   flags, never values or labels) is stored the same way and is only shared if you download a
-  diagnostics report and send it yourself.
+  diagnostics report and send it yourself. Fixed profile values you enter (first name, last name, e-mail,
+  phone and password) are stored there too, without encryption. Do not enter a real password; the field is
+  for test accounts only.
 - **Backups are files you control.** Exporting settings writes a JSON file to your computer; importing
   reads a file you choose. Nothing is uploaded.
 - **Reads form fields only when you ask it to fill.** FillHub acts when you press a shortcut, use
   the context menu, or press Fill in the toolbar popup. It reads the labels and names of form fields on the
   page you are viewing in order to choose a fake value for each field, and writes values back to
   those fields.
-- **Does not read or store the values you type**, except the value it has just written, so the
-  Undo command can restore the previous state within the current page session.
+- **Does not store the values it writes into form fields**, except the previous values that the Undo
+  command needs to restore the page, which are kept in memory for the current page session. The fixed
+  profile values described above are the only values you type that FillHub keeps.
 
 ## Permissions and why they are needed
 
