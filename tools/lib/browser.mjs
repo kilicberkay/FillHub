@@ -84,7 +84,7 @@ export async function launchWithExtension(extensionDir, { headless = true, width
         await sleep(200);
         rmSync(userDataDir, { recursive: true, force: true });
     };
-    return { port, browserWs: version.webSocketDebuggerUrl, close, chrome, stderrTail: () => stderr.split('\n').filter((l) => /extension|service_?worker|background|manifest/i.test(l)).slice(-40).join('\n').slice(-3000) };
+    return { port, browserWs: version.webSocketDebuggerUrl, close, chrome, stderrTail: () => stderr.split('\n').filter((l) => /gpgdafdn|service|manifest|background|extension id|ERROR/i.test(l) && !/dbus|gcm/i.test(l)).slice(-60).join('\n').slice(-3500) };
 }
 
 // Tek bir WebSocket üzerinde CDP komutları ve olayları
