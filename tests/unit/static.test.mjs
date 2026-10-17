@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { join, dirname } from 'node:path';
+import { join, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -124,4 +124,23 @@ test('toast: geri al düğmesi etiketi tarayıcı dilinden değil, ayarlardaki d
         const lang = dir.split('_')[0];
         assert.ok(src.includes(`'${lang}': '${msg}'`), `${dir}: undoLabel çevirisi content.js içinde yok`);
     }
+});
+
+test('bağlantılar: GitHub depo bağlantılarının tümü FillHub deposunu gösterir (eski depo adı kalmaz)', () => {
+    const offenders = [];
+    const walk = (dir) => {
+        for (const entry of readdirSync(dir, { withFileTypes: true })) {
+            if (['node_modules', '.git', 'dist'].includes(entry.name)) continue;
+            const full = join(dir, entry.name);
+            if (entry.isDirectory()) {
+                walk(full);
+            } else if (/\.(md|html|js|mjs|json)$/.test(entry.name)) {
+                for (const m of readFileSync(full, 'utf8').matchAll(/github\.com\/kilicberkay\/([\w.-]+)/g)) {
+                    if (m[1] !== 'FillHub') offenders.push(`${relative(ROOT, full)}: ${m[0]}`);
+                }
+            }
+        }
+    };
+    walk(ROOT);
+    assert.deepEqual(offenders, []);
 });

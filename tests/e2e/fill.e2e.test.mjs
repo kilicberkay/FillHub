@@ -626,15 +626,15 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
             try {
                 const r = await send(env, form.tabId, { action: 'fill' });
                 assert.equal(r.status, 'success');
-                const buttons = await form.page.eval(`document.querySelectorAll('#fake-filler-toast [data-role="action"]').length`);
+                const buttons = await form.page.eval(`document.querySelectorAll('#fillhub-toast [data-role="action"]').length`);
                 assert.equal(buttons, 1, 'bildirimde Geri al düğmesi olmalı');
-                assert.equal(await form.page.eval(`!!document.activeElement?.closest('#fake-filler-toast')`), false, 'bildirim odak almamalı');
+                assert.equal(await form.page.eval(`!!document.activeElement?.closest('#fillhub-toast')`), false, 'bildirim odak almamalı');
 
-                await form.page.eval(`document.querySelector('#fake-filler-toast [data-role="action"]').click()`);
+                await form.page.eval(`document.querySelector('#fillhub-toast [data-role="action"]').click()`);
                 await wait(300);
                 const restored = await readForm(form.page);
                 assert.ok(Object.values(restored).every((v) => v === '' || v === false), 'alanlar önceki haline dönmeli');
-                assert.equal(await form.page.eval(`document.querySelectorAll('#fake-filler-toast [data-role="action"]').length`), 0, 'geri alındıktan sonra düğme kalkmalı');
+                assert.equal(await form.page.eval(`document.querySelectorAll('#fillhub-toast [data-role="action"]').length`), 0, 'geri alındıktan sonra düğme kalkmalı');
             } finally {
                 await closeForm(form);
             }
@@ -648,7 +648,7 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
                 await form.page.eval(`document.getElementById('kayit').addEventListener('submit', (e) => e.preventDefault())`);
                 await send(env, form.tabId, { action: 'fill' });
                 await wait(900);
-                const buttons = await form.page.eval(`document.querySelectorAll('#fake-filler-toast [data-role="action"]').length`);
+                const buttons = await form.page.eval(`document.querySelectorAll('#fillhub-toast [data-role="action"]').length`);
                 assert.equal(buttons, 0, 'gönderilmiş bir formu geri almak sunulmamalı');
             } finally {
                 await closeForm(form);
@@ -952,7 +952,7 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
                 })()`);
                 const r = await send(env, form.tabId, { action: 'fill' });
                 assert.equal(r.status, 'success');
-                const toast = await form.page.eval(`document.getElementById('fake-filler-toast')?.textContent || ''`);
+                const toast = await form.page.eval(`document.getElementById('fillhub-toast')?.textContent || ''`);
                 assert.ok(/captcha/i.test(toast), `captcha bildirimi gösterilmeli: "${toast}"`);
                 const outline = await form.page.eval(`document.getElementById('captcha-test').style.outline`);
                 assert.ok(outline.length > 0, 'captcha vurgulanmalı');
