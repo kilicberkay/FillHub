@@ -84,7 +84,12 @@ export async function launchWithExtension(extensionDir, { headless = true, width
         await sleep(200);
         rmSync(userDataDir, { recursive: true, force: true });
     };
-    return { port, browserWs: version.webSocketDebuggerUrl, close, chrome, stderrTail: () => { const keep = stderr.split('\n').filter((l) => /gpgdafdn|fillhub|Failed to load|Could not load|extension.*(error|fail)|manifest|ERROR:.*(extension|service)/i.test(l) && !/dbus|gcm/i.test(l)); return [...keep.slice(0, 30), '...', ...keep.slice(-20)].join('\n').slice(0, 4000); } }
+    return { port, browserWs: version.webSocketDebuggerUrl, close, chrome, stderrTail: () => {
+            // Geçici profil yolu (fillhub-e2e-…) her satırda geçtiği için ayrıca dışlanır; yalnız eklenti ile ilgili satırlar kalır
+            const keep = stderr.split('\n').filter((l) => /extension|manifest|service_worker|Failed to load|Could not load|ERROR:/i.test(l)
+                && !/dbus|gcm|fillhub-e2e|Cannot stat|component_updater|omnibox/i.test(l));
+            return [...keep.slice(0, 30), '...', ...keep.slice(-20)].join('\n').slice(0, 4000);
+        } }
 }
 
 // Tek bir WebSocket üzerinde CDP komutları ve olayları
