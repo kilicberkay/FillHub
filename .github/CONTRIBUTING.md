@@ -46,4 +46,11 @@ Chromium binary if it is not found automatically. Without a browser, the e2e sui
    scripts or the settings page.
 4. Use the pull request template and describe what you verified in a real browser.
 
+## Branches and releases
+
+- `main` is the only long-lived branch. Store listings and the README link to files on `main`.
+- Work happens on short-lived branches (`feat/...`, `fix/...`, `docs/...`). Delete them after merging.
+- A release is a `vX.Y.Z` tag on `main`. Pushing the tag runs the release workflow, which builds the
+  package and creates the GitHub Release. There are no release branches.
+
 Commit messages: short imperative summary in English, body optional.

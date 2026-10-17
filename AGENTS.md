@@ -166,3 +166,8 @@ Tüm yollar depo köküne göredir; eklenti dosyaları `extension/` altındadır
 7. Paket: `npm run build`; zip açılıp `extension/manifest.json`'daki dosyaların hepsinin içinde olduğu doğrulanır.
 8. Kimlik sağlaması yalnız bilinen vektörlerle doğrulanan algoritmalarda iddia edilir; biçim-only numaralara
    geçerlilik iddiası yazılmaz.
+
+## Dal ve Sürüm Düzeni
+- Kalıcı dal yalnızca `main`'dir. Mağaza metinleri ve README, dosyalara `main` üzerinden bağlanır (`blob/main/PRIVACY.md`); `release/*` dalı açılmaz.
+- İş kısa ömürlü dallarda yapılır (`feat/…`, `fix/…`, `docs/…`); birleşince dal silinir.
+- Sürüm, `main` üzerinde `vX.Y.Z` etiketidir. `v*` etiketi gönderilince `.github/workflows/release.yml` paketi derler ve GitHub Release oluşturur.

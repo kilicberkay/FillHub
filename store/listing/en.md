@@ -44,7 +44,7 @@ Right-click a single field and choose "Fill this field" to fill only that field.
 Privacy
 
 FillHub collects no data. Settings stay in your browser. The extension sends nothing to the author or
-to any third party. See the privacy policy: https://github.com/kilicberkay/FillHub/blob/release/1.2.0/PRIVACY.md
+to any third party. See the privacy policy: https://github.com/kilicberkay/FillHub/blob/main/PRIVACY.md
 
 Open source
 
