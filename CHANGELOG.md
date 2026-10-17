@@ -5,7 +5,11 @@ All notable changes to FillHub are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.3.2] - 2026-10-17
+
 ### Fixed
+- The password field of a fixed profile is masked on the settings page (it was plain text), and the privacy
+  policies say that fixed profile values, including the password, are stored unencrypted on the device.
 - The "Star on GitHub" and "Report an issue" links in the settings page's Support section open the FillHub
   repository. They pointed to an old repository name.
 - The README and FAQ no longer say that FillHub scrolls to a visible captcha. It outlines the captcha, shows a

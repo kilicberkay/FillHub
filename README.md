@@ -183,7 +183,7 @@ FillHub does not click, solve, or call captcha APIs. When a visible reCAPTCHA, h
 
 ### From source (developer mode)
 
-1. Clone the repository, or download [`fillhub-1.3.1.zip`](https://github.com/kilicberkay/FillHub/releases/tag/v1.3.1) from the Releases page and unpack it.
+1. Clone the repository, or download [`fillhub-1.3.2.zip`](https://github.com/kilicberkay/FillHub/releases/tag/v1.3.2) from the Releases page and unpack it.
 2. Open `chrome://extensions` and turn on **Developer mode**.
 3. Click **Load unpacked** and select the `extension/` folder (the one that contains `manifest.json`).
 4. Open any page with a form and press `Ctrl+Shift+F`.

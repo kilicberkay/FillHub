@@ -182,7 +182,7 @@ FillHub captcha'ya tıklamaz, çözmez ve captcha API'lerini çağırmaz. Sayfad
 
 ### Kaynaktan (geliştirici modu)
 
-1. Depoyu klonlayın ya da [Sürümler sayfası](https://github.com/kilicberkay/FillHub/releases/tag/v1.3.1) üzerinden `fillhub-1.3.1.zip` dosyasını indirip açın.
+1. Depoyu klonlayın ya da [Sürümler sayfası](https://github.com/kilicberkay/FillHub/releases/tag/v1.3.2) üzerinden `fillhub-1.3.2.zip` dosyasını indirip açın.
 2. `chrome://extensions` adresini açın ve **Geliştirici modu**nu etkinleştirin.
 3. **Paketlenmemiş öğe yükle** düğmesine tıklayın ve `extension/` klasörünü (içinde `manifest.json` bulunan klasör) seçin.
 4. Herhangi bir form içeren sayfayı açın ve `Ctrl+Shift+F` tuşlarına basın.
