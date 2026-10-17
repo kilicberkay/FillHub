@@ -82,7 +82,7 @@ export async function launchWithExtension(extensionDir, { headless = true, width
         await sleep(200);
         rmSync(userDataDir, { recursive: true, force: true });
     };
-    return { port, browserWs: version.webSocketDebuggerUrl, close, chrome, stderrTail: () => stderr.slice(-600) };
+    return { port, browserWs: version.webSocketDebuggerUrl, close, chrome, stderrTail: () => stderr.slice(-1500) };
 }
 
 // Tek bir WebSocket üzerinde CDP komutları ve olayları
