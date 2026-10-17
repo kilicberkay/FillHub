@@ -3,7 +3,8 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/demo.gif" alt="FillHub fills a sign-up form, then undo restores it" width="90%">
+  <a href="docs/videos/demo-en.mp4"><img src="docs/images/demo.gif" alt="FillHub fills a sign-up form, then undo restores it" width="90%"></a><br>
+  <sub><a href="docs/videos/demo-en.mp4">▶ Watch the full-quality video (MP4, 1280×800)</a></sub>
 </p>
 
 <h1 align="center">FillHub</h1>

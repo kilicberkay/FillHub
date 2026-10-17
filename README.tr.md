@@ -3,7 +3,8 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/tr/demo.gif" alt="FillHub bir kayıt formunu doldurur, geri al ile eski hâline döner" width="90%">
+  <a href="docs/videos/demo-tr.mp4"><img src="docs/images/tr/demo.gif" alt="FillHub bir kayıt formunu doldurur, geri al ile eski hâline döner" width="90%"></a><br>
+  <sub><a href="docs/videos/demo-tr.mp4">▶ Tam kaliteli videoyu izle (MP4, 1280×800)</a></sub>
 </p>
 
 <h1 align="center">FillHub</h1>
