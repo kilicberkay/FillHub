@@ -10,10 +10,16 @@ All notable changes to FillHub are documented here. The format follows
   repository. They pointed to an old repository name.
 - The README and FAQ no longer say that FillHub scrolls to a visible captcha. It outlines the captcha, shows a
   notice, and leaves focus and scroll position alone.
+- The "Support" item in the settings sidebar had a contrast of about 4.1:1 in the light theme when it was active.
+  Its label now uses the same colours as the other items; only the heart keeps the accent colour.
+- The README describes the e-mail addresses generated with PII Safe off accurately: they look realistic and use
+  generic domains.
 
 ### Changed
-- The toolbar popup says when a page has no fields to fill, instead of reporting "0 fields filled". The text is
-  available in all 15 interface languages.
+- The toolbar popup says when a page has no fields to fill, or when there is nothing to undo, instead of reporting
+  "0 fields". The texts are available in all 15 interface languages.
+- The About page describes what FillHub does, in all 15 languages, without superlatives.
+- The browser tests run on every push and pull request. A manual run can still skip them.
 - The notification element that FillHub adds to web pages is named `fillhub-toast` (it was `fake-filler-toast`).
 - README and store screenshots are retaken from the current build, so the notification's undo button matches
   the extension language.
