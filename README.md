@@ -3,19 +3,13 @@
 </p>
 
 <p align="center">
-  <a href="docs/videos/demo-en.mp4"><img src="docs/images/demo.gif" alt="FillHub fills a sign-up form, then undo restores it" width="90%"></a><br>
-  <sub><a href="docs/videos/demo-en.mp4">▶ Watch the full-quality video (MP4, 1280×800)</a></sub>
-</p>
-
-<h1 align="center">FillHub</h1>
-
-<p align="center">
   <b>Realistic, consistent fake data for web forms, in 15 languages.</b><br>
   A Chrome extension for developers and testers. Privacy-safe by default. No data collection.
 </p>
 
 <p align="center">
   <a href="https://chromewebstore.google.com/detail/fillhub/chkkiamcnmilalgbokfofnhhlckmaihi"><img src="https://img.shields.io/badge/Chrome%20Web%20Store-install-4285F4?logo=googlechrome&logoColor=white" alt="Get FillHub on the Chrome Web Store"></a>
+  <a href="https://github.com/kilicberkay/FillHub/releases/latest"><img src="https://img.shields.io/github/v/release/kilicberkay/FillHub" alt="Latest release"></a>
   <a href="https://github.com/kilicberkay/FillHub/actions/workflows/ci.yml"><img src="https://github.com/kilicberkay/FillHub/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT license"></a>
   <img src="https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4?logo=googlechrome&logoColor=white" alt="Chrome Manifest V3">
@@ -26,11 +20,25 @@
   English · <a href="README.tr.md">Türkçe</a>
 </p>
 
+<p align="center">
+  <a href="#install">Install</a> · <a href="#features">Features</a> · <a href="#screenshots">Screenshots</a> · <a href="docs/FAQ.md">FAQ</a> · <a href="#development">Development</a>
+</p>
+
+<p align="center">
+  <a href="docs/videos/demo-en.mp4"><img src="docs/images/demo.gif" alt="FillHub fills a sign-up form in four countries, then undo restores it" width="90%"></a><br>
+  <sub><a href="docs/videos/demo-en.mp4">▶ Watch the full-quality video (MP4, 1280×800)</a></sub>
+</p>
+
+| Languages | Consistency | Shortcuts | Data |
+|---|---|---|---|
+| 15 countries | One consistent person per fill | `Ctrl+Shift+F` fills, `Ctrl+Shift+U` undoes | None collected |
+
 ---
 
 ## Contents
 
 - [What it does](#what-it-does)
+- [Screenshots](#screenshots)
 - [Features](#features)
 - [Install](#install)
 - [Use](#use)
@@ -51,6 +59,43 @@ Every fill creates **one consistent person**. The first name, last name, e-mail,
 <p align="center">
   <img src="docs/images/fill-form.png" alt="A sign-up form filled by FillHub" width="90%">
 </p>
+
+## Screenshots
+
+<table align="center" width="100%">
+  <tr>
+    <td align="center" width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/popup.png">
+        <img src="docs/images/light/popup.png" alt="Toolbar popup with country, identity profile, Fill and Undo" width="240">
+      </picture><br>
+      <sub>Toolbar popup</sub>
+    </td>
+    <td align="center" width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/settings-profiles.png">
+        <img src="docs/images/light/settings-profiles.png" alt="Identity profiles page with a fixed test account" width="100%">
+      </picture><br>
+      <sub>Identity profiles</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/settings-rules.png">
+        <img src="docs/images/light/settings-rules.png" alt="Custom rules page mapping CSS selectors to data types" width="100%">
+      </picture><br>
+      <sub>Custom rules</sub>
+    </td>
+    <td align="center" width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/settings-general.png">
+        <img src="docs/images/light/settings-general.png" alt="General settings page with default country and smart features" width="100%">
+      </picture><br>
+      <sub>General settings</sub>
+    </td>
+  </tr>
+</table>
 
 ## Features
 
@@ -99,25 +144,9 @@ A profile decides who is used for a fill:
 - **Fixed person**: the same person every time, with a button to generate another one.
 
 Create, edit, and switch profiles on the **Profiles** page. The active profile is always shown at the top.
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/settings-profiles.png">
-    <img src="docs/images/light/settings-profiles.png" alt="Identity profiles page with the active profile banner and profile cards" width="90%">
-  </picture>
-</p>
-
 ### Custom rules
 
 When built-in detection misses a field, map a CSS selector to a data type on the **Custom Rules** page.
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/settings-rules.png">
-    <img src="docs/images/light/settings-rules.png" alt="Custom rules page" width="90%">
-  </picture>
-</p>
-
 ### Smart form behavior
 
 - **Smart e-mail linking**: e-mail fields follow the generated name.
@@ -137,27 +166,11 @@ When built-in detection misses a field, map a CSS selector to a data type on the
 FillHub does not click, solve, or call captcha APIs. When a visible reCAPTCHA, hCaptcha, or Turnstile widget is on the page, FillHub scrolls to it, highlights it, and asks you to complete it yourself.
 
 ### Settings
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/settings-general.png">
-    <img src="docs/images/light/settings-general.png" alt="General settings page with default country and smart features" width="90%">
-  </picture>
-</p>
-
 - **General**: default country, smart features, and PII Safe mode.
 - **Profiles**: identity profiles (see above).
 - **Custom Rules**: selector-to-type rules.
 - **About**: version and project information.
 - **Support**: how to support the project.
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/settings-support.png">
-    <img src="docs/images/light/settings-support.png" alt="Support page with the GitHub Sponsors link" width="90%">
-  </picture>
-</p>
-
 ## Install
 
 ### Chrome Web Store (recommended)
@@ -250,7 +263,8 @@ npm run build:css     # regenerate options/options.css after UI changes
 
 The browser tests use Chromium from `CHROME_BIN` or from the Playwright cache. Without a browser they are skipped.
 
-### Project layout
+<details>
+<summary><b>Project layout</b></summary>
 
 ```
 FillHub/
@@ -273,6 +287,8 @@ FillHub/
 ├── AGENTS.md            Notes for AI coding agents working on this repository
 └── package.json         Development tools (npm); the extension itself has no dependencies
 ```
+
+</details>
 
 ## Documentation
 

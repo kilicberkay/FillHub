@@ -3,19 +3,13 @@
 </p>
 
 <p align="center">
-  <a href="docs/videos/demo-tr.mp4"><img src="docs/images/tr/demo.gif" alt="FillHub bir kayıt formunu doldurur, geri al ile eski hâline döner" width="90%"></a><br>
-  <sub><a href="docs/videos/demo-tr.mp4">▶ Tam kaliteli videoyu izle (MP4, 1280×800)</a></sub>
-</p>
-
-<h1 align="center">FillHub</h1>
-
-<p align="center">
   <b>Web formları için 15 dilde gerçekçi ve tutarlı sahte veri.</b><br>
   Geliştiriciler ve test uzmanları için bir Chrome eklentisi. Varsayılan olarak gizlilik odaklı. Veri toplamaz.
 </p>
 
 <p align="center">
   <a href="https://chromewebstore.google.com/detail/fillhub/chkkiamcnmilalgbokfofnhhlckmaihi"><img src="https://img.shields.io/badge/Chrome%20Web%20Store-y%C3%BCkle-4285F4?logo=googlechrome&logoColor=white" alt="FillHub Chrome Web Store'da"></a>
+  <a href="https://github.com/kilicberkay/FillHub/releases/latest"><img src="https://img.shields.io/github/v/release/kilicberkay/FillHub" alt="Son sürüm"></a>
   <a href="https://github.com/kilicberkay/FillHub/actions/workflows/ci.yml"><img src="https://github.com/kilicberkay/FillHub/actions/workflows/ci.yml/badge.svg" alt="CI durumu"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/lisans-MIT-blue.svg" alt="MIT lisansı"></a>
   <img src="https://img.shields.io/badge/Chrome-Manifest%20V3-4285F4?logo=googlechrome&logoColor=white" alt="Chrome Manifest V3">
@@ -26,11 +20,25 @@
   <a href="README.md">English</a> · Türkçe
 </p>
 
+<p align="center">
+  <a href="#kurulum">Kurulum</a> · <a href="#özellikler">Özellikler</a> · <a href="#ekran-görüntüleri">Ekran görüntüleri</a> · <a href="docs/FAQ.md">SSS</a> · <a href="#geliştirme">Geliştirme</a>
+</p>
+
+<p align="center">
+  <a href="docs/videos/demo-tr.mp4"><img src="docs/images/tr/demo.gif" alt="FillHub dört ülkede form doldurur, geri al ile eski hâline döner" width="90%"></a><br>
+  <sub><a href="docs/videos/demo-tr.mp4">▶ Tam kaliteli videoyu izle (MP4, 1280×800)</a></sub>
+</p>
+
+| Diller | Tutarlılık | Kısayollar | Veri |
+|---|---|---|---|
+| 15 ülke | Her doldurmada tek ve tutarlı bir kişi | `Ctrl+Shift+F` doldurur, `Ctrl+Shift+U` geri alır | Toplanmaz |
+
 ---
 
 ## İçindekiler
 
 - [Ne yapar](#ne-yapar)
+- [Ekran görüntüleri](#ekran-görüntüleri)
 - [Özellikler](#özellikler)
 - [Kurulum](#kurulum)
 - [Kullanım](#kullanım)
@@ -51,6 +59,43 @@ Her doldurma **tutarlı tek bir kişi** üretir. Ad, soyad, e-posta, "e-postayı
 <p align="center">
   <img src="docs/images/tr/fill-form.png" alt="FillHub'ın doldurduğu bir kayıt formu" width="90%">
 </p>
+
+## Ekran görüntüleri
+
+<table align="center" width="100%">
+  <tr>
+    <td align="center" width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/tr/dark/popup.png">
+        <img src="docs/images/tr/light/popup.png" alt="Ülke, profil, Doldur ve Geri al düğmelerini içeren araç çubuğu penceresi" width="240">
+      </picture><br>
+      <sub>Araç çubuğu açılır penceresi</sub>
+    </td>
+    <td align="center" width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/tr/dark/settings-profiles.png">
+        <img src="docs/images/tr/light/settings-profiles.png" alt="Sabit test hesabının bulunduğu kimlik profilleri sayfası" width="100%">
+      </picture><br>
+      <sub>Kimlik profilleri</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/tr/dark/settings-rules.png">
+        <img src="docs/images/tr/light/settings-rules.png" alt="CSS seçicilerini veri türlerine eşleyen özel kurallar sayfası" width="100%">
+      </picture><br>
+      <sub>Özel kurallar</sub>
+    </td>
+    <td align="center" width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/tr/dark/settings-general.png">
+        <img src="docs/images/tr/light/settings-general.png" alt="Varsayılan ülke ve akıllı özelliklerin bulunduğu genel ayarlar" width="100%">
+      </picture><br>
+      <sub>Genel ayarlar</sub>
+    </td>
+  </tr>
+</table>
 
 ## Özellikler
 
@@ -99,25 +144,9 @@ Bir profil, doldurmada kimin kullanılacağını belirler:
 - **Sabit kişi**: her seferinde aynı kişi; isterseniz "başka kişi üret" ile yenisini oluşturabilirsiniz.
 
 Profilleri **Profiller** sayfasında oluşturun, düzenleyin ve değiştirin. Aktif profil her zaman en üstte gösterilir.
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/images/tr/dark/settings-profiles.png">
-    <img src="docs/images/tr/light/settings-profiles.png" alt="Aktif profil şeridi ve profil kartlarıyla kimlik profilleri sayfası" width="90%">
-  </picture>
-</p>
-
 ### Özel kurallar
 
 Yerleşik tanıma bir alanı kaçırırsa, **Özel Kurallar** sayfasında bir CSS seçicisini bir veri türüne eşleyebilirsiniz.
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/images/tr/dark/settings-rules.png">
-    <img src="docs/images/tr/light/settings-rules.png" alt="Özel kurallar sayfası" width="90%">
-  </picture>
-</p>
-
 ### Akıllı form davranışı
 
 - **Akıllı e-posta bağlantısı**: e-posta alanları üretilen ada uyar.
@@ -137,27 +166,11 @@ Yerleşik tanıma bir alanı kaçırırsa, **Özel Kurallar** sayfasında bir CS
 FillHub captcha'ya tıklamaz, çözmez ve captcha API'lerini çağırmaz. Sayfada görünür bir reCAPTCHA, hCaptcha veya Turnstile varsa FillHub onu kaydırıp vurgular ve doğrulamayı sizin tamamlamanızı ister.
 
 ### Ayarlar
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/images/tr/dark/settings-general.png">
-    <img src="docs/images/tr/light/settings-general.png" alt="Varsayılan ülke ve akıllı özelliklerin bulunduğu genel ayarlar" width="90%">
-  </picture>
-</p>
-
 - **Genel**: varsayılan ülke, akıllı özellikler ve güvenli mod.
 - **Profiller**: kimlik profilleri (yukarıya bakın).
 - **Özel Kurallar**: seçici-tür kuralları.
 - **Hakkında**: sürüm ve proje bilgileri.
 - **Destek ol**: projeyi nasıl destekleyebileceğiniz.
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/images/tr/dark/settings-support.png">
-    <img src="docs/images/tr/light/settings-support.png" alt="GitHub Sponsors bağlantısının bulunduğu destek sayfası" width="90%">
-  </picture>
-</p>
-
 ## Kurulum
 
 ### Chrome Web Store (önerilen)
@@ -250,7 +263,8 @@ npm run build:css     # arayüz değişince options/options.css dosyasını yeni
 
 Tarayıcı testleri `CHROME_BIN` ile verilen ya da Playwright önbelleğindeki Chromium'u kullanır. Tarayıcı yoksa atlanırlar.
 
-### Proje yapısı
+<details>
+<summary><b>Proje yapısı</b></summary>
 
 ```
 FillHub/
@@ -273,6 +287,8 @@ FillHub/
 ├── AGENTS.md            Bu depoda çalışan yapay zekâ kodlama ajanları için notlar
 └── package.json         Geliştirme araçları (npm); eklentinin kendisinin bağımlılığı yoktur
 ```
+
+</details>
 
 ## Belgeler
 
