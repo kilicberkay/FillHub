@@ -6,11 +6,12 @@ import { createServer } from 'node:net';
 import { tmpdir, homedir } from 'node:os';
 import { join } from 'node:path';
 
-// Sırayla: CHROME_BIN ortam değişkeni, Playwright önbelleği, yaygın sistem yolları
+// Sırayla: CHROME_BIN ortam değişkeni, Playwright önbellekleri (PLAYWRIGHT_BROWSERS_PATH, sonra varsayılan), yaygın sistem yolları
 export function findChrome() {
     if (process.env.CHROME_BIN && existsSync(process.env.CHROME_BIN)) return process.env.CHROME_BIN;
-    const cache = join(homedir(), '.cache', 'ms-playwright');
-    if (existsSync(cache)) {
+    const caches = [process.env.PLAYWRIGHT_BROWSERS_PATH, join(homedir(), '.cache', 'ms-playwright')].filter(Boolean);
+    for (const cache of caches) {
+        if (!existsSync(cache)) continue;
         const dirs = readdirSync(cache).filter((d) => d.startsWith('chromium-')).sort().reverse();
         for (const d of dirs) {
             for (const rel of ['chrome-linux64/chrome', 'chrome-linux/chrome']) {
