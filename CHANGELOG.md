@@ -12,6 +12,8 @@ All notable changes to FillHub are documented here. The format follows
   notice, and leaves focus and scroll position alone.
 
 ### Changed
+- The toolbar popup says when a page has no fields to fill, instead of reporting "0 fields filled". The text is
+  available in all 15 interface languages.
 - The notification element that FillHub adds to web pages is named `fillhub-toast` (it was `fake-filler-toast`).
 - README and store screenshots are retaken from the current build, so the notification's undo button matches
   the extension language.
