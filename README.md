@@ -134,7 +134,7 @@ PII Safe is **on by default**. It replaces personal identifiers with values that
 
 ### Smart field detection
 
-Each field is classified from its `autocomplete` value, `type`, label, `name` and `id`, placeholder, and nearby text. The detection corpus covers 107 labels across the 15 languages, including tricky ones such as `Soyadınız` (surname), which must not be read as a first name. Select boxes are matched to the country, state, and phone-code options they contain.
+Each field is classified from its `autocomplete` value, `type`, label, `name` and `id`, placeholder, and nearby text. The detection corpus covers more than 100 labels across the 15 languages, including tricky ones such as `Soyadınız` (surname), which must not be read as a first name. Select boxes are matched to the country, state, and phone-code options they contain.
 
 ### Identity profiles
 
@@ -144,9 +144,11 @@ A profile decides who is used for a fill:
 - **Fixed person**: the same person every time, with a button to generate another one.
 
 Create, edit, and switch profiles on the **Profiles** page. The active profile is always shown at the top.
+
 ### Custom rules
 
-When built-in detection misses a field, map a CSS selector to a data type on the **Custom Rules** page.
+When built-in detection misses a field, map a CSS selector to a data type on the **Custom Rules** page. Rules are checked in order and the first match wins. **Test on this page** shows how many fields a selector matches before you fill anything.
+
 ### Smart form behavior
 
 - **Smart e-mail linking**: e-mail fields follow the generated name.
@@ -163,14 +165,16 @@ When built-in detection misses a field, map a CSS selector to a data type on the
 
 ### Captchas are never clicked
 
-FillHub does not click, solve, or call captcha APIs. When a visible reCAPTCHA, hCaptcha, or Turnstile widget is on the page, FillHub scrolls to it, highlights it, and asks you to complete it yourself.
+FillHub does not click, solve, or call captcha APIs. When a visible reCAPTCHA, hCaptcha, or Turnstile widget is on the page, FillHub outlines it, shows a notice, and leaves the verification to you. It never scrolls the page to the captcha or moves focus there.
 
 ### Settings
+
 - **General**: default country, smart features, and PII Safe mode.
 - **Profiles**: identity profiles (see above).
 - **Custom Rules**: selector-to-type rules.
 - **About**: version and project information.
 - **Support**: how to support the project.
+
 ## Install
 
 ### Chrome Web Store (recommended)

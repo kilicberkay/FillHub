@@ -134,7 +134,7 @@ Güvenli mod **varsayılan olarak açıktır**. Kişisel tanımlayıcıları, te
 
 ### Akıllı alan tanıma
 
-Her alan; `autocomplete` değeri, `type`, etiket, `name` ve `id`, placeholder ve çevredeki metinden sınıflandırılır. Tanıma korpusu 15 dildeki 107 etiketi kapsar; bunların arasında `Soyadınız` (soyad) gibi, ad olarak okunmaması gereken zor etiketler de vardır. Açılır listeler, içerdikleri ülke, il ve telefon kodu seçenekleriyle eşleştirilir.
+Her alan; `autocomplete` değeri, `type`, etiket, `name` ve `id`, placeholder ve çevredeki metinden sınıflandırılır. Tanıma korpusu 15 dildeki 100'den fazla etiketi kapsar; bunların arasında `Soyadınız` (soyad) gibi, ad olarak okunmaması gereken zor etiketler de vardır. Açılır listeler, içerdikleri ülke, il ve telefon kodu seçenekleriyle eşleştirilir.
 
 ### Kimlik profilleri
 
@@ -144,9 +144,11 @@ Bir profil, doldurmada kimin kullanılacağını belirler:
 - **Sabit kişi**: her seferinde aynı kişi; isterseniz "başka kişi üret" ile yenisini oluşturabilirsiniz.
 
 Profilleri **Profiller** sayfasında oluşturun, düzenleyin ve değiştirin. Aktif profil her zaman en üstte gösterilir.
+
 ### Özel kurallar
 
-Yerleşik tanıma bir alanı kaçırırsa, **Özel Kurallar** sayfasında bir CSS seçicisini bir veri türüne eşleyebilirsiniz.
+Yerleşik tanıma bir alanı kaçırırsa, **Özel Kurallar** sayfasında bir CSS seçicisini bir veri türüne eşleyebilirsiniz. Kurallar sırayla denenir ve ilk eşleşen kazanır. **Bu sayfada dene** düğmesi, doldurmadan önce seçicinin kaç alanla eşleştiğini gösterir.
+
 ### Akıllı form davranışı
 
 - **Akıllı e-posta bağlantısı**: e-posta alanları üretilen ada uyar.
@@ -163,9 +165,10 @@ Yerleşik tanıma bir alanı kaçırırsa, **Özel Kurallar** sayfasında bir CS
 
 ### Captcha'lara asla tıklanmaz
 
-FillHub captcha'ya tıklamaz, çözmez ve captcha API'lerini çağırmaz. Sayfada görünür bir reCAPTCHA, hCaptcha veya Turnstile varsa FillHub onu kaydırıp vurgular ve doğrulamayı sizin tamamlamanızı ister.
+FillHub captcha'ya tıklamaz, çözmez ve captcha API'lerini çağırmaz. Sayfada görünür bir reCAPTCHA, hCaptcha veya Turnstile varsa FillHub onu çerçeveler, bir bildirim gösterir ve doğrulamayı sizin tamamlamanızı bekler. Sayfayı captcha'ya kaydırmaz ve odağı oraya taşımaz.
 
 ### Ayarlar
+
 - **Genel**: varsayılan ülke, akıllı özellikler ve güvenli mod.
 - **Profiller**: kimlik profilleri (yukarıya bakın).
 - **Özel Kurallar**: seçici-tür kuralları.
