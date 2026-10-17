@@ -38,8 +38,9 @@ jobs:
           name: fillhub-zip
           path: dist/fillhub-*.zip
 
+  # Runs on every push and pull request; a manual run can skip it by setting e2e to false
   e2e:
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.e2e == 'true'
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.e2e == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

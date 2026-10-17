@@ -86,3 +86,12 @@ captcha or moves focus there.
 
 The browser tests also run against the unpacked store archive (`FILLHUB_EXT_DIR=…`), so the package
 that gets published is the one that is tested.
+
+## Host access
+
+The manifest asks for `storage`, `contextMenus`, `scripting` and host access to all sites (`<all_urls>`). The
+broad host access is needed because a fill can run on any page the user chooses. `activeTab` would grant access
+only after a user gesture on the current tab, and each entry point (shortcut, toolbar popup, context menu)
+is such a gesture. It is not used yet: the browser tests cannot produce a gesture on an extension action, so a
+switch would ship without test coverage, and a failure would show up only for users. Switch once the tests can
+invoke an extension action, and update the permission justifications in `store/listing/` at the same time.
