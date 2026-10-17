@@ -127,7 +127,7 @@ PII Safe is **on by default**. It replaces personal identifiers with values that
 | Field | PII Safe on | PII Safe off |
 |---|---|---|
 | Name | Mixed names from the language pools | Same pools |
-| E-mail | `ayse.demir47@example.com` (test domains only) | A realistic address, e.g. `ayse.demir47@mail.com` |
+| E-mail | `ayse.demir47@example.com` (test domains only) | A realistic-looking address on a generic domain, e.g. `ayse.demir47@mail.com` |
 | Phone | `5320000000` (operator prefix followed by zeros) | `5320478545` (realistic) |
 | National ID | `11111111110` (checksum-valid test number) | A random checksum-valid number |
 | Company and website | `Test Şirketi 4821`, `https://www.example.org` | Names from the country's company list |
@@ -265,7 +265,7 @@ npm run build         # dist/fillhub-<version>.zip for the Chrome Web Store
 npm run build:css     # regenerate options/options.css after UI changes
 ```
 
-The browser tests use Chromium from `CHROME_BIN` or from the Playwright cache. Without a browser they are skipped.
+The browser tests use Chromium from `CHROME_BIN`, from `PLAYWRIGHT_BROWSERS_PATH`, or from the default Playwright cache. Without a browser they are skipped.
 
 <details>
 <summary><b>Project layout</b></summary>

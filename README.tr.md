@@ -127,7 +127,7 @@ Güvenli mod **varsayılan olarak açıktır**. Kişisel tanımlayıcıları, te
 | Alan | Güvenli mod açık | Güvenli mod kapalı |
 |---|---|---|
 | Ad | Dil havuzlarından karışık adlar | Aynı havuzlar |
-| E-posta | `ayse.demir47@example.com` (yalnızca test alan adları) | Gerçekçi bir adres, örneğin `ayse.demir47@mail.com` |
+| E-posta | `ayse.demir47@example.com` (yalnızca test alan adları) | Gerçekçi görünümlü bir adres, genel bir alan adında; örneğin `ayse.demir47@mail.com` |
 | Telefon | `5320000000` (operatör öneki ve sıfırlar) | `5320478545` (gerçekçi) |
 | TC Kimlik No | `11111111110` (sağlaması geçerli test numarası) | Rastgele, sağlaması geçerli bir numara |
 | Şirket ve web sitesi | `Test Şirketi 4821`, `https://www.example.org` | Ülkenin şirket listesinden adlar |
@@ -264,7 +264,7 @@ npm run build         # Chrome Web Store için dist/fillhub-<sürüm>.zip
 npm run build:css     # arayüz değişince options/options.css dosyasını yeniden üretir
 ```
 
-Tarayıcı testleri `CHROME_BIN` ile verilen ya da Playwright önbelleğindeki Chromium'u kullanır. Tarayıcı yoksa atlanırlar.
+Tarayıcı testleri `CHROME_BIN`, `PLAYWRIGHT_BROWSERS_PATH` ya da varsayılan Playwright önbelleğindeki Chromium'u kullanır. Tarayıcı yoksa atlanırlar.
 
 <details>
 <summary><b>Proje yapısı</b></summary>
