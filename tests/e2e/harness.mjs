@@ -1,11 +1,40 @@
 // Uçtan uca testler için ortam: yerel form sunucusu, uzantılı Chromium ve servis çalışanı üzerinden komut.
 import { createServer } from 'node:http';
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { launchWithExtension, Cdp, PageSession, wait, findChrome } from '../../tools/lib/browser.mjs';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+// Paketlenmemiş bir uzantının kimliği, klasörün mutlak yolunun SHA-256 özetinden üretilir (Chromium'un yöntemi)
+export function unpackedExtensionId(dir) {
+    const hex = createHash('sha256').update(resolve(dir)).digest('hex').slice(0, 32);
+    return [...hex].map((c) => String.fromCharCode(97 + parseInt(c, 16))).join('');
+}
+
+// Uzantı sayfasını açıp bir mesaj gönderir; servis çalışanı olay geldiğinde başlar. Sonuç: kimlik ve yanıt.
+async function wakeServiceWorker(cdp, extId) {
+    const { targetId } = await cdp.send('Target.createTarget', { url: `chrome-extension://${extId}/options/options.html` });
+    const { sessionId } = await cdp.send('Target.attachToTarget', { targetId, flatten: true });
+    for (let k = 0; k < 50; k++) {
+        const href = await cdp.send('Runtime.evaluate', { expression: 'location.href', returnByValue: true }, sessionId)
+            .then((r) => r.result.value).catch(() => '');
+        if (String(href).startsWith('chrome-extension://')) break;
+        await wait(100);
+    }
+    const r = await cdp.send('Runtime.evaluate', {
+        expression: `(async () => {
+            const id = chrome.runtime.id;
+            const reply = await new Promise((res) => chrome.runtime.sendMessage({ type: 'harness-wake' }, () => res(chrome.runtime.lastError ? chrome.runtime.lastError.message : 'yanıtsız')));
+            return JSON.stringify({ id, reply });
+        })()`,
+        awaitPromise: true,
+        returnByValue: true,
+    }, sessionId);
+    return r.exceptionDetails ? `istisna: ${r.exceptionDetails.exception?.description || r.exceptionDetails.text}` : r.result.value;
+}
+
 // Tarayıcıya yüklenen eklenti klasörü (paketlenen tek kaynak)
 export const EXT = join(ROOT, 'extension');
 const FIXTURES = {
@@ -49,10 +78,16 @@ export async function startEnv() {
     let sw = null;
     let sessionId = null;
     let seen = [];
-    const deadline = Date.now() + 30000;
+    const started = Date.now();
+    const deadline = started + 30000;
+    const expectedId = unpackedExtensionId(process.env.FILLHUB_EXT_DIR || EXT);
+    let wake = null;
     while (!sw && Date.now() < deadline) {
         const { targetInfos } = await cdp.send('Target.getTargets');
         seen = targetInfos.map((t) => `${t.type} ${t.url.slice(0, 60)}`);
+        if (wake === null && Date.now() - started > 5000) {
+            wake = await wakeServiceWorker(cdp, expectedId).catch((e) => `hata: ${e.message}`);
+        }
         for (const candidate of targetInfos.filter((t) => t.type === 'service_worker' && t.url.startsWith('chrome-extension://'))) {
             const attached = await cdp.send('Target.attachToTarget', { targetId: candidate.targetId, flatten: true });
             let ready = false;
@@ -78,7 +113,7 @@ export async function startEnv() {
         cdp.close();
         srv.close();
         await browser.close();
-        throw new Error(`FillHub servis çalışanı bulunamadı. Görülen hedefler: [${seen.join(' | ')}]. Chromium stderr: ${stderr}`);
+        throw new Error(`FillHub servis çalışanı bulunamadı (kimlik ${expectedId}, uyandırma: ${wake}). Görülen hedefler: [${seen.join(' | ')}]. Chromium stderr: ${stderr}`);
     }
     const extId = sw.url.split('/')[2];
 
