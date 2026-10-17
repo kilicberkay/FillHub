@@ -43,22 +43,34 @@ export async function startEnv() {
     const cdp = await new Cdp(browser.browserWs).connect();
 
     // Yalnızca bu uzantının servis çalışanı. Tarayıcı --disable-extensions-except ile açıldığı için
-    // chrome-extension:// adresli servis çalışanı bu uzantıya aittir; hedef adresinin biçimi Chromium
-    // sürümüne göre değişebildiğinden dosya adına veya manifest adına bakılmaz.
-    // Yavaş makinelerde (CI) ayağa kalkması 30 saniyeye kadar sürebilir.
+    // chrome-extension:// adresli bir servis çalışanı aday olur; ayrıca chrome.storage erişimi olmalıdır
+    // (bu izin yalnızca FillHub'ın manifestinde var). Hedef adresinin biçimi Chromium sürümüne göre
+    // değiştiğinden dosya adına bakılmaz. Yavaş makinelerde (CI) ayağa kalkması 30 saniyeye kadar sürebilir.
     let sw = null;
     let sessionId = null;
     let seen = [];
-    for (let i = 0; i < 300 && !sw; i++) {
+    const deadline = Date.now() + 30000;
+    while (!sw && Date.now() < deadline) {
         const { targetInfos } = await cdp.send('Target.getTargets');
         seen = targetInfos.map((t) => `${t.type} ${t.url.slice(0, 60)}`);
-        const candidate = targetInfos.find((t) => t.type === 'service_worker' && t.url.startsWith('chrome-extension://'));
-        if (candidate) {
-            sessionId = (await cdp.send('Target.attachToTarget', { targetId: candidate.targetId, flatten: true })).sessionId;
-            sw = candidate;
-        } else {
-            await wait(100);
+        for (const candidate of targetInfos.filter((t) => t.type === 'service_worker' && t.url.startsWith('chrome-extension://'))) {
+            const attached = await cdp.send('Target.attachToTarget', { targetId: candidate.targetId, flatten: true });
+            let ready = false;
+            for (let k = 0; k < 10 && !ready; k++) {
+                ready = await cdp.send('Runtime.evaluate', {
+                    expression: "typeof chrome !== 'undefined' && !!chrome.storage",
+                    returnByValue: true,
+                }, attached.sessionId).then((r) => r.result.value === true).catch(() => false);
+                if (!ready) await wait(300);
+            }
+            if (ready) {
+                sw = candidate;
+                sessionId = attached.sessionId;
+                break;
+            }
+            await cdp.send('Target.detachFromTarget', { sessionId: attached.sessionId }).catch(() => {});
         }
+        if (!sw) await wait(200);
     }
     if (!sw) {
         // Tarayıcı açık kalırsa test süreci hiç bitmez; hatayı tanılama bilgisiyle birlikte hemen fırlat
