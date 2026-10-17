@@ -43,13 +43,23 @@ export async function startEnv() {
     const cdp = await new Cdp(browser.browserWs).connect();
 
     // Yalnızca bu uzantının servis çalışanı (Chrome'un kendi bileşenleri hariç)
+    // Yavaş makinelerde (CI) servis çalışanının ayağa kalkması 10 saniyeden uzun sürebilir
     let sw = null;
-    for (let i = 0; i < 100 && !sw; i++) {
+    let seen = [];
+    for (let i = 0; i < 300 && !sw; i++) {
         const { targetInfos } = await cdp.send('Target.getTargets');
+        seen = targetInfos.map((t) => `${t.type} ${t.url.slice(0, 60)}`);
         sw = targetInfos.find((t) => t.type === 'service_worker' && t.url.endsWith('/scripts/background.js')) || null;
         if (!sw) await wait(100);
     }
-    if (!sw) throw new Error('FillHub servis çalışanı bulunamadı');
+    if (!sw) {
+        // Tarayıcı açık kalırsa test süreci hiç bitmez; hatayı tanılama bilgisiyle birlikte hemen fırlat
+        const stderr = browser.stderrTail();
+        cdp.close();
+        srv.close();
+        await browser.close();
+        throw new Error(`FillHub servis çalışanı bulunamadı. Görülen hedefler: [${seen.join(' | ')}]. Chromium stderr: ${stderr}`);
+    }
     const extId = sw.url.split('/')[2];
     const { sessionId } = await cdp.send('Target.attachToTarget', { targetId: sw.targetId, flatten: true });
 
