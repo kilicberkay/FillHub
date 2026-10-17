@@ -20,8 +20,10 @@ export function findChrome() {
             }
         }
     }
+    // Markalı Google Chrome (sürüm 137 ve sonrası) --load-extension ve --disable-extensions-except bayraklarını yok sayar;
+    // bu yüzden /usr/bin/google-chrome bilerek listede yoktur. Chrome for Testing bu bayrakları destekler.
     const fixed = [
-        '/usr/bin/chromium', '/usr/bin/chromium-browser', '/usr/bin/google-chrome',
+        '/usr/bin/chromium', '/usr/bin/chromium-browser',
         '/Applications/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing',
     ];
     return fixed.find((p) => existsSync(p)) || null;
