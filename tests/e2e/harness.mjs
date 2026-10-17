@@ -2,6 +2,7 @@
 import { createServer } from 'node:http';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { launchWithExtension, Cdp, PageSession, wait, findChrome } from '../../tools/lib/browser.mjs';
@@ -82,10 +83,13 @@ export async function startEnv() {
     const deadline = started + 30000;
     const expectedId = unpackedExtensionId(process.env.FILLHUB_EXT_DIR || EXT);
     let wake = null;
+    let lastWake = 0;
     while (!sw && Date.now() < deadline) {
         const { targetInfos } = await cdp.send('Target.getTargets');
         seen = targetInfos.map((t) => `${t.type} ${t.url.slice(0, 60)}`);
-        if (wake === null && Date.now() - started > 5000) {
+        // Uzantı geç yüklenirse uyandırma bir kez yetmeyebilir; beş saniyede bir yeniden denenir
+        if (Date.now() - started > 5000 && Date.now() - lastWake > 5000) {
+            lastWake = Date.now();
             wake = await wakeServiceWorker(cdp, expectedId).catch((e) => `hata: ${e.message}`);
         }
         for (const candidate of targetInfos.filter((t) => t.type === 'service_worker' && t.url.startsWith('chrome-extension://'))) {
@@ -110,10 +114,11 @@ export async function startEnv() {
     if (!sw) {
         // Tarayıcı açık kalırsa test süreci hiç bitmez; hatayı tanılama bilgisiyle birlikte hemen fırlat
         const stderr = browser.stderrTail();
+        const version = execFileSync(browser.chrome, ['--version'], { encoding: 'utf8' }).trim();
         cdp.close();
         srv.close();
         await browser.close();
-        throw new Error(`FillHub servis çalışanı bulunamadı (kimlik ${expectedId}, uyandırma: ${wake}). Görülen hedefler: [${seen.join(' | ')}]. Chromium stderr: ${stderr}`);
+        throw new Error(`FillHub servis çalışanı bulunamadı (kimlik ${expectedId}, uyandırma: ${wake}). Tarayıcı: ${browser.chrome} (${version}). Görülen hedefler: [${seen.join(' | ')}]. Chromium stderr: ${stderr}`);
     }
     const extId = sw.url.split('/')[2];
 
