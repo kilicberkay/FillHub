@@ -12,8 +12,8 @@ field's `name`, `id`, and `autocomplete` (no personal data).
 ## Why does FillHub not solve captchas?
 
 By design. FillHub never clicks, solves, or calls reCAPTCHA, hCaptcha, or Turnstile. A captcha is a check that
-a person is present, so FillHub leaves it to you. When a visible captcha is on the page, FillHub scrolls to it,
-outlines it, and shows a notice.
+a person is present, so FillHub leaves it to you. When a visible captcha is on the page, FillHub outlines it and
+shows a notice. It does not scroll to the captcha or move focus there.
 
 ## Does it work with React, Vue, and other frameworks?
 
@@ -37,7 +37,7 @@ Turn it off in **General** to get realistic-looking values instead.
 No. A number can pass the public checksum of its country without belonging to anyone. Do not use generated
 numbers for a real application, purchase, or identity claim. See the verification table in the README.
 
-## Why are two boxes in a consent group checked when I want one of them unchecked?
+## Why are consent boxes checked when I want them unchecked?
 
 FillHub checks terms, privacy, and consent boxes (for example KVKK) and leaves marketing boxes unchecked. Turn
 off **Check consent boxes** in **General** to use the random policy for those boxes, or turn on **Check all
@@ -53,6 +53,16 @@ Dates are spread across that range so that tests do not depend on a single year.
 Only if **Auto-Submit Form** is on (it is off by default). Even then, FillHub clicks only real submit
 controls. Buttons such as Cancel, Delete, or Reset are never clicked.
 
+## Why does FillHub say it cannot fill this page?
+
+Chrome does not let extensions run on its own pages, such as `chrome://` pages, the Chrome Web Store, and the
+new tab page. Open a regular web page with a form and try again.
+
+## Does it work in Firefox or Safari?
+
+FillHub is built for Chromium-based browsers: Chrome 116 or newer, and other Chromium browsers that support
+Manifest V3. It has not been tested in Firefox or Safari.
+
 ## Where is my data stored?
 
 Settings and profiles are stored in `chrome.storage.local` in your browser profile. Nothing is sent to a
@@ -67,4 +77,4 @@ You can always use the toolbar popup or the right-click menu instead.
 ## How do I reset the settings?
 
 Remove FillHub from `chrome://extensions` and install it again, or clear the extension's storage. The default
-persona is always random and cannot be deleted.
+profile is always random and cannot be deleted.

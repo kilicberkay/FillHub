@@ -5,6 +5,17 @@ All notable changes to FillHub are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+- The "Star on GitHub" and "Report an issue" links in the settings page's Support section open the FillHub
+  repository. They pointed to an old repository name.
+- The README and FAQ no longer say that FillHub scrolls to a visible captcha. It outlines the captcha, shows a
+  notice, and leaves focus and scroll position alone.
+
+### Changed
+- The notification element that FillHub adds to web pages is named `fillhub-toast` (it was `fake-filler-toast`).
+- README and store screenshots are retaken from the current build, so the notification's undo button matches
+  the extension language.
+
 ## [1.3.1] - 2026-10-16
 
 ### Added

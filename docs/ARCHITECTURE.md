@@ -66,7 +66,8 @@ sequenceDiagram
 ## Captchas
 
 The content script never clicks, solves, or calls reCAPTCHA, hCaptcha, or Turnstile APIs. It only looks
-for visible captcha elements after a fill, scrolls to the first one, outlines it, and shows a notice.
+for visible captcha elements after a fill, outlines the first one, and shows a notice. It never scrolls to the
+captcha or moves focus there.
 
 ## Settings and storage
 
