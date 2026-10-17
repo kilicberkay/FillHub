@@ -42,14 +42,28 @@ export async function startEnv() {
     const browser = await launchWithExtension(process.env.FILLHUB_EXT_DIR || EXT, {});
     const cdp = await new Cdp(browser.browserWs).connect();
 
-    // Yalnızca bu uzantının servis çalışanı (Chrome'un kendi bileşenleri hariç)
-    // Yavaş makinelerde (CI) servis çalışanının ayağa kalkması 10 saniyeden uzun sürebilir
+    // Yalnızca bu uzantının servis çalışanı (Chrome'un kendi bileşenleri hariç). Hedef adresi Chromium
+    // sürümüne göre değişebildiği için (ör. CI'da "service_worker_…" biçimi) dosya adına değil, uzantının
+    // manifest adına bakılır. Yavaş makinelerde (CI) ayağa kalkması 30 saniyeye kadar sürebilir.
     let sw = null;
+    let sessionId = null;
     let seen = [];
     for (let i = 0; i < 300 && !sw; i++) {
         const { targetInfos } = await cdp.send('Target.getTargets');
         seen = targetInfos.map((t) => `${t.type} ${t.url.slice(0, 60)}`);
-        sw = targetInfos.find((t) => t.type === 'service_worker' && t.url.endsWith('/scripts/background.js')) || null;
+        for (const t of targetInfos.filter((x) => x.type === 'service_worker' && x.url.startsWith('chrome-extension://'))) {
+            const attached = await cdp.send('Target.attachToTarget', { targetId: t.targetId, flatten: true });
+            const name = await cdp.send('Runtime.evaluate', {
+                expression: "(typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getManifest) ? chrome.runtime.getManifest().name : ''",
+                returnByValue: true,
+            }, attached.sessionId).then((r) => r.result.value).catch(() => '');
+            if (name === 'FillHub') {
+                sw = t;
+                sessionId = attached.sessionId;
+                break;
+            }
+            await cdp.send('Target.detachFromTarget', { sessionId: attached.sessionId }).catch(() => {});
+        }
         if (!sw) await wait(100);
     }
     if (!sw) {
@@ -61,7 +75,6 @@ export async function startEnv() {
         throw new Error(`FillHub servis çalışanı bulunamadı. Görülen hedefler: [${seen.join(' | ')}]. Chromium stderr: ${stderr}`);
     }
     const extId = sw.url.split('/')[2];
-    const { sessionId } = await cdp.send('Target.attachToTarget', { targetId: sw.targetId, flatten: true });
 
     const env = {
         base, extId, browser, cdp, srv, runCounter: 0,
