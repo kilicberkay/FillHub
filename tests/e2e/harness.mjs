@@ -20,10 +20,13 @@ async function wakeServiceWorker(cdp, extId) {
     const { targetId } = await cdp.send('Target.createTarget', { url: `chrome-extension://${extId}/options/options.html` });
     const { sessionId } = await cdp.send('Target.attachToTarget', { targetId, flatten: true });
     await wait(1000);
-    await cdp.send('Runtime.evaluate', {
-        expression: "chrome.runtime.sendMessage({ type: 'harness-wake' }).catch(() => {}); 'sent'",
+    // Yanıt geri çağrısındaki lastError, alıcı olup olmadığını gösterir ("message port closed" = alıcı var)
+    const r = await cdp.send('Runtime.evaluate', {
+        expression: "new Promise((res) => chrome.runtime.sendMessage({ type: 'harness-wake' }, () => res(chrome.runtime.lastError ? chrome.runtime.lastError.message : 'yanıtsız')))",
+        awaitPromise: true,
         returnByValue: true,
     }, sessionId);
+    return r.result.value;
 }
 // Tarayıcıya yüklenen eklenti klasörü (paketlenen tek kaynak)
 export const EXT = join(ROOT, 'extension');
@@ -75,7 +78,7 @@ export async function startEnv() {
         seen = targetInfos.map((t) => `${t.type} ${t.url.slice(0, 60)}`);
         if (!woke && i === 30) {
             woke = true;
-            await wakeServiceWorker(cdp, expectedId).catch((e) => { wakeError = e.message; });
+            await wakeServiceWorker(cdp, expectedId).then((msg) => { wakeError = msg; }).catch((e) => { wakeError = e.message; });
             continue;
         }
         for (const t of targetInfos.filter((x) => x.type === 'service_worker' && x.url.startsWith('chrome-extension://'))) {
