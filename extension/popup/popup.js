@@ -80,7 +80,7 @@
             return;
         }
         if (action === 'undo') {
-            showResult(`${text.popupUndone} ${response.restored}`);
+            showResult(response.restored === 0 ? text.popupNothingToUndo : `${text.popupUndone} ${response.restored}`);
         } else if (response.filled === 0) {
             showResult(text.popupNoFields);
         } else {
