@@ -841,6 +841,22 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
             }
         });
 
+        it('alan yoksa açılır pencere "0 alan" yerine açıklama gösterir', async () => {
+            await setStorage(env, { uiLang: 'tr', preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
+            const form = await openForm(env, { fixture: 'no-fields' });
+            const popup = await openPopup();
+            try {
+                await env.swEval(`chrome.tabs.update(${form.tabId}, { active: true })`);
+                await popup.eval(`document.getElementById('popupFillBtn').click()`);
+                await popup.waitFor(`!document.getElementById('popupResult').hidden`, 10000);
+                const shown = await popup.eval(`document.getElementById('popupResult').textContent`);
+                assert.equal(shown, 'Bu sayfada doldurulabilir alan bulunamadı.', `beklenmeyen sonuç: "${shown}"`);
+            } finally {
+                await popup.close();
+                await closeForm(form);
+            }
+        });
+
         it('doldurma ve geri alma etkin sekmede çalışır ve sonucu gösterir', async () => {
             await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
             const form = await openForm(env);

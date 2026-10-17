@@ -79,7 +79,13 @@
             showResult(text.popupNoPage);
             return;
         }
-        showResult(action === 'undo' ? `${text.popupUndone} ${response.restored}` : `${text.popupFilled} ${response.filled}`);
+        if (action === 'undo') {
+            showResult(`${text.popupUndone} ${response.restored}`);
+        } else if (response.filled === 0) {
+            showResult(text.popupNoFields);
+        } else {
+            showResult(`${text.popupFilled} ${response.filled}`);
+        }
     }
 
     fillBtn.addEventListener('click', () => runAction('fill'));
