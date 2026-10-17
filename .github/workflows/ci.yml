@@ -42,6 +42,8 @@ jobs:
   e2e:
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.e2e == 'true'
     runs-on: ubuntu-latest
+    # A hung browser run should fail with its logs instead of occupying a runner for hours
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
