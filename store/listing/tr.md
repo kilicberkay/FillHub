@@ -65,9 +65,10 @@ bu nedenle üretilen verileri gerçek başvurularda, satın almalarda ya da kiml
   yerel olarak saklar. Hiçbir şey eşitlenmez ya da dışarı gönderilmez.
 - **contextMenus:** sağ tık menüsüne "Formu sahte verilerle doldur", "Bu alanı doldur" ve "Sahte doldurmayı geri al"
   öğelerini ekler.
-- **Tüm sitelere erişim (`<all_urls>`) ve tüm çerçevelerde içerik betikleri:** FillHub, kullanıcının
-  doldurmayı seçtiği her sitede (iframe içindeki formlar dahil) çalışır. Yalnızca kullanıcı bir kısayola
-  basınca, simgedeki Doldur düğmesine basınca ya da bağlam menüsünü kullanınca işlem yapar; arka planda sayfa okumaz.
+- **activeTab:** FillHub yalnızca kullanıcının baktığı sekmede çalışır ve yalnızca kullanıcı bir kısayola
+  bastığında, araç çubuğu açılır penceresinde Doldur ya da Test düğmesine bastığında, ya da bağlam menüsünü
+  kullandığında işlem yapar. İzin yalnızca o sekme için verilir ve kullanıcı sekmeden ayrıldığında biter. Tüm
+  sitelere erişim izni yoktur; arka planda sayfa okumaz.
 
 Uzaktan kod: yok. Uzantı tüm kodunu paketin içinde taşır ve ağ isteği yapmaz. Veri toplama: yok.
 

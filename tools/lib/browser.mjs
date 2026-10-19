@@ -60,6 +60,9 @@ export async function launchWithExtension(extensionDir, { headless = true, width
         '--disable-background-networking',
         `--remote-debugging-port=${port}`,
         `--user-data-dir=${userDataDir}`,
+        // Site istisnaları alan adıyla çalışır (IP adresi geçerli alan adı değildir).
+        // Test sunucusu 127.0.0.1'de dinler; bu eşleme formun "fillhub.test" alan adından da açılmasını sağlar.
+        '--host-resolver-rules=MAP fillhub.test 127.0.0.1',
         `--load-extension=${extensionDir}`,
         `--disable-extensions-except=${extensionDir}`,
         `--window-size=${width},${height}`,

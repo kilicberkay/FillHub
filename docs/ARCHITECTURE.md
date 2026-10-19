@@ -7,9 +7,9 @@ files in the repository are loaded as they are. npm is used only for development
 
 | Part | Files | Responsibility |
 |---|---|---|
-| Manifest | `extension/manifest.json` | Name and description via `__MSG_…__`, permissions (`storage`, `contextMenus`, `scripting`), shortcuts; no content scripts are declared |
+| Manifest | `extension/manifest.json` | Name and description via `__MSG_…__`, permissions (`storage`, `contextMenus`, `scripting`, `activeTab`), shortcuts; no content scripts are declared and no host permission is requested |
 | Service worker | `extension/scripts/background.js` | Context menus (localized with `chrome.i18n`), shortcut commands, requests from the toolbar popup; forwards `fill`, `fill_field`, `undo` to the active tab together with its host (used by site exceptions) |
-| Toolbar popup | `extension/popup/popup.html`, `extension/popup/popup.js` | Default country and profile selection (saved to settings), Fill and Undo buttons; shares `extension/options/options.css` and `extension/options/i18n.js` |
+| Toolbar popup | `extension/popup/popup.html`, `extension/popup/popup.js` | Default country and profile selection (saved to settings), Fill and Undo buttons, and the custom-rule selector test; shares `extension/options/options.css` and `extension/options/i18n.js` |
 | Backup | `extension/scripts/backup.js` (`FillHubBackup`) | Builds the export file and validates imported files field by field; the options page writes the result to storage |
 | Site exceptions | `extension/scripts/site-rules.js` (`FillHubSiteRules`) | Normalizes host names and matches a page against the list of sites where auto-submit is off (subdomains included) |
 | Diagnostics | `extension/scripts/diagnostics.js` (`FillHubDiagnostics`) | Builds the downloadable report from settings flags, counts and the last fill summary; never includes names, values, labels, profile names or site addresses |
@@ -67,7 +67,9 @@ sequenceDiagram
 
 The content script never clicks, solves, or calls reCAPTCHA, hCaptcha, or Turnstile APIs. It only looks
 for visible captcha elements after a fill, outlines the first one, and shows a notice. It never scrolls to the
-captcha or moves focus there.
+captcha or moves focus there. Before a fill starts, the service worker checks every frame of the tab for a visible
+captcha and passes the result to all frames, so a captcha in any frame stops auto-submit in all of them. A captcha
+that appears only after the fill, in a frame other than the form's own, is not seen.
 
 ## Settings and storage
 
@@ -89,9 +91,16 @@ that gets published is the one that is tested.
 
 ## Host access
 
-The manifest asks for `storage`, `contextMenus`, `scripting` and host access to all sites (`<all_urls>`). The
-broad host access is needed because a fill can run on any page the user chooses. `activeTab` would grant access
-only after a user gesture on the current tab, and each entry point (shortcut, toolbar popup, context menu)
-is such a gesture. It is not used yet: the browser tests cannot produce a gesture on an extension action, so a
-switch would ship without test coverage, and a failure would show up only for users. Switch once the tests can
-invoke an extension action, and update the permission justifications in `store/listing/` at the same time.
+The manifest asks for `storage`, `contextMenus`, `scripting` and `activeTab`. There is no host permission.
+`activeTab` gives access to the current tab only after a user gesture: a keyboard shortcut, the context menu, or
+the toolbar popup's Fill or Test button. Access ends when the user leaves the tab.
+
+Consequences in the code:
+
+- Every action reads the active tab with `chrome.tabs.query({ active: true })` in the service worker, after
+  the gesture. The settings page has no tab access, so the selector test lives in the toolbar popup.
+- The e2e harness grants the permission the way a user does: `Ctrl+Shift+U` (Undo) on the form tab, then the
+  fill runs against that tab. Chrome hides a tab's URL from extensions until such a gesture, so the harness
+  finds the form tab among the active tabs, not by URL.
+- Store listing (`store/listing/`), `store/privacy-policy.md` and `PRIVACY.md` describe `activeTab` and no
+  longer mention `<all_urls>`. Keep them in step with the manifest; a unit test checks there is no `host_permissions`.

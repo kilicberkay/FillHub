@@ -67,10 +67,11 @@ do not use generated data for real applications, purchases, or identity claims.
   presets) locally in the browser. Nothing is synced or sent out.
 - **contextMenus:** adds "Fill form with fake data", "Fill this field", and "Undo fake fill" to the right-click menu.
 - **scripting:** injects the fill scripts into the page you are filling, only after you start a fill (shortcut, toolbar icon, or menu). No FillHub code runs on pages you do not fill.
-- **Host access to all sites (`<all_urls>`) and content scripts in all frames:** FillHub fills forms on
-  any website the user chooses to fill, including forms inside iframes. It only acts after the user
-  presses a shortcut, presses Fill in the toolbar popup, or uses the context menu. It does not read pages in the
-  background.
+- **activeTab:** FillHub reads and fills only the tab the user is looking at, and only after the user
+  presses a shortcut, presses Fill or Test in the toolbar popup, or uses the context menu. The permission is
+  granted for that tab only, and it ends when the user leaves the tab. FillHub has no host access to
+  all sites and does not read pages in the background. Content scripts inject into the frames of that tab
+  (including forms inside iframes) only after the user's action.
 
 Remote code: none. The extension ships all its code in the package and makes no network requests.
 Data collection: none.

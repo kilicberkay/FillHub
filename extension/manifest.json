@@ -9,10 +9,8 @@
     "permissions": [
         "storage",
         "contextMenus",
-        "scripting"
-    ],
-    "host_permissions": [
-        "<all_urls>"
+        "scripting",
+        "activeTab"
     ],
     "action": {
         "default_title": "__MSG_actionTitle__",
@@ -42,8 +40,8 @@
         },
         "fill_chaos": {
             "suggested_key": {
-                "default": "Ctrl+Shift+D",
-                "mac": "Command+Shift+D"
+                "default": "Ctrl+Shift+Y",
+                "mac": "Command+Shift+Y"
             },
             "description": "__MSG_cmdChaos__"
         },

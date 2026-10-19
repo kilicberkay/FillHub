@@ -67,6 +67,8 @@ export async function startEnv() {
     });
     await new Promise((resolve) => srv.listen(0, '127.0.0.1', resolve));
     const base = `http://127.0.0.1:${srv.address().port}/form.html`;
+    // Alan adı gerektiren testler için (site istisnası): tarayıcı "--host-resolver-rules" ile bu adı 127.0.0.1'e çözer
+    const hostBase = `http://fillhub.test:${srv.address().port}/form.html`;
 
     // FILLHUB_EXT_DIR: açılmış paket kopyası (ör. dist/fillhub-*.zip çıktısı) de sınanabilir
     const browser = await launchWithExtension(process.env.FILLHUB_EXT_DIR || EXT, {});
@@ -123,7 +125,7 @@ export async function startEnv() {
     const extId = sw.url.split('/')[2];
 
     const env = {
-        base, extId, browser, cdp, srv, runCounter: 0,
+        base, hostBase, extId, browser, cdp, srv, runCounter: 0,
         // Servis çalışanında ifade değerlendirir (chrome.* API'leri burada)
         swEval: async (expression) => {
             const r = await cdp.send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true }, sessionId);
@@ -152,18 +154,45 @@ export async function setStorage(env, data) {
     }
 }
 
-// Her çağrı benzersiz bir sorgu parametresiyle yeni bir form sekmesi açar
-export async function openForm(env, { lang = 'tr', fixture = null } = {}) {
+// Her çağrı benzersiz bir sorgu parametresiyle yeni bir form sekmesi açar.
+// host: 'fillhub.test' verilirse form alan adı üzerinden açılır (site istisnası testleri için).
+export async function openForm(env, { lang = 'tr', fixture = null, host = null } = {}) {
     env.runCounter += 1;
-    const url = `${env.base}?${fixture ? `page=${fixture}&` : ''}${lang === 'en' ? 'lang=en&' : ''}run=${env.runCounter}_${Date.now()}`;
+    const origin = host ? env.hostBase : env.base;
+    const url = `${origin}?${fixture ? `page=${fixture}&` : ''}${lang === 'en' ? 'lang=en&' : ''}run=${env.runCounter}_${Date.now()}`;
     const page = await PageSession.open(env.cdp, url);
     await page.waitFor('document.readyState === "complete" && !!document.getElementById("kayit")', 10000);
+    // activeTab: Chrome sekmenin URL'ini yalnız kullanıcı eyleminden sonra gösterir. Bu yüzden sekme,
+    // etkinleştirilip bir eylem (kısayol) ile izin verildikten sonra aktif sekmeden bulunur.
+    await env.cdp.send('Target.activateTarget', { targetId: page.targetId }).catch(() => {});
     await wait(300);
+    await grantActiveTab(env, page);
     const tabId = await env.swEval(
-        `chrome.tabs.query({}).then(ts => ts.find(t => t.url === ${JSON.stringify(url)})?.id ?? null)`,
+        `chrome.tabs.query({active: true, currentWindow: true}).then(ts => ts.find(t => t.url === ${JSON.stringify(url)})?.id ?? null)`,
     );
     if (!tabId) throw new Error('form sekmesi bulunamadı');
     return { page, tabId, url };
+}
+
+// Manifest'teki kısayollar: Ctrl+Shift+F (doldur), Ctrl+Shift+Y (chaos), Ctrl+Shift+U (geri al).
+// Tarayıcı düzeyindeki komutlar CDP tuş olayıyla tetiklenir; sayfa içeriği bu tuşları görmez.
+const SHORTCUT_KEYS = { F: 70, Y: 89, U: 85 };
+
+export async function pressShortcut(env, page, letter) {
+    const vk = SHORTCUT_KEYS[letter];
+    if (!vk) throw new Error(`bilinmeyen kısayol: ${letter}`);
+    const mods = 10; // Ctrl (2) + Shift (8)
+    const key = async (type) => env.cdp.send('Input.dispatchKeyEvent', {
+        type, modifiers: mods, windowsVirtualKeyCode: vk, nativeVirtualKeyCode: vk, code: `Key${letter}`, key: letter,
+    }, page.sid);
+    await key('rawKeyDown');
+    await key('keyUp');
+}
+
+// Kullanıcı jesti: Ctrl+Shift+U (geri al) kısayolu, activeTab iznini etkin sekmeye verir. Doldurma kısayolu da aynı izni verir.
+export async function grantActiveTab(env, page) {
+    await pressShortcut(env, page, 'U');
+    await wait(600);
 }
 
 // Content script'e mesaj gönderir; içerik betiği hazır olana kadar yeniden dener

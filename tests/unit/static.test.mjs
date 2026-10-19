@@ -13,11 +13,12 @@ const require = createRequire(import.meta.url);
 const manifest = JSON.parse(read('manifest.json'));
 const { contentFiles } = require('../../tools/lib/content-files.js');
 
-test('manifest: MV3, izinler storage, contextMenus ve scripting; host <all_urls>', () => {
+test('manifest: MV3, izinler storage, contextMenus, scripting ve activeTab; host izni yok', () => {
     assert.equal(manifest.manifest_version, 3);
-    assert.deepEqual(manifest.permissions.slice().sort(), ['contextMenus', 'scripting', 'storage']);
+    assert.deepEqual(manifest.permissions.slice().sort(), ['activeTab', 'contextMenus', 'scripting', 'storage']);
     assert.equal(manifest.content_scripts, undefined, 'içerik betikleri otomatik enjekte edilmemeli');
-    assert.deepEqual(manifest.host_permissions, ['<all_urls>']);
+    // Sekme erişimi yalnızca kullanıcı eylemiyle (kısayol, menü, popup) verilir; kalıcı host izni yoktur
+    assert.equal(manifest.host_permissions, undefined, 'host_permissions olmamalı (activeTab kullanılır)');
 });
 
 test('manifest: sürüm biçimi ve ad yerelleştirmesi (varsayılan dilde FillHub)', () => {

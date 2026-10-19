@@ -147,7 +147,7 @@ Create, edit, and switch profiles on the **Profiles** page. The active profile i
 
 ### Custom rules
 
-When built-in detection misses a field, map a CSS selector to a data type on the **Custom Rules** page. Rules are checked in order and the first match wins. **Test on this page** shows how many fields a selector matches before you fill anything.
+When built-in detection misses a field, map a CSS selector to a data type on the **Custom Rules** page. Rules are checked in order and the first match wins. **Test on this page** in the toolbar popup shows how many fields a selector matches before you fill anything.
 
 ### Smart form behavior
 
@@ -196,7 +196,7 @@ Requires Chrome 116 or newer, or another Chromium-based browser that supports Ma
 |---|---|---|
 | Fill the whole form | `Ctrl+Shift+F` (macOS: `Command+Shift+F`) | Toolbar popup → *Fill*, or right-click → *Fill form with fake data* |
 | Fill the focused field | none | Right-click a field → *Fill this field* |
-| Chaos mode (unusual values for fuzz tests) | `Ctrl+Shift+D` | none |
+| Chaos mode (unusual values for fuzz tests) | `Ctrl+Shift+Y` | none |
 | Undo the last fill | `Ctrl+Shift+U` | Right-click → *Undo fake fill* |
 
 Shortcuts can be changed at `chrome://extensions/shortcuts`.
@@ -234,7 +234,7 @@ FillHub can produce identity numbers that pass the public checksum of their coun
 
 - **No data collection.** FillHub has no analytics, telemetry, accounts, or servers. Nothing leaves your browser.
 - **Settings stay local**, in `chrome.storage.local`.
-- **Minimal permissions**: `storage` (settings), `contextMenus` (right-click items), and `scripting`, which injects the fill scripts only when you start a fill. Nothing runs on pages you do not fill.
+- **Minimal permissions**: `storage` (settings), `contextMenus` (right-click items), `scripting` (injects the fill scripts only when you start a fill), and `activeTab` (the tab you are looking at, only after you press a shortcut, a popup button, or a menu item). There is no access to all sites, and nothing runs on pages you do not fill.
 - **Generated data is for testing.** PII Safe mode is on by default. Do not use generated data for real applications, purchases, or identity claims.
 
 Full policy: [PRIVACY.md](PRIVACY.md).

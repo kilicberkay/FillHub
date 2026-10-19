@@ -18,9 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const ruleSelectorInput = document.getElementById('ruleSelector');
     const ruleSelectorError = document.getElementById('ruleSelectorError');
-    const ruleTestBtn = document.getElementById('ruleTestBtn');
     const ruleCancelBtn = document.getElementById('ruleCancelBtn');
-    const ruleTestResult = document.getElementById('ruleTestResult');
     const ruleTypeSelect = document.getElementById('ruleType');
     const addRuleBtn = document.getElementById('addRuleBtn');
     const rulesList = document.getElementById('rulesList');
@@ -476,7 +474,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 ruleSelectorInput.value = rule.selector;
                 ruleTypeSelect.value = rule.type;
                 ruleSelectorError.hidden = true;
-                ruleTestResult.hidden = true;
                 addRuleBtn.textContent = currentText.ruleUpdateBtn;
                 ruleCancelBtn.hidden = false;
                 ruleSelectorInput.focus();
@@ -618,7 +615,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ruleSelectorInput.addEventListener('input', () => {
         ruleSelectorError.hidden = true;
-        ruleTestResult.hidden = true;
     });
 
     addRuleBtn.onclick = () => {
@@ -638,47 +634,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     ruleCancelBtn.addEventListener('click', exitRuleEditMode);
-
-    // Test: etkin web sayfasında seçicinin eşleştiği alan sayısı. Yalnızca bir sayı okunur; sayfa içeriği saklanmaz.
-    async function findWebTab() {
-        const tabs = await chrome.tabs.query({ lastFocusedWindow: true });
-        const web = tabs.filter(t => /^https?:\/\//.test(t.url || ''));
-        web.sort((a, b) => (b.lastAccessed || 0) - (a.lastAccessed || 0));
-        return web[0] || null;
-    }
-
-    function showRuleTest(message, isError) {
-        ruleTestResult.textContent = message;
-        ruleTestResult.classList.toggle('text-rose-600', isError);
-        ruleTestResult.classList.toggle('dark:text-rose-400', isError);
-        ruleTestResult.classList.toggle('text-soft', !isError);
-        ruleTestResult.hidden = false;
-    }
-
-    ruleTestBtn.addEventListener('click', async () => {
-        const selector = ruleSelectorInput.value.trim();
-        if (!selector || !isValidSelector(selector)) {
-            ruleSelectorError.textContent = currentText.ruleSelectorError;
-            ruleSelectorError.hidden = false;
-            return;
-        }
-        const tab = await findWebTab();
-        const [injection] = tab
-            ? await chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                func: (sel) => { try { return document.querySelectorAll(sel).length; } catch (e) { return -1; } },
-                args: [selector]
-            }).catch(() => [])
-            : [];
-        if (!injection || typeof injection.result !== 'number') {
-            showRuleTest(currentText.ruleNoPage, true);
-        } else if (injection.result < 0) {
-            ruleSelectorError.textContent = currentText.ruleSelectorError;
-            ruleSelectorError.hidden = false;
-        } else {
-            showRuleTest(injection.result === 0 ? currentText.ruleMatchNone : `${currentText.ruleMatchCount} ${injection.result}`, false);
-        }
-    });
 
     // Site istisnaları: bu sitelerde otomatik gönderim yapılmaz; alanlar yine doldurulur
     function renderSites() {

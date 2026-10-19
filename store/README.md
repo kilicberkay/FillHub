@@ -32,8 +32,8 @@ node tools/make-store-assets.mjs   # needs Chromium, rsvg-convert, and ImageMagi
 5. In **Privacy practices**, declare: no data collected, no data sold or transferred, no remote code.
    Give the permission justifications from the listing. Use the privacy policy URL
    `https://github.com/kilicberkay/FillHub/blob/main/PRIVACY.md`.
-6. Submit for review. Broad host access (`<all_urls>`) can lengthen the review; keep the justification
-   text handy.
+6. Submit for review. The package uses `activeTab` (no host access to all sites); keep the `activeTab`
+   justification from the listing handy.
 
 ## Before each submission
 

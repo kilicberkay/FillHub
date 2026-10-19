@@ -68,11 +68,23 @@
         result.hidden = true;
     });
 
+    // Popup'ın kendi sekme ve pencere kimlikleri: arka plan hedef sekmeyi bunları dışlayarak bulur.
+    // Açılır pencere bir sekme olarak açılırsa getCurrent sekmeyi verir; pencere kimliği de sekmeden gelir.
+    async function ownIds() {
+        const self = await chrome.tabs.getCurrent().catch(() => null);
+        const win = await chrome.windows.getCurrent().catch(() => null);
+        return {
+            popupTabId: self && Number.isInteger(self.id) ? self.id : -1,
+            popupWindowId: win && Number.isInteger(win.id) ? win.id : -1
+        };
+    }
+
     // Arka plan etkin sekmeyi bulur ve içerik betiğinin yanıtını döner
     async function runAction(action) {
         fillBtn.disabled = true;
         undoBtn.disabled = true;
-        const response = await chrome.runtime.sendMessage({ type: 'popup-action', action }).catch(() => null);
+        const ids = await ownIds();
+        const response = await chrome.runtime.sendMessage({ type: 'popup-action', action, ...ids }).catch(() => null);
         fillBtn.disabled = false;
         undoBtn.disabled = false;
         if (!response || response.status !== 'success') {
@@ -91,6 +103,46 @@
     fillBtn.addEventListener('click', () => runAction('fill'));
     undoBtn.addEventListener('click', () => runAction('undo'));
     settingsBtn.addEventListener('click', () => chrome.runtime.openOptionsPage());
+
+    // Seçici testi: etkin sayfada seçicinin eşleştiği alan sayısı. Geçersiz seçici tarayıcıda reddedilir.
+    const selectorInput = document.getElementById('popupSelector');
+    const selectorTestBtn = document.getElementById('ruleTestBtn');
+    const selectorResult = document.getElementById('popupSelectorResult');
+
+    function isValidSelector(selector) {
+        try {
+            document.createDocumentFragment().querySelector(selector);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function showSelectorResult(message, isError) {
+        selectorResult.textContent = message;
+        selectorResult.classList.toggle('text-rose-600', isError);
+        selectorResult.classList.toggle('dark:text-rose-400', isError);
+        selectorResult.classList.toggle('text-soft', !isError);
+        selectorResult.hidden = false;
+    }
+
+    selectorTestBtn.addEventListener('click', async () => {
+        const selector = selectorInput.value.trim();
+        if (!selector || !isValidSelector(selector)) {
+            showSelectorResult(text.ruleSelectorError, true);
+            return;
+        }
+        // Popup'ın kendi sekme kimliği: test ortamında popup sekme olarak açılır ve etkin sekme olabilir
+        const ids = await ownIds();
+        const response = await chrome.runtime.sendMessage({ type: 'selector-test', selector, ...ids }).catch(() => null);
+        if (!response || response.status === 'no-page') {
+            showSelectorResult(text.ruleNoPage, true);
+        } else if (response.status === 'invalid') {
+            showSelectorResult(text.ruleSelectorError, true);
+        } else {
+            showSelectorResult(response.matches === 0 ? text.ruleMatchNone : `${text.ruleMatchCount} ${response.matches}`, false);
+        }
+    });
 
     init();
 })();

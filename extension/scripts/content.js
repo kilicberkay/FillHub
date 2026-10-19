@@ -858,15 +858,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
 
         await fillPage(settings);
-        // Görünür captcha varsa doğrulamayı kullanıcı tamamlar: öğe işaretlenir, otomatik işlem yapılmaz
-        const captcha = findVisibleCaptcha();
-        // Gönderim yalnız bu çerçevede alan doldurulduysa, captcha yoksa ve sayfa site istisnası listesinde değilse
+        // Görünür captcha varsa doğrulamayı kullanıcı tamamlar: öğe işaretlenir, otomatik işlem yapılmaz.
+        // Captcha bu çerçevede ya da sayfanın başka bir çerçevesinde olabilir; arka plan tüm çerçeveleri yoklayıp tabCaptcha ile bildirir.
+        const captchaHere = findVisibleCaptcha();
+        const captchaOnPage = captchaHere !== null || request.tabCaptcha === true;
+        if (captchaHere) highlightCaptcha(captchaHere);
+        // Gönderim yalnız bu çerçevede alan doldurulduysa, sayfada captcha yoksa ve sayfa site istisnası listesinde değilse
         // (sayfa alan adı arka plandan gelir; iframe'ler üst sayfanın kuralına tabidir)
         const siteExcluded = FillHubSiteRules.matchesSite(request.pageHost || location.hostname, settings.noAutoSubmitSites);
-        const submitRequested = !!(settings.autoSubmit && request.action === 'fill' && filledCount > 0 && !captcha && !siteExcluded);
+        const submitRequested = !!(settings.autoSubmit && request.action === 'fill' && filledCount > 0 && !captchaOnPage && !siteExcluded);
         if (window.top === window) {
-            if (captcha) {
-                highlightCaptcha(captcha);
+            if (captchaOnPage) {
                 showToast(getLocalizedMessage(settings.preferredLocale, 'captcha'), settings.theme);
             } else {
                 // Gönderim istenmediyse bildirimde "Geri al" sunulur; gönderilmiş bir formu geri almak mümkün değildir
@@ -888,7 +890,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     at: new Date().toISOString(),
                     filled: filledCount,
                     detected: fillStats.detected,
-                    captchaVisible: !!captcha,
+                    captchaVisible: captchaOnPage,
                     siteExcluded,
                     submitRequested,
                     durationMs: Date.now() - startedAt

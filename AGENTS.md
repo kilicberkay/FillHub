@@ -10,7 +10,8 @@ Doldurma mantığı sayfa bağlamında içerik betiği olarak çalışır.
 Tüm yollar depo köküne göredir; eklenti dosyaları `extension/` altındadır (ör. `extension/scripts/content.js`).
 - `extension/manifest.json` — MV3 tanımı. İçerik betikleri manifestte tanımlı değildir; `background.js` içindeki `CONTENT_FILES` listesi,
   kullanıcı doldurmayı başlattığında `chrome.scripting` ile her çerçeveye (eksik olanlara) enjekte edilir.
-  İzinler `storage`, `contextMenus` ve `scripting` ile sınırlıdır.
+  İzinler `storage`, `contextMenus`, `scripting` ve `activeTab` ile sınırlıdır; host izni (`<all_urls>`) yoktur.
+  Sekme erişimi yalnızca kullanıcı eylemiyle (kısayol, sağ tık menüsü, popup düğmesi) verilir ve sekmeden ayrılınca biter.
 - `extension/scripts/locale-data.js` — `FillHubLocaleData`: 15 dilin havuzları (ad, soyad, Latin karşılıklar,
   UI havuzları) ve 15 ülkenin profilleri (şehir+posta öneki, telefon, adres şablonu, kimlik/IBAN belirtimi).
 - `extension/scripts/id-rules.js` — `FillHubIdRules`: kimlik/vergi algoritmaları (sağlama vs. biçim ayrımıyla).
@@ -23,7 +24,9 @@ Tüm yollar depo köküne göredir; eklenti dosyaları `extension/` altındadır
 - `extension/scripts/backup.js` — `FillHubBackup`: yedek dosyası üretimi ve içe aktarma doğrulaması (alan alan; boyut, biçim, seçici, tür, kimlik yapısı).
 - `extension/scripts/diagnostics.js` — `FillHubDiagnostics`: tanılama raporu; kişisel veri (ad, değer, etiket, profil adı, site adresi) içermez.
 - `extension/scripts/content-dates.js` — tarih alanlarının air-datepicker takvimiyle doldurulması (DOM sözleşmesi, gezinme, yıl atlama).
-- `extension/popup/popup.html`, `extension/popup/popup.js` — araç çubuğu açılır penceresi: ülke ve profil seçimi, Doldur ve Geri al. Stil `extension/options/options.css` ile paylaşılır.
+- `extension/popup/popup.html`, `extension/popup/popup.js` — araç çubuğu açılır penceresi: ülke ve profil seçimi, Doldur, Geri al ve
+  özel kural seçicisi testi (Test düğmesi; yalnızca eşleşme sayısı okunur). Ayar sayfasının sekme erişimi olmadığı için seçici testi oradan
+  buraya taşındı. Stil `extension/options/options.css` ile paylaşılır.
   Persona göçü (`migrateProfiles`) ve etkin kimlik (`activeIdentity`) burada; içerik betiği de bunları kullanır.
 - `tools/verify-data.js` — bağımlılıksız denetim (`node tools/verify-data.js`): bilinen vektörler, harita
   bütünlüğü, 15 ülkede 300'er kişi, i18n anahtar eşleşmesi.
@@ -31,9 +34,10 @@ Tüm yollar depo köküne göredir; eklenti dosyaları `extension/` altındadır
   (`assignFieldValue`), dosya/select/radio/tarih-picker yolları, geri alma (`undoFill`),
   mesaj dinleyicisi.
 - `extension/scripts/background.js` — servis çalışanı: sağ tık menüleri (`chrome.i18n`), kısayollar, açılır pencere isteklerinin etkin sekmeye iletilmesi.
+  Hedef sekme `findTargetTab` ile bulunur; popup'ın kendi sekme ve pencere kimlikleri dışlanır (araç çubuğu popup'ı odağı alır).
 - `extension/options/` — ayar sayfası (`generator.js` betik olarak yüklenir); persona/şablon yönetimi burada.
   - `ui.src.css` — tasarım kaynağı: `@theme` tokenları (marka skalası, gölgeler), `@utility` yardımcıları,
-    form taban kuralları, `@font-face`. `@source` ile yalnızca `options.html` ve `options.js` taranır.
+    form taban kuralları, `@font-face`. `@source` ile `options.html`, `options.js` ve `../popup/popup.html`, `../popup/popup.js` taranır.
   - `options.css` — **üretilmiş**, elle düzenlenmez: `npm run build:css` (Tailwind CLI 4.3.3, küçültülmüş).
     `ui.src.css`, `options.html` veya `options.js` sınıf içerdiğinde yeniden üretilmelidir.
   - `i18n.js` — ayar sayfası metinleri, 15 dil; her dilde aynı anahtar kümesi (`tools/verify-data.js` ve birim testi denetler).

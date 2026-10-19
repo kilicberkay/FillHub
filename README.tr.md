@@ -147,7 +147,7 @@ Profilleri **Profiller** sayfasında oluşturun, düzenleyin ve değiştirin. Ak
 
 ### Özel kurallar
 
-Yerleşik tanıma bir alanı kaçırırsa, **Özel Kurallar** sayfasında bir CSS seçicisini bir veri türüne eşleyebilirsiniz. Kurallar sırayla denenir ve ilk eşleşen kazanır. **Bu sayfada dene** düğmesi, doldurmadan önce seçicinin kaç alanla eşleştiğini gösterir.
+Yerleşik tanıma bir alanı kaçırırsa, **Özel Kurallar** sayfasında bir CSS seçicisini bir veri türüne eşleyebilirsiniz. Kurallar sırayla denenir ve ilk eşleşen kazanır. Araç çubuğu açılır penceresindeki **Bu sayfada dene** düğmesi, doldurmadan önce seçicinin kaç alanla eşleştiğini gösterir.
 
 ### Akıllı form davranışı
 
@@ -195,7 +195,7 @@ Chrome 116 veya üzeri, ya da Manifest V3 destekleyen Chromium tabanlı bir tara
 |---|---|---|
 | Tüm formu doldur | `Ctrl+Shift+F` (macOS: `Command+Shift+F`) | Araç çubuğu açılır penceresi → *Doldur* veya sağ tık → *Formu sahte verilerle doldur* |
 | Odaklanılan alanı doldur | yok | Alana sağ tık → *Bu alanı doldur* |
-| Kaos modu (fuzz testleri için olağandışı değerler) | `Ctrl+Shift+D` | yok |
+| Kaos modu (fuzz testleri için olağandışı değerler) | `Ctrl+Shift+Y` | yok |
 | Son doldurmayı geri al | `Ctrl+Shift+U` | Sağ tık → *Sahte doldurmayı geri al* |
 
 Kısayollar `chrome://extensions/shortcuts` adresinden değiştirilebilir.
@@ -233,7 +233,7 @@ FillHub, ülkesinin genel sağlama algoritmasını geçen kimlik numaraları ür
 
 - **Veri toplanmaz.** FillHub'da analitik, telemetri, hesap veya sunucu yoktur. Hiçbir şey tarayıcınızdan çıkmaz.
 - **Ayarlar yerel kalır**, `chrome.storage.local` içinde saklanır.
-- **İzinler minimumda tutulur**: `storage` (ayarlar), `contextMenus` (sağ tık öğeleri) ve `scripting`; `scripting` doldurma betiklerini yalnızca siz doldurmayı başlattığınızda enjekte eder. Kullanmadığınız sayfalarda hiçbir betik çalışmaz.
+- **İzinler minimumda tutulur**: `storage` (ayarlar), `contextMenus` (sağ tık öğeleri), `scripting` (doldurma betiklerini yalnızca siz başlattığınızda enjekte eder) ve `activeTab` (yalnızca kısayola, açılır pencere düğmesine veya menü öğesine bastığınızda, yalnızca o sekme için). Tüm sitelere erişim yoktur; kullanmadığınız sayfalarda hiçbir betik çalışmaz.
 - **Üretilen veriler test içindir.** Güvenli mod varsayılan olarak açıktır. Üretilen verileri gerçek uygulamalarda, satın almalarda veya kimlik beyanlarında kullanmayın.
 
 Tam politika: [PRIVACY.md](PRIVACY.md).

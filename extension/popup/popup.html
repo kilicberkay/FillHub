@@ -35,6 +35,15 @@
 
         <p id="popupResult" role="status" class="text-[11px] font-medium text-soft" hidden></p>
 
+        <div class="space-y-1 pt-1">
+            <label for="popupSelector" id="selectorLabel" class="block text-xs font-medium text-zinc-700 dark:text-zinc-300">CSS Selector (id, class, etc.)</label>
+            <div class="flex gap-2">
+                <input type="text" id="popupSelector" placeholder="#first-name" class="min-w-0 flex-1 rounded-lg border border-zinc-500 bg-white px-2.5 text-[13px] text-zinc-800 h-8 focus-ring dark:border-zinc-500 dark:bg-white/[0.04] dark:text-zinc-100">
+                <button type="button" id="ruleTestBtn" class="inline-flex h-8 cursor-pointer select-none items-center justify-center rounded-lg border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50 focus-ring dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-200 dark:hover:bg-white/[0.06]">Test on this page</button>
+            </div>
+            <p id="popupSelectorResult" role="status" class="text-xs font-medium text-soft" hidden></p>
+        </div>
+
         <footer class="flex items-center justify-end border-t border-zinc-200/70 pt-2.5 dark:border-white/[0.06]">
             <button type="button" id="popupSettingsBtn" class="inline-flex h-7 cursor-pointer select-none items-center justify-center rounded-lg px-2.5 text-xs font-medium text-brand-700 transition-colors hover:bg-brand-50 focus-ring dark:text-brand-300 dark:hover:bg-brand-500/10">Settings</button>
         </footer>

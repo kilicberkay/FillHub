@@ -5,6 +5,20 @@ All notable changes to FillHub are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+- FillHub no longer asks for access to all websites. It uses the `activeTab` permission: it acts on the tab you
+  are looking at, and only after you press a shortcut, the popup's Fill or Test button, or a context menu item.
+  The install warning about reading and changing data on all sites no longer appears.
+- The "Test on this page" selector check moved from the Custom Rules page to the toolbar popup, because only a
+  toolbar action can reach the current tab under `activeTab`.
+
+### Fixed
+- Auto-submit no longer sends a form inside an iframe while a visible captcha is elsewhere on the page when the
+  fill starts. The service worker checks every frame of the tab, and the captcha is outlined in whichever frame holds it.
+- Chaos mode's suggested shortcut `Ctrl+Shift+D` was never assigned: Chrome reserves that key for "Bookmark all
+  tabs" and drops the extension's request without a message. The shortcut is now `Ctrl+Shift+Y`, the settings page
+  and README list it, and a browser test presses the key to prove the command runs.
+
 ## [1.3.2] - 2026-10-17
 
 ### Fixed
