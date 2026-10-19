@@ -65,6 +65,15 @@ test('options.js her getElementById çağrısı options.html içinde bir id bulu
     assert.deepEqual(missing, []);
 });
 
+test('popup.js her getElementById çağrısı popup.html içinde bir id bulur', () => {
+    const js = read('popup/popup.js');
+    const html = read('popup/popup.html');
+    const ids = [...js.matchAll(/getElementById\(['"]([^'"]+)['"]\)/g)].map((m) => m[1]);
+    assert.ok(ids.length >= 8, `beklenenden az id: ${ids.length}`);
+    const missing = [...new Set(ids)].filter((id) => !html.includes(`id="${id}"`));
+    assert.deepEqual(missing, [], 'popup.js var olmayan bir id arıyor');
+});
+
 test('ayar sayfası: yalnızca yerel betik yüklenir (uzak kod yok)', () => {
     const html = read('options/options.html');
     const srcs = [...html.matchAll(/<script[^>]*\ssrc=["']([^"']+)["']/g)].map((m) => m[1]);
