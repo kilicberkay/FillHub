@@ -161,7 +161,7 @@ When built-in detection misses a field, map a CSS selector to a data type on the
 - **URL fields** receive links to reserved example domains, never to real sites.
 - **File inputs** receive a generated file.
 - **Auto-submit** (off by default) clicks the real submit button after filling. Fake buttons and destructive controls such as Cancel or Delete are never clicked.
-- **Works inside iframes**, skips disabled and read-only fields, and keeps framework state (React, Vue) in sync with the values it writes.
+- **Works inside same-origin iframes**, skips disabled and read-only fields, and keeps framework state (React, Vue) in sync with the values it writes. Cross-origin iframes are outside the `activeTab` grant and are left untouched.
 
 ### Captchas are never clicked
 
@@ -183,7 +183,7 @@ FillHub does not click, solve, or call captcha APIs. When a visible reCAPTCHA, h
 
 ### From source (developer mode)
 
-1. Clone the repository, or download [`fillhub-1.3.2.zip`](https://github.com/kilicberkay/FillHub/releases/tag/v1.3.2) from the Releases page and unpack it.
+1. Clone the repository, or download the latest `fillhub-*.zip` from the [Releases page](https://github.com/kilicberkay/FillHub/releases) and unpack it.
 2. Open `chrome://extensions` and turn on **Developer mode**.
 3. Click **Load unpacked** and select the `extension/` folder (the one that contains `manifest.json`).
 4. Open any page with a form and press `Ctrl+Shift+F`.

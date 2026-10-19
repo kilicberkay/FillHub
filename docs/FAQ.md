@@ -22,8 +22,9 @@ events, so framework state updates the same way it does for typed text.
 
 ## Does it work inside iframes?
 
-Yes. The content script runs in every frame of the page. Forms inside an iframe are filled from the same
-settings and the same person as the rest of the page.
+Yes, for same-origin iframes. The `activeTab` permission covers the tab's main frame origin, so the
+content script is injected into the top page and its same-origin frames; they use the same settings and
+the same person. Cross-origin iframes are outside that grant and are left untouched.
 
 ## What does PII Safe mode do?
 

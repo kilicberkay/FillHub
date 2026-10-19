@@ -174,6 +174,17 @@ test('yayın notu: CHANGELOG bölümü çıkarılır ve sonraki sürüme taşmaz
     assert.ok(!out.includes('## [1.1.0]'), 'önceki sürüm bölümü taşmamalı');
 });
 
+test('CHANGELOG: manifest sürümü için bölüm var', () => {
+    const version = manifest.version.replace(/\./g, '\\.');
+    assert.match(read('CHANGELOG.md'), new RegExp(`^## \\[${version}\\]`, 'm'));
+});
+
+test('CHANGELOG: güncel sürüm bölümü boş değil', () => {
+    const { execFileSync } = require('node:child_process');
+    const current = execFileSync(process.execPath, [join(ROOT, 'tools', 'changelog-section.js'), manifest.version], { encoding: 'utf8' });
+    assert.ok(current.trim().length > 0, 'güncel sürüm bölümü boş');
+});
+
 test('yayın iş akışı: release varsa günceller, yoksa oluşturur; sağlama toplamı üretir', () => {
     const wf = read('.github/workflows/release.yml');
     assert.match(wf, /gh release view/);

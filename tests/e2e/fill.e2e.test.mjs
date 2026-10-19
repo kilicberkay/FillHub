@@ -844,7 +844,7 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
             }
         });
 
-        it('iframe içindeki alanlar da doldurulur ve sonuç tüm çerçevelerin toplamıdır', async () => {
+        it('aynı kökenli iframe içindeki alanlar da doldurulur ve sonuç tüm çerçevelerin toplamıdır', async () => {
             await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
             const form = await openForm(env, { fixture: 'frames' });
             const popup = await openPopup();
@@ -859,6 +859,28 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
                 const frameFilled = await form.page.eval(`(() => { const d = document.getElementById('cerceve').contentDocument; return ${filledIn('d')}; })()`);
                 assert.ok(frameFilled > 0, 'iframe içindeki alanlar dolmalı');
                 assert.ok(count >= topFilled + frameFilled, `sonuç tüm çerçevelerin toplamı olmalı (üst ${topFilled}, iframe ${frameFilled}): "${shown}"`);
+            } finally {
+                await popup.close();
+                await closeForm(form);
+            }
+        });
+
+        it('çapraz kökenli iframe activeTab kapsamı dışında kalır', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
+            const form = await openForm(env, { fixture: 'frames-cross-origin', host: 'fillhub.test' });
+            const popup = await openPopup();
+            try {
+                await form.page.waitFor('window.__crossValues !== null', 10000);
+                await env.swEval(`chrome.tabs.update(${form.tabId}, { active: true })`);
+                await popup.eval(`document.getElementById('popupFillBtn').click()`);
+                await popup.waitFor(`!document.getElementById('popupResult').hidden`, 10000);
+                const topFilled = await form.page.eval(`[...document.querySelectorAll('#kayit input')].filter((i) => i.value).length`);
+                const crossValues = await form.page.eval('window.__crossValues');
+                assert.ok(topFilled > 0, 'üst çerçeve dolmalı');
+                assert.deepEqual(crossValues.filter(Boolean), [], 'çapraz kökenli iframe doldurulmamalı');
+                const shown = await popup.eval(`document.getElementById('popupResult').textContent`);
+                const count = Number((shown.match(/(\d+)\s*$/) || [])[1]);
+                assert.equal(count, topFilled, 'sonuç yalnız erişilebilir çerçeveleri saymalı');
             } finally {
                 await popup.close();
                 await closeForm(form);

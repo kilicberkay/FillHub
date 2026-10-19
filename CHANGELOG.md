@@ -5,6 +5,10 @@ All notable changes to FillHub are documented here. The format follows
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-10-19
+
+This release also includes the fixes from 1.3.2, which was not published separately.
+
 ### Changed
 - FillHub no longer asks for access to all websites. It uses the `activeTab` permission: it acts on the tab you
   are looking at, and only after you press a shortcut, the popup's Fill or Test button, or a context menu item.

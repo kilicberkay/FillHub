@@ -38,6 +38,11 @@ node tools/make-store-assets.mjs   # needs Chromium, rsvg-convert, and ImageMagi
 ## Before each submission
 
 - `npm test` passes.
+- `npm run build` passes, then unpack `dist/fillhub-<version>.zip` and run the browser tests against the
+  archive: `FILLHUB_EXT_DIR=<unpacked folder> npm run test:e2e`. CI and the release workflow test the
+  packaged archive, not the source tree. On PowerShell set `$env:FILLHUB_EXT_DIR` first.
+- The store privacy policy URL is `https://github.com/kilicberkay/FillHub/blob/main/PRIVACY.md` and it
+  returns 200 (a `release/*` branch URL breaks as soon as the branch is removed).
 - `extension/manifest.json` version is higher than the published version.
 - The screenshots match the current UI.
 - The store description and the README describe the same features.

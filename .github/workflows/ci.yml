@@ -51,6 +51,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run build
       - name: Install Chromium for Playwright
         # Playwright 1.56.1 bundles Chromium 141, the build the browser tests are run against locally.
         # An unpinned install fetched a newer Chromium (156) on which the tests hang.
@@ -60,5 +61,12 @@ jobs:
           CHROME=$(find "${PLAYWRIGHT_BROWSERS_PATH:-$HOME/.cache/ms-playwright}" -type f -path '*chrome-linux*' -name chrome | head -n 1)
           test -n "$CHROME"
           echo "CHROME_BIN=$CHROME" >> "$GITHUB_ENV"
-      - name: Browser tests
+      - name: Unpack the store archive
+        run: |
+          rm -rf dist/unpacked
+          mkdir -p dist/unpacked
+          python3 -m zipfile -e dist/fillhub-*.zip dist/unpacked
+      - name: Browser tests (packaged archive)
+        env:
+          FILLHUB_EXT_DIR: ${{ github.workspace }}/dist/unpacked
         run: node --test --test-timeout=400000 tests/e2e/*.test.mjs

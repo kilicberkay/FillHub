@@ -161,7 +161,7 @@ Yerleşik tanıma bir alanı kaçırırsa, **Özel Kurallar** sayfasında bir CS
 - **URL alanları** gerçek sitelere değil, ayrılmış örnek alan adlarına bağlantılar alır.
 - **Dosya alanları** üretilmiş bir dosya alır.
 - **Otomatik gönderim** (varsayılan olarak kapalı) doldurmadan sonra gerçek gönderim düğmesine basar. İptal, Sil gibi sahte veya yıkıcı düğmelere hiçbir zaman basılmaz.
-- **iframe içinde çalışır**, devre dışı ve salt okunur alanları atlar, yazdığı değerleri React ve Vue gibi çerçevelerin durumuyla senkron tutar.
+- **Aynı kökenli iframe içinde çalışır**, devre dışı ve salt okunur alanları atlar, yazdığı değerleri React ve Vue gibi çerçevelerin durumuyla senkron tutar. Çapraz kökenli iframe'ler `activeTab` izninin dışındadır ve doldurulmaz.
 
 ### Captcha'lara asla tıklanmaz
 
@@ -182,7 +182,7 @@ FillHub captcha'ya tıklamaz, çözmez ve captcha API'lerini çağırmaz. Sayfad
 
 ### Kaynaktan (geliştirici modu)
 
-1. Depoyu klonlayın ya da [Sürümler sayfası](https://github.com/kilicberkay/FillHub/releases/tag/v1.3.2) üzerinden `fillhub-1.3.2.zip` dosyasını indirip açın.
+1. Depoyu klonlayın ya da [Sürümler sayfası](https://github.com/kilicberkay/FillHub/releases) üzerinden en son `fillhub-*.zip` dosyasını indirip açın.
 2. `chrome://extensions` adresini açın ve **Geliştirici modu**nu etkinleştirin.
 3. **Paketlenmemiş öğe yükle** düğmesine tıklayın ve `extension/` klasörünü (içinde `manifest.json` bulunan klasör) seçin.
 4. Herhangi bir form içeren sayfayı açın ve `Ctrl+Shift+F` tuşlarına basın.

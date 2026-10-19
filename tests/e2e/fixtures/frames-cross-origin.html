@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <title>FillHub çapraz kökenli çerçeve</title>
+</head>
+<body>
+    <form id="kayit" action="#">
+        <label for="ad">Adınız</label>
+        <input id="ad" name="ad" type="text">
+        <label for="eposta">E-posta</label>
+        <input id="eposta" name="eposta" type="email">
+    </form>
+    <iframe id="cerceve" style="width:600px;height:420px;border:1px solid #999"></iframe>
+    <script>
+        window.__crossValues = null;
+        addEventListener('message', (event) => {
+            if (event.data && Array.isArray(event.data.fillhubCross)) window.__crossValues = event.data.fillhubCross;
+        });
+        // Üst sayfa fillhub.test; iframe cross.test: aynı sunucu, farklı köken
+        document.getElementById('cerceve').src = `http://cross.test:${location.port}/?page=cross-frame`;
+    </script>
+</body>
+</html>

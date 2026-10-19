@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <title>FillHub çapraz kökenli form</title>
+</head>
+<body>
+    <form id="kayit" action="#">
+        <label for="ad">Adınız</label>
+        <input id="ad" name="ad" type="text">
+        <label for="eposta">E-posta</label>
+        <input id="eposta" name="eposta" type="email">
+    </form>
+    <script>
+        // Üst sayfa çapraz kökenli olduğu için DOM'a erişemez; değerleri mesajla bildirir
+        setInterval(() => {
+            parent.postMessage({ fillhubCross: [...document.querySelectorAll('#kayit input')].map((i) => i.value) }, '*');
+        }, 250);
+    </script>
+</body>
+</html>

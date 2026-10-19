@@ -30,7 +30,7 @@ kullanmadan deneyebilir.
 - Metin alanları, ülkenin dilinde örnek cümleler alır ve alanın en fazla uzunluğuna göre kırpılır.
 - Uç durumları denemek için kaos modu.
 - Geri al: son doldurmayı, doldurmadan önceki haline döndürür.
-- iframe içindeki formlarda çalışır; JavaScript çerçeveleriyle değer senkronizasyonunu korur.
+- Aynı kökenli iframe içindeki formlarda çalışır; JavaScript çerçeveleriyle değer senkronizasyonunu korur. Çapraz kökenli iframe'ler activeTab izninin dışındadır ve doldurulmaz.
 
 Nasıl kullanılır
 
@@ -68,7 +68,8 @@ bu nedenle üretilen verileri gerçek başvurularda, satın almalarda ya da kiml
 - **activeTab:** FillHub yalnızca kullanıcının baktığı sekmede çalışır ve yalnızca kullanıcı bir kısayola
   bastığında, araç çubuğu açılır penceresinde Doldur ya da Test düğmesine bastığında, ya da bağlam menüsünü
   kullandığında işlem yapar. İzin yalnızca o sekme için verilir ve kullanıcı sekmeden ayrıldığında biter. Tüm
-  sitelere erişim izni yoktur; arka planda sayfa okumaz.
+  sitelere erişim izni yoktur; arka planda sayfa okumaz. İzin ana çerçevenin kökenini kapsar; aynı kökenli
+  iframe'ler doldurulur, çapraz kökenli iframe'ler doldurulmaz.
 
 Uzaktan kod: yok. Uzantı tüm kodunu paketin içinde taşır ve ağ isteği yapmaz. Veri toplama: yok.
 

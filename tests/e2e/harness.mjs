@@ -48,10 +48,12 @@ const FIXTURES = {
     ar: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-ar.html')),
     picker: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'picker.html')),
     frames: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'frames.html')),
+    'frames-cross-origin': readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'frames-cross-origin.html')),
+    'cross-frame': readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-cross-frame.html')),
     'no-fields': readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'no-fields.html')),
 };
 // ?page=<anahtar> ile seçilen sayfalar; diğer istekler dile göre TR ya da EN formunu alır
-const NAMED_PAGES = ['consent', 'rich', 'ja', 'zh', 'ar', 'picker', 'frames', 'no-fields'];
+const NAMED_PAGES = ['consent', 'rich', 'ja', 'zh', 'ar', 'picker', 'frames', 'frames-cross-origin', 'cross-frame', 'no-fields'];
 
 export const chromeAvailable = () => Boolean(findChrome());
 
@@ -59,9 +61,9 @@ export const chromeAvailable = () => Boolean(findChrome());
 export async function startEnv() {
     const srv = createServer((req, res) => {
         // ?lang=en → İngilizce etiketli form; varsayılan Türkçe
-        // ?page=consent → onay kutuları ve metin alanları formu; ?lang=en → İngilizce etiketli form
-        const named = NAMED_PAGES.find((p) => req.url.includes(`page=${p}`));
-        const key = named ?? (req.url.includes('lang=en') ? 'en' : 'tr');
+        // ?page=consent → adlandırılmış fixture; tam eşleşme (ör. "frames" ile "frames-cross-origin" karışmaz)
+        const wanted = new URL(req.url, 'http://127.0.0.1').searchParams.get('page');
+        const key = NAMED_PAGES.includes(wanted) ? wanted : (req.url.includes('lang=en') ? 'en' : 'tr');
         res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
         res.end(FIXTURES[key]);
     });

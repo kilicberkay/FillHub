@@ -17,7 +17,7 @@ files in the repository are loaded as they are. npm is used only for development
 | Identity rules | `extension/scripts/id-rules.js` (`FillHubIdRules`) | Generators and validators for identity numbers; test vectors; PII sentinel values |
 | Field detection | `extension/scripts/field-detect.js` (`FillHubDetect`) | Classifies a field from `autocomplete`, `type`, label, `name`/`id`, placeholder; priority-ordered rules; Turkish, Latin and non-Latin token matching |
 | Generator | `extension/scripts/generator.js` (`FakeDataGenerator`) | Locale resolution, `createPerson`, value per field type, PII Safe values, persona migration |
-| Content script | `extension/scripts/content.js` | Walks each frame and shadow root, fills fields, handles checkboxes, radios, selects, dates, files, undo, toast, captcha notice |
+| Content script | `extension/scripts/content.js` | Walks each accessible frame and shadow root, fills fields, handles checkboxes, radios, selects, dates, files, undo, toast, captcha notice |
 | Settings page | `extension/options/options.html`, `extension/options/options.js`, `extension/options/i18n.js` | Profiles, custom rules, general settings, about, support; 15 interface languages |
 | Styles | `extension/options/ui.src.css` → `extension/options/options.css` | Tailwind CSS 4 build (`npm run build:css`); generated file is not edited by hand |
 
@@ -104,3 +104,5 @@ Consequences in the code:
   finds the form tab among the active tabs, not by URL.
 - Store listing (`store/listing/`), `store/privacy-policy.md` and `PRIVACY.md` describe `activeTab` and no
   longer mention `<all_urls>`. Keep them in step with the manifest; a unit test checks there is no `host_permissions`.
+- `activeTab` grants host permission for the tab's main frame origin. Same-origin iframes are injected and filled;
+  cross-origin iframes are not. The browser tests cover both cases (`frames` and `frames-cross-origin`).

@@ -29,6 +29,18 @@ jobs:
       - run: node --test tests/unit/*.test.mjs
       - run: npm run build
 
+      - name: Install Chromium for Playwright
+        run: |
+          npx --yes playwright@1.56.1 install --with-deps chromium
+          CHROME=$(find "${PLAYWRIGHT_BROWSERS_PATH:-$HOME/.cache/ms-playwright}" -type f -path '*chrome-linux*' -name chrome | head -n 1)
+          test -n "$CHROME"
+          echo "CHROME_BIN=$CHROME" >> "$GITHUB_ENV"
+      - name: Browser tests (packaged archive)
+        run: |
+          rm -rf dist/unpacked && mkdir -p dist/unpacked
+          python3 -m zipfile -e dist/fillhub-*.zip dist/unpacked
+          FILLHUB_EXT_DIR="$PWD/dist/unpacked" node --test --test-timeout=400000 tests/e2e/*.test.mjs
+
       - name: Etiket ile manifest sürümünün eşleştiğini doğrula
         env:
           INPUT_TAG: ${{ github.event.inputs.tag }}

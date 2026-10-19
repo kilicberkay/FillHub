@@ -31,7 +31,7 @@ that your data stays on your device.
 | `storage` | Saves your settings locally. |
 | `contextMenus` | Adds the "Fill form with fake data", "Fill this field" and "Undo fake fill" items to the right-click menu. |
 | `scripting` | Injects the fill scripts into a page only after you start a fill. Pages you do not fill run no FillHub code. |
-| `activeTab` | Access to the tab you are looking at, granted only when you press a shortcut, the popup's Fill or Test button, or a context menu item, and only for that tab. Lets FillHub fill forms, including forms inside iframes, on that page. No access to other sites. |
+| `activeTab` | Access to the tab you are looking at, granted only when you press a shortcut, the popup's Fill or Test button, or a context menu item, and only for that tab. Lets FillHub fill forms on that page, including same-origin iframes. Cross-origin iframes are outside this permission. No access to other sites. |
 
 ## Fake data
 

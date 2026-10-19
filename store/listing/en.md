@@ -31,8 +31,8 @@ Highlights
 - Text fields receive sample sentences in the country's language, cut to the field's maximum length.
 - Chaos mode for fuzz-style testing of unusual inputs.
 - Undo restores the form to the state it had before the last fill.
-- Works in iframes, reads labels in the page's own language, and keeps values in sync with
-  JavaScript frameworks.
+- Works in same-origin iframes, reads labels in the page's own language, and keeps values in sync with
+  JavaScript frameworks. Cross-origin iframes are outside the activeTab grant and are left untouched.
 
 How to use
 
@@ -71,7 +71,7 @@ do not use generated data for real applications, purchases, or identity claims.
   presses a shortcut, presses Fill or Test in the toolbar popup, or uses the context menu. The permission is
   granted for that tab only, and it ends when the user leaves the tab. FillHub has no host access to
   all sites and does not read pages in the background. Content scripts inject into the frames of that tab
-  (including forms inside iframes) only after the user's action.
+  (including forms inside same-origin iframes) only after the user's action.
 
 Remote code: none. The extension ships all its code in the package and makes no network requests.
 Data collection: none.
