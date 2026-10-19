@@ -32,7 +32,7 @@ jobs:
       - run: npm run build
       - name: Store archive contents
         run: python3 -m zipfile -t dist/fillhub-*.zip
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: matrix.node == 22
         with:
           name: fillhub-zip
