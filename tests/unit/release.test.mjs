@@ -8,13 +8,13 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
-// Eklenti dosyaları (manifest, _locales, options, popup, scripts, icons) extension/ altındadır
+// Eklenti dosyaları (manifest, _locales, options, scripts, icons) extension/ altındadır
 const EXT = join(ROOT, 'extension');
 const readExt = (p) => readFileSync(join(EXT, p), 'utf8');
 const require = createRequire(import.meta.url);
 const manifest = JSON.parse(readExt('manifest.json'));
 const { contentFiles } = require('../../tools/lib/content-files.js');
-const LOCALE_KEYS = ['extName', 'extDescription', 'actionTitle', 'cmdFill', 'cmdChaos', 'cmdUndo', 'menuFillForm', 'menuFillField', 'menuUndo'];
+const LOCALE_KEYS = ['extName', 'extDescription', 'actionTitle', 'cmdFill', 'cmdChaos', 'cmdUndo', 'menuFillForm', 'menuFillField', 'menuUndo', 'menuSettings'];
 
 test('_locales: 15 dil, her birinde aynı anahtarlar, açıklama ≤132 karakter', () => {
     const dirs = readdirSync(join(EXT, '_locales')).sort();
@@ -120,10 +120,10 @@ test('paket içeriği: çalışma zamanı dosyaları var, geliştirme dosyaları
     }
 });
 
-test('paket: ayar sayfası ve açılır pencerenin yerel img/link/script referansları pakette var', () => {
+test('paket: ayar sayfasının yerel img/link/script referansları pakette var', () => {
     const { collect } = require('../../tools/build.js');
     const files = new Set(collect());
-    for (const page of ['options/options.html', 'popup/popup.html']) {
+    for (const page of ['options/options.html']) {
         const html = readExt(page);
         const refs = [...html.matchAll(/(?:src|href)="([^"]+)"/g)].map((m) => m[1]).filter((s) => !/^(https?:|data:|#|mailto:)/.test(s));
         assert.ok(refs.length >= 3, `${page}: yerel başvuru sayısı ${refs.length}`);
@@ -132,7 +132,6 @@ test('paket: ayar sayfası ve açılır pencerenin yerel img/link/script referan
             assert.ok(files.has(rel), `${page} ${r} referansı pakette yok: ${rel}`);
         }
     }
-    assert.ok(files.has('popup/popup.js'), 'açılır pencere betiği pakette olmalı');
 });
 
 test('build: zip yazıcısı geçerli bir zip üretir (merkezi dizin ve CRC)', () => {
@@ -162,7 +161,8 @@ test('README görselleri (HTML img ve Markdown) diskte var', () => {
         const md = [...read(doc).matchAll(/!\[[^\]]*\]\(([^)\s]+)\)/g)].map((m) => m[1]);
         const srcset = [...read(doc).matchAll(/srcset="([^"]+)"/g)].map((m) => m[1]);
         const srcs = [...html, ...md, ...srcset].filter((s) => !/^https?:/.test(s));
-        assert.ok(srcs.length >= 10, `${doc}: en az 10 görsel bekleniyor, bulunan ${srcs.length}`);
+        // Banner, demo, doldurma ekranı ve üç ayar sayfası görselinin açık/koyu kopyaları
+        assert.ok(srcs.length >= 9, `${doc}: en az 9 görsel bekleniyor, bulunan ${srcs.length}`);
         for (const s of srcs) assert.ok(existsSync(join(ROOT, s)), `${doc}: eksik görsel ${s}`);
     }
 });

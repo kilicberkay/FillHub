@@ -25,5 +25,8 @@
   },
   "menuUndo": {
     "message": "Undo fake fill"
+  },
+  "menuSettings": {
+    "message": "Settings"
   }
 }

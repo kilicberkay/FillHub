@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { LABEL_CORPUS } from './field-corpus.mjs';
+import { LABEL_CORPUS, NUMBER_INPUT_CORPUS } from './field-corpus.mjs';
 
 const require = createRequire(import.meta.url);
 const D = require('../../extension/scripts/field-detect.js');
@@ -25,6 +25,16 @@ test('input.type sinyali etiketten önce gelir', () => {
     assert.equal(D.classify(['Bilinmeyen'], { inputType: 'email' }), 'email');
     assert.equal(D.classify(['Bilinmeyen'], { inputType: 'tel' }), 'phone');
     assert.equal(D.classify(['Bilinmeyen'], { inputType: 'password' }), 'password');
+});
+
+test('sayı alanı: telefon, posta kodu ve kimlik etiketten tanınır; diğer etiketler sayı kalır', () => {
+    const failures = [];
+    for (const [label, expected] of NUMBER_INPUT_CORPUS) {
+        const got = D.classify([label], { inputType: 'number' });
+        if (got !== expected) failures.push(`${label} → ${got} (beklenen ${expected})`);
+    }
+    assert.deepEqual(failures, []);
+    assert.equal(D.classify(['Metin'], { inputType: 'number', autocomplete: 'postal-code' }), 'zip');
 });
 
 test('autocomplete jetonu etiketten önce gelir (son jeton kullanılır)', () => {

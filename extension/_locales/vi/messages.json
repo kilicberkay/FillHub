@@ -25,5 +25,8 @@
   },
   "menuUndo": {
     "message": "Hoàn tác điền dữ liệu giả"
+  },
+  "menuSettings": {
+    "message": "Cài đặt"
   }
 }

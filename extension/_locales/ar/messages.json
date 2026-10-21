@@ -25,5 +25,8 @@
   },
   "menuUndo": {
     "message": "التراجع عن الملء الوهمي"
+  },
+  "menuSettings": {
+    "message": "الإعدادات"
   }
 }

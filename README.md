@@ -31,7 +31,7 @@
 
 | Languages | Consistency | Shortcuts | Data |
 |---|---|---|---|
-| 15 countries | One consistent person per fill | `Ctrl+Shift+F` fills, `Ctrl+Shift+U` undoes | None collected |
+| 15 languages, 15 country profiles | One consistent person per fill | `Ctrl+Shift+F` fills, `Ctrl+Shift+U` undoes | None collected |
 
 ---
 
@@ -66,20 +66,11 @@ Every fill creates **one consistent person**. The first name, last name, e-mail,
   <tr>
     <td align="center" width="50%">
       <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/popup.png">
-        <img src="docs/images/light/popup.png" alt="Toolbar popup with country, identity profile, Fill and Undo" width="240">
-      </picture><br>
-      <sub>Toolbar popup</sub>
-    </td>
-    <td align="center" width="50%">
-      <picture>
         <source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/settings-profiles.png">
         <img src="docs/images/light/settings-profiles.png" alt="Identity profiles page with a fixed test account" width="100%">
       </picture><br>
       <sub>Identity profiles</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="50%">
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/settings-rules.png">
@@ -87,7 +78,9 @@ Every fill creates **one consistent person**. The first name, last name, e-mail,
       </picture><br>
       <sub>Custom rules</sub>
     </td>
-    <td align="center" width="50%">
+  </tr>
+  <tr>
+    <td align="center" colspan="2">
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="docs/images/dark/settings-general.png">
         <img src="docs/images/light/settings-general.png" alt="General settings page with default country and smart features" width="100%">
@@ -101,7 +94,7 @@ Every fill creates **one consistent person**. The first name, last name, e-mail,
 
 ### One-action form filling
 
-Press `Ctrl+Shift+F` (`Command+Shift+F` on macOS), open the toolbar popup and press **Fill**, or choose **Fill form with fake data** from the right-click menu. The popup also lets you pick the default country and profile. A single field can be filled with **Fill this field**, and **Undo** restores the form to the state it had before the last fill.
+Press `Ctrl+Shift+F` (`Command+Shift+F` on macOS), click the FillHub icon in the toolbar, or choose **Fill form with fake data** from the right-click menu. Change the default country and profile on the settings page, which opens with **Settings** in the right-click menu (or by right-clicking the toolbar icon). A single field can be filled with **Fill this field**, and **Undo** restores the form to the state it had before the last fill.
 
 ### Fifteen languages, fifteen countries
 
@@ -134,7 +127,7 @@ PII Safe is **on by default**. It replaces personal identifiers with values that
 
 ### Smart field detection
 
-Each field is classified from its `autocomplete` value, `type`, label, `name` and `id`, placeholder, and nearby text. The detection corpus covers more than 100 labels across the 15 languages, including tricky ones such as `Soyadınız` (surname), which must not be read as a first name. Select boxes are matched to the country, state, and phone-code options they contain.
+Each field is classified from its `type`, its `autocomplete` value, and its texts: `name`, `id`, placeholder, `title`, `aria-label`, `aria-labelledby`, and the attached `<label>`. Number inputs (`type="number"`) can still be recognized as phone, postal code, or ID fields, and receive digits only. The detection corpus covers more than 100 labels across the 15 languages, including tricky ones such as `Soyadınız` (surname), which must not be read as a first name. Select boxes are matched to the country, state, and phone-code options they contain.
 
 ### Identity profiles
 
@@ -143,37 +136,41 @@ A profile decides who is used for a fill:
 - **Random on every fill** (the default): a new, consistent person each time.
 - **Fixed person**: the same person every time, with a button to generate another one.
 
+A profile can also pin values: first name, last name, e-mail, phone, and password. Pinned values are used on every fill while the profile is active, so a profile can hold a fixed test account. The e-mail stays consistent with pinned names. Pinned values are stored unencrypted in the browser, so do not enter a real password.
+
 Create, edit, and switch profiles on the **Profiles** page. The active profile is always shown at the top.
 
 ### Custom rules
 
-When built-in detection misses a field, map a CSS selector to a data type on the **Custom Rules** page. Rules are checked in order and the first match wins. **Test on this page** in the toolbar popup shows how many fields a selector matches before you fill anything.
+When built-in detection misses a field, map a CSS selector to a data type on the **Custom Rules** page. Rules are checked in order and the first match wins.
 
 ### Smart form behavior
 
 - **Smart e-mail linking**: e-mail fields follow the generated name.
 - **Match passwords**: "confirm password" fields receive the same value.
 - **Consent checkboxes** (terms, privacy, KVKK) are checked, and **marketing checkboxes** (newsletter, campaigns) stay unchecked. Required boxes are always checked. Other boxes are set at random, unless **Check all checkboxes** is on. Turn off **Check consent boxes** to use the random policy for consent boxes too.
-- **Radio groups** receive exactly one choice.
+- **Radio groups** receive exactly one choice. Custom-styled checkboxes and radios that hide the native input behind a visible label are filled too.
 - **HTML constraints** are respected: `pattern`, `minlength`, and the `min` and `max` limits of date and time fields.
 - **Date fields** receive dates between 2000 and today.
 - **Text fields** receive sample sentences in the language of the country profile. Long sentences go into multi-line fields, and values are cut to the field's `maxlength`.
 - **URL fields** receive links to reserved example domains, never to real sites.
 - **File inputs** receive a generated file.
-- **Auto-submit** (off by default) clicks the real submit button after filling. Fake buttons and destructive controls such as Cancel or Delete are never clicked.
+- **Auto-submit** (off by default) clicks the real submit button of the form that was filled, not another form on the page (a search box, for example). Fake buttons and destructive controls such as Cancel or Delete are never clicked. Sites can be excluded from auto-submit on the **General** page; fields are still filled there.
 - **Works inside same-origin iframes**, skips disabled and read-only fields, and keeps framework state (React, Vue) in sync with the values it writes. Cross-origin iframes are outside the `activeTab` grant and are left untouched.
 
 ### Captchas are never clicked
 
-FillHub does not click, solve, or call captcha APIs. When a visible reCAPTCHA, hCaptcha, or Turnstile widget is on the page, FillHub outlines it, shows a notice, and leaves the verification to you. It never scrolls the page to the captcha or moves focus there.
+FillHub does not click, solve, or call captcha APIs. When a visible reCAPTCHA, hCaptcha, or Turnstile widget is on the page, FillHub outlines it, shows a notice, leaves the verification to you, and does not auto-submit. It never scrolls the page to the captcha or moves focus there. Invisible reCAPTCHA (v3 and the invisible v2 badge) asks nothing of the user, so it does not count as a visible captcha.
 
 ### Settings
 
-- **General**: default country, smart features, and PII Safe mode.
-- **Profiles**: identity profiles (see above).
+- **General**: default country, smart features, PII Safe mode, auto-submit and its site exceptions, settings backup (export to and import from a JSON file), and a diagnostics report. The report holds counts and setting flags only, never values, labels, profile names, or addresses.
+- **Profiles**: identity profiles and pinned values (see above).
 - **Custom Rules**: selector-to-type rules.
-- **About**: version and project information.
+- **About**: version, project information, and the interface language (15 languages).
 - **Support**: how to support the project.
+
+The header switches between the light and dark theme. The on-page notices use the same interface language and theme.
 
 ## Install
 
@@ -181,12 +178,14 @@ FillHub does not click, solve, or call captcha APIs. When a visible reCAPTCHA, h
 
 **[Add FillHub to Chrome](https://chromewebstore.google.com/detail/fillhub/chkkiamcnmilalgbokfofnhhlckmaihi)**
 
+Store updates go through Google's review, so the store version can be behind the [latest release](https://github.com/kilicberkay/FillHub/releases/latest). The release page always has the newest package.
+
 ### From source (developer mode)
 
 1. Clone the repository, or download the latest `fillhub-*.zip` from the [Releases page](https://github.com/kilicberkay/FillHub/releases) and unpack it.
 2. Open `chrome://extensions` and turn on **Developer mode**.
 3. Click **Load unpacked** and select the `extension/` folder (the one that contains `manifest.json`).
-4. Open any page with a form and press `Ctrl+Shift+F`.
+4. Open any page with a form and press `Ctrl+Shift+F`, or click the FillHub icon in the toolbar.
 
 Requires Chrome 116 or newer, or another Chromium-based browser that supports Manifest V3.
 
@@ -194,12 +193,15 @@ Requires Chrome 116 or newer, or another Chromium-based browser that supports Ma
 
 | Action | Shortcut | Menu or toolbar |
 |---|---|---|
-| Fill the whole form | `Ctrl+Shift+F` (macOS: `Command+Shift+F`) | Toolbar popup → *Fill*, or right-click → *Fill form with fake data* |
+| Fill the whole form | `Ctrl+Shift+F` (macOS: `Command+Shift+F`) | Click the FillHub icon, or right-click → *Fill form with fake data* |
 | Fill the focused field | none | Right-click a field → *Fill this field* |
+| Open settings | none | Right-click → *Settings* (also when you right-click the toolbar icon) |
 | Chaos mode (unusual values for fuzz tests) | `Ctrl+Shift+Y` | none |
 | Undo the last fill | `Ctrl+Shift+U` | Right-click → *Undo fake fill* |
 
 Shortcuts can be changed at `chrome://extensions/shortcuts`.
+
+Earlier versions opened a toolbar popup for the country and profile. Since 1.4.1 the icon fills the page directly; the same choices are on the settings page.
 
 ## How the data is made
 
@@ -234,7 +236,7 @@ FillHub can produce identity numbers that pass the public checksum of their coun
 
 - **No data collection.** FillHub has no analytics, telemetry, accounts, or servers. Nothing leaves your browser.
 - **Settings stay local**, in `chrome.storage.local`.
-- **Minimal permissions**: `storage` (settings), `contextMenus` (right-click items), `scripting` (injects the fill scripts only when you start a fill), and `activeTab` (the tab you are looking at, only after you press a shortcut, a popup button, or a menu item). There is no access to all sites, and nothing runs on pages you do not fill.
+- **Minimal permissions**: `storage` (settings), `contextMenus` (right-click items, including Settings), `scripting` (injects the fill scripts only when you start a fill), and `activeTab` (the tab you are looking at, only after you click the toolbar icon, press a shortcut, or use a menu item). There is no access to all sites, and nothing runs on pages you do not fill.
 - **Generated data is for testing.** PII Safe mode is on by default. Do not use generated data for real applications, purchases, or identity claims.
 
 Full policy: [PRIVACY.md](PRIVACY.md).
@@ -243,7 +245,7 @@ Full policy: [PRIVACY.md](PRIVACY.md).
 
 ```mermaid
 flowchart LR
-    A["Shortcut, toolbar popup<br/>or context menu"] --> B["Service worker<br/>scripts/background.js"]
+    A["Toolbar icon, shortcut<br/>or context menu"] --> B["Service worker<br/>scripts/background.js"]
     B -->|"fill · fill_field · undo"| C["Content script, injected on demand<br/>scripts/content.js"]
     S[("chrome.storage.local<br/>settings and profiles")] --> C
     C --> D["Field detection<br/>scripts/field-detect.js"]
@@ -261,6 +263,8 @@ The design is described in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 npm ci
 npm test              # every check, including the browser tests (needs Chromium)
 npm run test:quick    # every check except the browser tests
+npm run check         # syntax check of every JavaScript file
+npm run verify        # data checks: ID vectors, map integrity, 300 people per country, translations
 npm run build         # dist/fillhub-<version>.zip for the Chrome Web Store
 npm run build:css     # regenerate options/options.css after UI changes
 ```
@@ -277,7 +281,6 @@ FillHub/
 │   ├── _locales/        Localized name, description, shortcut and menu texts (15 languages)
 │   ├── scripts/         Service worker, content scripts, generator, detection, data
 │   ├── options/         Settings page: HTML, JavaScript, translations, Tailwind source and output
-│   ├── popup/           Toolbar popup: country, profile, Fill and Undo
 │   └── icons/           Toolbar and store icons (vector source: logo.svg)
 ├── tests/               Unit tests (tests/unit) and browser tests (tests/e2e)
 ├── tools/               Syntax check, data verification, zip build, store image generator

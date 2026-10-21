@@ -25,5 +25,8 @@
   },
   "menuUndo": {
     "message": "Sahte doldurmayı geri al"
+  },
+  "menuSettings": {
+    "message": "Ayarlar"
   }
 }

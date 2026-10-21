@@ -31,20 +31,6 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
         if (env) await env.close();
     });
 
-    // Araç çubuğu açılır penceresi: gerçek kullanımda ayrı bir pencere olarak açılır, bu yüzden ayrı pencere kullanılır.
-    // Bir sekme olarak açmak etkin sekmeyi popup'a kaydırır ve formu etkin olmaktan çıkarır.
-    const openPopup = async () => {
-        const { targetId } = await env.cdp.send('Target.createTarget', {
-            url: `chrome-extension://${env.extId}/popup/popup.html`, newWindow: true, width: 340, height: 520,
-        });
-        const { sessionId } = await env.cdp.send('Target.attachToTarget', { targetId, flatten: true });
-        const page = new PageSession(env.cdp, sessionId, targetId, 'popup');
-        await env.cdp.send('Runtime.enable', {}, sessionId);
-        await page.waitFor('document.getElementById("popupCountry").options.length > 0', 10000);
-        await wait(200);
-        return page;
-    };
-
     // Her doldurma taze bir form sekmesinde yapılır; değerler sıfırdan okunur
     async function fillTimes(storage, n) {
         await setStorage(env, storage);
@@ -444,45 +430,7 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
             }
         });
 
-        it('seçici bu sayfada kaç alanla eşleştiğini gösterir (açılır pencere, activeTab)', async () => {
-            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
-            const form = await openForm(env);
-            await send(env, form.tabId, { action: 'fill' });
-            await env.swEval(`chrome.tabs.update(${form.tabId}, { active: true })`);
-            const popup = await openPopup();
-            try {
-                await popup.eval(`document.getElementById('popupSelector').value = '#ad'`);
-                await popup.eval(`document.getElementById('ruleTestBtn').click()`);
-                await popup.waitFor(`!document.getElementById('popupSelectorResult').hidden`, 10000);
-                const shown = await popup.eval(`document.getElementById('popupSelectorResult').textContent`);
-                assert.match(shown, /:\s*1$/, `tek bir alan eşleşmeli: "${shown}"`);
-                // Sayfa içeriği okunmaz: sonuç yalnızca eşleşme sayısını taşır, alan değerini değil
-                const values = await readForm(form.page);
-                if (typeof values.ad === 'string' && values.ad.length > 0) assert.equal(shown.includes(values.ad), false, 'alan değeri gösterilmemeli');
-            } finally {
-                await popup.close();
-                await closeForm(form);
-            }
-        });
-
-        it('seçici testi geçersiz CSS seçicisini reddeder (açılır pencere)', async () => {
-            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
-            const form = await openForm(env);
-            await env.swEval(`chrome.tabs.update(${form.tabId}, { active: true })`);
-            const popup = await openPopup();
-            try {
-                await popup.eval(`document.getElementById('popupSelector').value = '##['`);
-                await popup.eval(`document.getElementById('ruleTestBtn').click()`);
-                await popup.waitFor(`!document.getElementById('popupSelectorResult').hidden`, 10000);
-                const shown = await popup.eval(`document.getElementById('popupSelectorResult').textContent`);
-                assert.match(shown, /geçersiz|invalid|Invalid|Geçersiz/i, `geçersiz seçici reddedilmeli: "${shown}"`);
-            } finally {
-                await popup.close();
-                await closeForm(form);
-            }
-        });
-
-        it('geçersiz CSS seçici reddedilir, geçerli olan kaydedilir', async () => {
+        it('seçici geçersizse reddedilir, geçerliyse kaydedilir', async () => {
             await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
             const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/options/options.html`);
             try {
@@ -825,194 +773,9 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
         });
     });
 
-    describe('açılır pencere', () => {
-        it('ülke ve profil seçimi ayarlara kalıcı olarak yazılır', async () => {
-            await setStorage(env, {
-                preferredLocale: 'tr-TR', piiSafe: true, activeProfileId: 'default',
-                profiles: [{ id: 'default', name: 'Standard Persona', mode: 'random' }, { id: 'p2', name: 'İkinci', mode: 'random' }],
-            });
-            const page = await openPopup();
-            try {
-                await page.eval(`(() => { const s = document.getElementById('popupCountry'); s.value = 'en-US'; s.dispatchEvent(new Event('change')); })()`);
-                await page.eval(`(() => { const s = document.getElementById('popupProfile'); s.value = 'p2'; s.dispatchEvent(new Event('change')); })()`);
-                await wait(300);
-                const all = JSON.parse(await env.swEval(`chrome.storage.local.get(null).then((r) => JSON.stringify(r))`));
-                assert.equal(all.preferredLocale, 'en-US');
-                assert.equal(all.activeProfileId, 'p2');
-            } finally {
-                await page.close();
-            }
-        });
-
-        it('aynı kökenli iframe içindeki alanlar da doldurulur ve sonuç tüm çerçevelerin toplamıdır', async () => {
-            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
-            const form = await openForm(env, { fixture: 'frames' });
-            const popup = await openPopup();
-            try {
-                await env.swEval(`chrome.tabs.update(${form.tabId}, { active: true })`);
-                await popup.eval(`document.getElementById('popupFillBtn').click()`);
-                await popup.waitFor(`!document.getElementById('popupResult').hidden`, 10000);
-                const shown = await popup.eval(`document.getElementById('popupResult').textContent`);
-                const count = Number((shown.match(/(\d+)\s*$/) || [])[1]);
-                const filledIn = (doc) => `[...${doc}.querySelectorAll('#kayit input')].filter((i) => (i.type === 'checkbox' ? i.checked : i.value)).length`;
-                const topFilled = await form.page.eval(filledIn('document'));
-                const frameFilled = await form.page.eval(`(() => { const d = document.getElementById('cerceve').contentDocument; return ${filledIn('d')}; })()`);
-                assert.ok(frameFilled > 0, 'iframe içindeki alanlar dolmalı');
-                assert.ok(count >= topFilled + frameFilled, `sonuç tüm çerçevelerin toplamı olmalı (üst ${topFilled}, iframe ${frameFilled}): "${shown}"`);
-            } finally {
-                await popup.close();
-                await closeForm(form);
-            }
-        });
-
-        it('çapraz kökenli iframe activeTab kapsamı dışında kalır', async () => {
-            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
-            const form = await openForm(env, { fixture: 'frames-cross-origin', host: 'fillhub.test' });
-            const popup = await openPopup();
-            try {
-                await form.page.waitFor('window.__crossValues !== null', 10000);
-                await env.swEval(`chrome.tabs.update(${form.tabId}, { active: true })`);
-                await popup.eval(`document.getElementById('popupFillBtn').click()`);
-                await popup.waitFor(`!document.getElementById('popupResult').hidden`, 10000);
-                const topFilled = await form.page.eval(`[...document.querySelectorAll('#kayit input')].filter((i) => i.value).length`);
-                const crossValues = await form.page.eval('window.__crossValues');
-                assert.ok(topFilled > 0, 'üst çerçeve dolmalı');
-                assert.deepEqual(crossValues.filter(Boolean), [], 'çapraz kökenli iframe doldurulmamalı');
-                const shown = await popup.eval(`document.getElementById('popupResult').textContent`);
-                const count = Number((shown.match(/(\d+)\s*$/) || [])[1]);
-                assert.equal(count, topFilled, 'sonuç yalnız erişilebilir çerçeveleri saymalı');
-            } finally {
-                await popup.close();
-                await closeForm(form);
-            }
-        });
-
-        // iframe'deki formun gönderim sayacı; frames fixture'ında iframe aynı kökenden form.html'i yükler
-        async function armFrameSubmits(form) {
-            await form.page.waitFor(`!!document.getElementById('cerceve').contentDocument?.getElementById('kayit')`, 10000);
-            await form.page.eval(`(() => {
-                const d = document.getElementById('cerceve').contentDocument;
-                d.defaultView.__frameSubmits = 0;
-                d.getElementById('kayit').addEventListener('submit', (e) => { e.preventDefault(); d.defaultView.__frameSubmits++; });
-            })()`);
-        }
-        const frameSubmitCount = (form) => form.page.eval(`document.getElementById('cerceve').contentDocument.defaultView.__frameSubmits`);
-
-        it('üst sayfadaki görünür captcha, iframe içindeki formun otomatik gönderilmesini engeller', async () => {
-            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true, autoSubmit: true });
-            const form = await openForm(env, { fixture: 'frames' });
-            const popup = await openPopup();
-            try {
-                await armFrameSubmits(form);
-                // Captcha yalnızca üst belgede; iframe'in kendi içinde captcha yok
-                await form.page.eval(`(() => {
-                    const d = document.createElement('div');
-                    d.className = 'g-recaptcha';
-                    d.style.cssText = 'width:304px;height:78px;background:#eee';
-                    document.body.appendChild(d);
-                })()`);
-                await env.swEval(`chrome.tabs.update(${form.tabId}, { active: true })`);
-                await popup.eval(`document.getElementById('popupFillBtn').click()`);
-                await popup.waitFor(`!document.getElementById('popupResult').hidden`, 10000);
-                await wait(1200);
-                assert.equal(await frameSubmitCount(form), 0, 'üst sayfada captcha varken iframe formu gönderilmemeli');
-            } finally {
-                await popup.close();
-                await closeForm(form);
-            }
-        });
-
-        it('captcha yokken iframe içindeki form bir kez gönderilir (karşılaştırma)', async () => {
-            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true, autoSubmit: true });
-            const form = await openForm(env, { fixture: 'frames' });
-            const popup = await openPopup();
-            try {
-                await armFrameSubmits(form);
-                await env.swEval(`chrome.tabs.update(${form.tabId}, { active: true })`);
-                await popup.eval(`document.getElementById('popupFillBtn').click()`);
-                await popup.waitFor(`!document.getElementById('popupResult').hidden`, 10000);
-                await wait(1200);
-                // Bu karşılaştırma, yukarıdaki "0" sonucunun gönderimin hiç çalışmamasından gelmediğini gösterir
-                assert.equal(await frameSubmitCount(form), 1, 'captcha yokken iframe formu gönderilmeli');
-            } finally {
-                await popup.close();
-                await closeForm(form);
-            }
-        });
-
-        it('alan yoksa açılır pencere "0 alan" yerine açıklama gösterir', async () => {
-            await setStorage(env, { uiLang: 'tr', preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
-            const form = await openForm(env, { fixture: 'no-fields' });
-            const popup = await openPopup();
-            try {
-                await env.swEval(`chrome.tabs.update(${form.tabId}, { active: true })`);
-                await popup.eval(`document.getElementById('popupFillBtn').click()`);
-                await popup.waitFor(`!document.getElementById('popupResult').hidden`, 10000);
-                const shown = await popup.eval(`document.getElementById('popupResult').textContent`);
-                assert.equal(shown, 'Bu sayfada doldurulabilir alan bulunamadı.', `beklenmeyen sonuç: "${shown}"`);
-            } finally {
-                await popup.close();
-                await closeForm(form);
-            }
-        });
-
-        it('geri alınacak bir doldurma yoksa açılır pencere "0 alan" yerine açıklama gösterir', async () => {
-            await setStorage(env, { uiLang: 'tr', preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
-            const form = await openForm(env);
-            const popup = await openPopup();
-            try {
-                await env.swEval(`chrome.tabs.update(${form.tabId}, { active: true })`);
-                await popup.eval(`document.getElementById('popupUndoBtn').click()`);
-                await popup.waitFor(`!document.getElementById('popupResult').hidden`, 10000);
-                const shown = await popup.eval(`document.getElementById('popupResult').textContent`);
-                assert.equal(shown, 'Bu sayfada geri alınacak bir şey yok.', `beklenmeyen sonuç: "${shown}"`);
-            } finally {
-                await popup.close();
-                await closeForm(form);
-            }
-        });
-
-        it('doldurma ve geri alma etkin sekmede çalışır ve sonucu gösterir', async () => {
-            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
-            const form = await openForm(env);
-            // Açılır pencere yeni sekme olarak açılır ve etkinleşir; etkin sekme form olacak şekilde geri alınır
-            const popup = await openPopup();
-            try {
-                await env.swEval(`chrome.tabs.update(${form.tabId}, { active: true })`);
-                await popup.eval(`document.getElementById('popupFillBtn').click()`);
-                await popup.waitFor(`!document.getElementById('popupResult').hidden`, 10000);
-                // "0" de bir sayıdır; sonucun gerçekten doldurulmuş alan sayısı olduğunu pozitiflikle denetle
-                const shownFill = await popup.eval(`document.getElementById('popupResult').textContent`);
-                assert.ok(Number((shownFill.match(/(\d+)\s*$/) || [])[1]) > 0, `doldurulan alan sayısı pozitif olmalı: "${shownFill}"`);
-                const filled = await readForm(form.page);
-                assert.ok(Object.values(filled).some((v) => v === true || (typeof v === 'string' && v.length > 0)), 'form doldurulmalı');
-
-                await popup.eval(`document.getElementById('popupUndoBtn').click()`);
-                await wait(800);
-                const restored = await readForm(form.page);
-                assert.ok(Object.values(restored).every((v) => v === '' || v === false), 'geri alma alanları önceki haline döndürmeli');
-            } finally {
-                await popup.close();
-                await closeForm(form);
-            }
-        });
-
-        it('doldurulamayan sayfada açılır pencere bildirim gösterir', async () => {
-            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
-            const popup = await openPopup();
-            try {
-                await popup.eval(`document.getElementById('popupFillBtn').click()`);
-                await popup.waitFor(`!document.getElementById('popupResult').hidden`, 10000);
-                assert.match(await popup.eval(`document.getElementById('popupResult').textContent`), /not available/i);
-            } finally {
-                await popup.close();
-            }
-        });
-    });
-
-    // Kısayollar arka plan üzerinden çalışır: komut dinleyicisi, hedef sekme, captcha yoklaması ve site istisnası.
-    // Diğer testler içerik betiğine doğrudan mesaj gönderdiği için bu yol ayrıca sınanır.
-    describe('kısayol yolu (arka plan üzerinden)', () => {
+    // Kısayol ve araç çubuğu simgesi arka plan üzerinden çalışır: komut dinleyicisi, hedef sekme,
+    // captcha yoklaması ve site istisnası. Diğer testler içerik betiğine doğrudan mesaj gönderdiği için bu yol ayrıca sınanır.
+    describe('arka plan yolu (kısayol ve simge)', () => {
         const filled = (page) => page.eval(`[...document.querySelectorAll('#kayit input[type=text],#kayit input[type=email],#kayit input[type=tel]')].filter((i) => i.value).length`);
 
         async function press(form, letter, ms = 1600) {
@@ -1027,6 +790,103 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
                 document.getElementById('kayit').addEventListener('submit', (e) => { e.preventDefault(); window.__submits++; });
             })()`);
         }
+
+        const toastText = (page) => page.eval(`document.querySelector('#fillhub-toast [data-role="message"]')?.textContent || ''`);
+
+        // iframe'deki formun gönderim sayacı; frames fixture'ında iframe aynı kökenden form.html'i yükler
+        async function armFrameSubmits(form) {
+            await form.page.waitFor(`!!document.getElementById('cerceve').contentDocument?.getElementById('kayit')`, 10000);
+            await form.page.eval(`(() => {
+                const d = document.getElementById('cerceve').contentDocument;
+                d.defaultView.__frameSubmits = 0;
+                d.getElementById('kayit').addEventListener('submit', (e) => { e.preventDefault(); d.defaultView.__frameSubmits++; });
+            })()`);
+        }
+        const frameSubmitCount = (form) => form.page.eval(`document.getElementById('cerceve').contentDocument.defaultView.__frameSubmits`);
+
+        // Araç çubuğu simgesi popup açmaz: tıklama, kısayolla aynı arka plan yolunu kullanır.
+        // Gerçek araç çubuğu tıklaması CDP'den üretilemez; burada tıklamanın çağırdığı işlev sınanır.
+        it('araç çubuğu simgesinin tıklaması formu doldurur ve bildirim gösterir', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, uiLang: 'tr', onboardingComplete: true });
+            const form = await openForm(env);
+            try {
+                await env.swEval(`chrome.tabs.update(${form.tabId}, { active: true })`);
+                const replies = await env.swEval(`(async () => runTabAction(await chrome.tabs.get(${form.tabId}), 'fill'))()`);
+                assert.ok(Array.isArray(replies) && replies.some((r) => r && r.filled > 0),
+                    `simge yolu doldurmayı bildirmeli: ${JSON.stringify(replies)}`);
+                await wait(1200);
+                assert.ok((await readForm(form.page)).ad.length > 0, 'form doldurulmalı');
+                assert.match(await toastText(form.page), /dolduruldu/i, 'doldurma bildirimi gösterilmeli');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('aynı kökenli iframe içindeki alanlar da doldurulur; sonuç tüm çerçevelerin toplamıdır', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
+            const form = await openForm(env, { fixture: 'frames' });
+            try {
+                await env.swEval(`chrome.tabs.update(${form.tabId}, { active: true })`);
+                const replies = await env.swEval(`(async () => runTabAction(await chrome.tabs.get(${form.tabId}), 'fill'))()`);
+                const total = replies.reduce((sum, r) => sum + (Number.isFinite(r.filled) ? r.filled : 0), 0);
+                const filledIn = (doc) => `[...${doc}.querySelectorAll('#kayit input')].filter((i) => (i.type === 'checkbox' ? i.checked : i.value)).length`;
+                const topFilled = await form.page.eval(filledIn('document'));
+                const frameFilled = await form.page.eval(`(() => { const d = document.getElementById('cerceve').contentDocument; return ${filledIn('d')}; })()`);
+                assert.ok(frameFilled > 0, 'iframe içindeki alanlar dolmalı');
+                assert.ok(total >= topFilled + frameFilled, `sonuç tüm çerçevelerin toplamı olmalı (üst ${topFilled}, iframe ${frameFilled}): ${total}`);
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('çapraz kökenli iframe activeTab kapsamı dışında kalır', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
+            const form = await openForm(env, { fixture: 'frames-cross-origin', host: 'fillhub.test' });
+            try {
+                await form.page.waitFor('window.__crossValues !== null', 10000);
+                await press(form, 'F');
+                const topFilled = await form.page.eval(`[...document.querySelectorAll('#kayit input')].filter((i) => i.value).length`);
+                const crossValues = await form.page.eval('window.__crossValues');
+                assert.ok(topFilled > 0, 'üst çerçeve dolmalı');
+                assert.deepEqual(crossValues.filter(Boolean), [], 'çapraz kökenli iframe doldurulmamalı');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('üst sayfadaki görünür captcha, iframe içindeki formun otomatik gönderilmesini engeller', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true, autoSubmit: true });
+            const form = await openForm(env, { fixture: 'frames' });
+            try {
+                await armFrameSubmits(form);
+                // Captcha yalnızca üst belgede; iframe'in kendi içinde captcha yok
+                await form.page.eval(`(() => {
+                    const d = document.createElement('div');
+                    d.className = 'g-recaptcha';
+                    d.style.cssText = 'width:304px;height:78px;background:#eee';
+                    document.body.appendChild(d);
+                })()`);
+                await press(form, 'F');
+                await wait(400);
+                assert.equal(await frameSubmitCount(form), 0, 'üst sayfada captcha varken iframe formu gönderilmemeli');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('captcha yokken iframe içindeki form bir kez gönderilir (karşılaştırma)', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true, autoSubmit: true });
+            const form = await openForm(env, { fixture: 'frames' });
+            try {
+                await armFrameSubmits(form);
+                await press(form, 'F');
+                await wait(400);
+                // Bu karşılaştırma, yukarıdaki "0" sonucunun gönderimin hiç çalışmamasından gelmediğini gösterir
+                assert.equal(await frameSubmitCount(form), 1, 'captcha yokken iframe formu gönderilmeli');
+            } finally {
+                await closeForm(form);
+            }
+        });
 
         it('fill_form kısayolu formu doldurur', async () => {
             await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true });
@@ -1243,6 +1103,284 @@ describe('FillHub uçtan uca', { skip: SKIP, timeout: 300000 }, () => {
                 assert.deepEqual(page.errors, [], `sayfa hatası olmamalı: ${page.errors.join(' | ')}`);
             } finally {
                 await page.close();
+            }
+        });
+
+        const openSettings = async () => {
+            const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/options/options.html`);
+            await page.waitFor('document.getElementById("defaultLocale").options.length > 0', 10000);
+            await wait(300);
+            return page;
+        };
+        const stored = async () => JSON.parse(await env.swEval(`chrome.storage.local.get(null).then((r) => JSON.stringify(r))`));
+        const toggle = (page, id) => page.eval(`document.getElementById(${JSON.stringify(id)}).click()`);
+
+        it('açık ayar sayfası, başka bir yerden yazılan ülke ve profili eski değerle ezmez', async () => {
+            await setStorage(env, {
+                preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true, uiLang: 'tr', activeProfileId: 'default',
+                profiles: [{ id: 'default', name: 'Standard Persona', mode: 'random' }, { id: 'p2', name: 'İkinci', mode: 'random' }],
+            });
+            const page = await openSettings();
+            try {
+                await env.swEval(`chrome.storage.local.set({ preferredLocale: 'en-US', activeProfileId: 'p2' })`);
+                await wait(200);
+                await toggle(page, 'matchPasswords');
+                await wait(200);
+                const all = await stored();
+                assert.equal(all.preferredLocale, 'en-US', 'dışarıdan yazılan ülke korunmalı');
+                assert.equal(all.activeProfileId, 'p2', 'dışarıdan yazılan profil korunmalı');
+                assert.equal(await page.eval(`document.getElementById('defaultLocale').value`), 'en-US', 'ayar sayfası yeni ülkeyi göstermeli');
+            } finally {
+                await page.close();
+            }
+        });
+
+        it('ülke araması seçili ülkeyi gizlese de kayıtlı ülke değişmez', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, onboardingComplete: true, uiLang: 'tr' });
+            const page = await openSettings();
+            try {
+                await page.eval(`(() => { const s = document.getElementById('countrySearch'); s.value = 'zzz'; s.dispatchEvent(new Event('input')); })()`);
+                await toggle(page, 'smartEmail');
+                await wait(200);
+                assert.equal((await stored()).preferredLocale, 'tr-TR');
+            } finally {
+                await page.close();
+            }
+        });
+
+        it('ayar sayfası açılmadan doldurulmuş kurulumda ilk kurulum yine yapılır', async () => {
+            await setStorage(env, { lastFillReport: { at: new Date().toISOString(), filled: 3, detected: {} } });
+            const page = await openSettings();
+            try {
+                await wait(200);
+                const all = await stored();
+                assert.ok(all.uiLang, 'arayüz dili tespit edilip kaydedilmeli');
+                assert.ok(all.preferredLocale, 'ülke tespit edilip kaydedilmeli');
+                assert.ok(Array.isArray(all.profiles) && all.profiles.length > 0, 'varsayılan profil kaydedilmeli');
+                assert.equal(all.lastFillReport.filled, 3, 'son doldurma özeti korunmalı');
+            } finally {
+                await page.close();
+            }
+        });
+    });
+
+    describe('doldurma davranışı (denetim düzeltmeleri)', () => {
+        const submitCounter = (page, formId = 'kayit', counter = '__submits') => page.eval(`(() => {
+            window.${counter} = 0;
+            document.getElementById(${JSON.stringify(formId)}).addEventListener('submit', (e) => { e.preventDefault(); window.${counter}++; });
+        })()`);
+        const toastText = (page) => page.eval(`document.querySelector('#fillhub-toast [data-role="message"]')?.textContent || ''`);
+
+        async function press(form, letter, ms = 1600) {
+            await env.swEval(`chrome.tabs.update(${form.tabId}, { active: true })`);
+            await pressShortcut(env, form.page, letter);
+            await wait(ms);
+        }
+
+        // Chromium, "about:blank#…" adresli bir çerçevede betik enjeksiyonunu "boşta" durumuna kadar süresiz bekletir
+        it('"about:blank#…" adresli iframe varken kısayol yine doldurur', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true });
+            const form = await openForm(env);
+            try {
+                await form.page.eval(`(() => { const f = document.createElement('iframe'); f.src = 'about:blank#reklam'; document.body.appendChild(f); })()`);
+                await press(form, 'F');
+                assert.ok((await form.page.eval(`document.getElementById('ad').value`)).length > 0, 'form dolmalı');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('görünmez reCAPTCHA rozeti otomatik gönderimi engellemez', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, autoSubmit: true });
+            const form = await openForm(env);
+            try {
+                await submitCounter(form.page);
+                // v3 rozeti: sabit konumlu, boyutlu ve çoğu sitede CSS ile gizlenmiş
+                await form.page.eval(`(() => {
+                    const badge = document.createElement('div');
+                    badge.className = 'grecaptcha-badge';
+                    badge.style.cssText = 'position:fixed;right:0;bottom:14px;width:256px;height:60px;visibility:hidden';
+                    const frame = document.createElement('iframe');
+                    frame.src = 'about:blank#recaptcha/api2/anchor?size=invisible';
+                    frame.style.cssText = 'width:256px;height:60px;border:0';
+                    badge.appendChild(frame);
+                    document.body.appendChild(badge);
+                    const hidden = document.createElement('div');
+                    hidden.className = 'g-recaptcha';
+                    hidden.style.cssText = 'width:304px;height:78px;visibility:hidden';
+                    document.body.appendChild(hidden);
+                })()`);
+                const r = await send(env, form.tabId, { action: 'fill' });
+                assert.equal(r.captcha, false, 'görünmez captcha görünür sayılmamalı');
+                await wait(900);
+                assert.equal(await form.page.eval('window.__submits'), 1, 'form bir kez gönderilmeli');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('otomatik gönderim doldurulan formu gönderir, sayfadaki başka formu göndermez', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, autoSubmit: true });
+            const form = await openForm(env);
+            try {
+                // Üst bilgideki arama formu belgede kayıt formundan önce gelir; alanı yoktur
+                await form.page.eval(`(() => {
+                    const search = document.createElement('form');
+                    search.id = 'arama';
+                    search.action = '#';
+                    search.innerHTML = '<button type="submit">Ara</button>';
+                    document.body.prepend(search);
+                })()`);
+                await submitCounter(form.page);
+                await submitCounter(form.page, 'arama', '__searchSubmits');
+                await send(env, form.tabId, { action: 'fill' });
+                await wait(900);
+                assert.equal(await form.page.eval('window.__submits'), 1, 'kayıt formu gönderilmeli');
+                assert.equal(await form.page.eval('window.__searchSubmits'), 0, 'arama formu gönderilmemeli');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('"Reset password" gibi gönderim düğmeleri yıkıcı sayılmaz', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, autoSubmit: true });
+            const form = await openForm(env);
+            try {
+                await form.page.eval(`document.querySelector('#kayit button[type=submit]').textContent = 'Reset password'`);
+                await submitCounter(form.page);
+                await send(env, form.tabId, { action: 'fill' });
+                await wait(900);
+                assert.equal(await form.page.eval('window.__submits'), 1, 'parola sıfırlama formu gönderilmeli');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('opaklığı sıfır olan özel onay kutusu, görünen etiketi sayesinde işaretlenir', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true });
+            const form = await openForm(env);
+            try {
+                await form.page.eval(`document.getElementById('kvkk').style.cssText = 'opacity:0;position:absolute;width:1px;height:1px'`);
+                await send(env, form.tabId, { action: 'fill' });
+                assert.equal(await form.page.eval(`document.getElementById('kvkk').checked`), true, 'zorunlu KVKK kutusu işaretlenmeli');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('radyo grupları sayılır; aynı adlı radyolar farklı formlarda ayrı gruptur', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true });
+            const form = await openForm(env, { fixture: 'no-fields' });
+            try {
+                await form.page.eval(`(() => {
+                    const radios = '<label><input type="radio" name="plan" value="a"> A</label><label><input type="radio" name="plan" value="b"> B</label>';
+                    document.getElementById('kayit').insertAdjacentHTML('beforeend', radios);
+                    const other = document.createElement('form');
+                    other.id = 'ikinci';
+                    other.innerHTML = radios;
+                    document.body.appendChild(other);
+                })()`);
+                const r = await send(env, form.tabId, { action: 'fill' });
+                assert.equal(r.filled, 2, 'her form için bir radyo grubu sayılmalı');
+                const checked = await form.page.eval(`['kayit', 'ikinci'].map((id) => document.querySelectorAll('#' + id + ' input:checked').length)`);
+                assert.deepEqual(checked, [1, 1], 'her formda tam bir seçim olmalı');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('çoklu seçim kutusu geri alınınca önceki seçimlerin tümü döner', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true });
+            const form = await openForm(env);
+            try {
+                await form.page.eval(`(() => {
+                    const s = document.createElement('select');
+                    s.id = 'diller';
+                    s.multiple = true;
+                    s.innerHTML = '<option value="a" selected>A</option><option value="b">B</option><option value="c" selected>C</option><option value="d">D</option>';
+                    document.getElementById('kayit').appendChild(s);
+                })()`);
+                await send(env, form.tabId, { action: 'fill' });
+                await send(env, form.tabId, { action: 'undo' });
+                const selected = await form.page.eval(`[...document.getElementById('diller').selectedOptions].map((o) => o.value)`);
+                assert.deepEqual(selected, ['a', 'c']);
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('gölge DOM içindeki odaklı alan tek alan doldurmayla dolar', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true });
+            const form = await openForm(env);
+            try {
+                await form.page.eval(`(() => {
+                    const host = document.createElement('div');
+                    host.id = 'golge';
+                    document.getElementById('kayit').appendChild(host);
+                    const root = host.attachShadow({ mode: 'open' });
+                    root.innerHTML = '<label for="g">E-posta</label><input id="g" name="email" type="email">';
+                    root.getElementById('g').focus();
+                })()`);
+                const r = await send(env, form.tabId, { action: 'fill_field' });
+                assert.equal(r.filled, 1);
+                const value = await form.page.eval(`document.getElementById('golge').shadowRoot.getElementById('g').value`);
+                assert.match(value, /@/, `gölge alana e-posta yazılmalı: "${value}"`);
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('alan yoksa bildirim "doldurulamadı" der ve Geri al sunmaz', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, uiLang: 'en' });
+            const form = await openForm(env, { fixture: 'no-fields' });
+            try {
+                await press(form, 'F');
+                assert.match(await toastText(form.page), /No fillable fields/);
+                assert.equal(await form.page.eval(`document.querySelectorAll('#fillhub-toast [data-role="action"]').length`), 0);
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('bildirim arayüz dilinde gösterilir (veri ülkesinden bağımsız)', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, uiLang: 'de' });
+            const form = await openForm(env);
+            try {
+                await press(form, 'F');
+                assert.match(await toastText(form.page), /Alle Felder/);
+                assert.equal(await form.page.eval(`document.querySelector('#fillhub-toast [data-role="action"]').textContent`), 'Testdaten-Füllung rückgängig machen');
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('sayı tipindeki telefon alanı rakamlardan oluşan bir telefon numarası alır', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: false });
+            const form = await openForm(env);
+            try {
+                await form.page.eval(`document.getElementById('kayit').insertAdjacentHTML('beforeend', '<label for="ceptel">Cep telefonu</label><input id="ceptel" name="ceptel" type="number">')`);
+                await send(env, form.tabId, { action: 'fill' });
+                const value = await form.page.eval(`document.getElementById('ceptel').value`);
+                assert.match(value, /^\d{10,}$/, `telefon numarası yazılmalı: "${value}"`);
+            } finally {
+                await closeForm(form);
+            }
+        });
+
+        it('bildirimdeki Geri al iframe içindeki alanları da geri alır', async () => {
+            await setStorage(env, { preferredLocale: 'tr-TR', piiSafe: true, uiLang: 'en' });
+            const form = await openForm(env, { fixture: 'frames' });
+            try {
+                await form.page.waitFor(`!!document.getElementById('cerceve').contentDocument?.getElementById('kayit')`, 10000);
+                const frameValue = `document.getElementById('cerceve').contentDocument.getElementById('ad').value`;
+                await press(form, 'F');
+                assert.ok((await form.page.eval(frameValue)).length > 0, 'iframe alanı dolmalı');
+                await form.page.eval(`document.querySelector('#fillhub-toast [data-role="action"]').click()`);
+                await wait(800);
+                assert.equal(await form.page.eval(frameValue), '', 'iframe alanı geri alınmalı');
+                assert.equal(await form.page.eval(`document.getElementById('ad').value`), '', 'üst çerçeve geri alınmalı');
+            } finally {
+                await closeForm(form);
             }
         });
     });

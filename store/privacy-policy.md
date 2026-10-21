@@ -1,6 +1,6 @@
 # FillHub privacy policy
 
-Last updated: 2026-10-17
+Last updated: 2026-10-21
 
 FillHub is an open-source Chrome extension that fills web forms with fake data. FillHub does not
 collect, transmit, sell, or share any personal data.
@@ -19,6 +19,6 @@ collect, transmit, sell, or share any personal data.
   obvious test values. Generated identity numbers may pass public checksum rules; do not use them for
   any real purpose.
 
-Permissions: `storage` (local settings), `contextMenus` (right-click menu), `scripting` (injects the fill scripts only when you start a fill), and `activeTab` (access to the tab you are looking at, granted only when you press a shortcut, the popup's button, or the context menu, and only for that tab).
+Permissions: `storage` (local settings), `contextMenus` (right-click menu, including Settings), `scripting` (injects the fill scripts only when you start a fill), and `activeTab` (access to the tab you are looking at, granted only when you click the toolbar icon, press a shortcut, or use the context menu, and only for that tab).
 
 Full policy with contact information: https://github.com/kilicberkay/FillHub/blob/main/PRIVACY.md

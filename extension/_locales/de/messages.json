@@ -25,5 +25,8 @@
   },
   "menuUndo": {
     "message": "Testdaten-Füllung rückgängig machen"
+  },
+  "menuSettings": {
+    "message": "Einstellungen"
   }
 }

@@ -1,4 +1,4 @@
-// Erişilebilirlik (statik): ayar sayfası ve açılır pencerede her girişin etiketi, her düğmenin metni ve her diyalogun başlığı var
+// Erişilebilirlik (statik): ayar sayfasında her girişin etiketi, her düğmenin metni ve her diyalogun başlığı var
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const EXT = join(ROOT, 'extension');
 const read = (p) => readFileSync(join(EXT, p), 'utf8');
-const PAGES = ['options/options.html', 'popup/popup.html'];
+const PAGES = ['options/options.html'];
 
 // Gizli ya da dosya girdileri kullanıcıya görünmez; etiket zorunluluğu yalnızca görünen denetimler için
 const isVisibleControl = (tag) => !/type="(hidden|file)"/.test(tag);

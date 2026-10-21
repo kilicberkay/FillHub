@@ -499,14 +499,17 @@ const FakeDataGenerator = (() => {
         return (space > max / 2 ? cut.slice(0, space) : cut).trimEnd();
     }
 
+    // 2000 ile bugün arası: içinde bulunulan yıl seçilirse ay ve gün bugünü geçmez (gelecek tarih, ör. ileri
+    // tarihli doğum günü üretilmez). Gün her ayda geçerli olsun diye 1-28 aralığındadır.
     function randomDateParts() {
+        const today = new Date();
         const minYear = 2000;
-        const maxYear = new Date().getFullYear();
-        return {
-            year: minYear + Math.floor(Math.random() * (maxYear - minYear + 1)),
-            month: Math.floor(Math.random() * 12) + 1,
-            day: Math.floor(Math.random() * 28) + 1
-        };
+        const maxYear = today.getFullYear();
+        const year = randomInt(minYear, maxYear);
+        const maxMonth = year === maxYear ? today.getMonth() + 1 : 12;
+        const month = randomInt(1, maxMonth);
+        const maxDay = year === maxYear && month === maxMonth ? Math.min(28, today.getDate()) : 28;
+        return { year, month, day: randomInt(1, maxDay) };
     }
 
     const DOMAINS = ['example.com', 'test.com', 'mail.com', 'demo.org'];

@@ -25,5 +25,8 @@
   },
   "menuUndo": {
     "message": "架空データの入力を元に戻す"
+  },
+  "menuSettings": {
+    "message": "設定"
   }
 }

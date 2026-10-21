@@ -1,5 +1,12 @@
 // Alan tespiti korpusu: [kaynak metin, beklenen tür]. Etiketler 15 dilden ve gerçek formlardan derlenmiştir.
 // Beklenen değer null ise yalnızca "bu tür DEĞİL" denetlenir (negatif örnek).
+// Sayı alanları (input type="number"): rakamla yazılabilen türler etiketten tanınır, diğerleri sayı kalır
+export const NUMBER_INPUT_CORPUS = [
+    ['Telefon', 'phone'], ['Phone number', 'phone'], ['Posta kodu', 'zip'], ['Zip code', 'zip'],
+    ['T.C. Kimlik No', 'idNumber'], ['Vergi Kimlik No', 'taxId'], ['Adet', 'number'], ['Quantity', 'number'],
+    ['Adınız', 'number'], ['Bilinmeyen', 'number'],
+];
+
 export const LABEL_CORPUS = [
     // Türkçe
     ['Adınız', 'firstName'], ['Adı', 'firstName'], ['Soyadınız', 'lastName'], ['Soyisminiz', 'lastName'],

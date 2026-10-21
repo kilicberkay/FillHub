@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     themeToggle.addEventListener('click', () => {
         state.theme = state.theme === 'dark' ? 'light' : 'dark';
         applyTheme(state.theme);
-        saveState();
+        saveState('theme');
     });
 
     // Mobil kenar çubuğu (lg altı): açma/kapama sınıfları blog kenar çubuğuyla aynı
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
     uiLangSelector.addEventListener('change', () => {
         state.uiLang = uiLangSelector.value;
         updateUILanguage(state.uiLang);
-        saveState();
+        saveState('uiLang');
     });
 
     // 3. Kimlik profilleri. Varsayılan profil her zaman rastgele ve değiştirilemez. Diğer profiller
@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isActive) {
             actions.append(actionButton(currentText.profileUseBtn, BTN_SECONDARY, () => {
                 state.activeProfileId = p.id;
-                saveState();
+                saveState('activeProfileId');
                 renderProfiles();
             }));
         }
@@ -376,7 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (fixed) p.identity = dialogDraft;
         else delete p.identity;
         if (profileActivate.checked) state.activeProfileId = p.id;
-        saveState();
+        saveState('profiles', 'activeProfileId');
         renderProfiles();
         closeProfileDialog();
     });
@@ -390,7 +390,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         state.profiles = state.profiles.filter(x => x.id !== dialogProfileId);
         if (state.activeProfileId === dialogProfileId) state.activeProfileId = 'default';
-        saveState();
+        saveState('profiles', 'activeProfileId');
         renderProfiles();
         closeProfileDialog();
     });
@@ -400,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const res = FakeDataGenerator.migrateProfiles(state.profiles, state.preferredLocale);
         state.profiles = res.profiles;
         if (!state.profiles.some(p => p.id === state.activeProfileId)) state.activeProfileId = 'default';
-        if (res.changed) chrome.storage.local.set(state);
+        if (res.changed) saveState('profiles', 'activeProfileId');
     }
 
     // Veri tipi adı okunur biçimde gösterilir (firstName → First name); kısaltmalar ayrıca yazılır
@@ -428,7 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
         [state.customRules[idx], state.customRules[target]] = [state.customRules[target], state.customRules[idx]];
         exitRuleEditMode();
         renderRules();
-        saveState();
+        saveState('customRules');
     }
 
     function ruleIconButton(label, glyph, onClick, disabled) {
@@ -487,7 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (editingRuleIndex !== null) exitRuleEditMode();
                 state.customRules.splice(idx, 1);
                 renderRules();
-                saveState();
+                saveState('customRules');
             };
 
             actions.append(
@@ -535,73 +535,70 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 6. State Lifecycle
-    function saveState() {
-        state.preferredLocale = defaultLocale.value;
-        state.smartEmail = smartEmail.checked;
-        state.matchPasswords = matchPasswords.checked;
-        state.checkAllBoxes = checkAllBoxes.checked;
-        state.consentBoxes = consentBoxes.checked;
-        state.piiSafe = piiSafe.checked;
-        state.autoSubmit = autoSubmit.checked;
-        chrome.storage.local.set(state);
+    // Yalnızca verilen anahtarlar yazılır: içerik betiğinin bu sayfa açıkken yazdığı
+    // diğer anahtarlar (ülke, etkin profil, son doldurma özeti) eski değerleriyle ezilmez
+    const SETTINGS_KEYS = Object.keys(state);
+
+    function saveState(...keys) {
+        chrome.storage.local.set(Object.fromEntries(keys.map(k => [k, state[k]])));
     }
 
     function loadState() {
         chrome.storage.local.get(null, (res) => {
-            const hasState = Object.keys(res).length > 0;
-            if (hasState) state = { ...state, ...res };
+            // İlk kurulum ölçütü arayüz dili kaydıdır. Ayar sayfası hiç açılmadan doldurulduysa depoda başka
+            // anahtarlar (son doldurma özeti) bulunabilir; bunlar ilk kurulumu engellemez.
+            const firstRun = !res.uiLang;
+            state = { ...state, ...res };
             // Eski kayıtlar çıplak ülke kodu (ör. "us", "tr") saklamış olabilir: kanonik biçime çevrilir
-            if (hasState) state.preferredLocale = FakeDataGenerator.canonicalLocale(state.preferredLocale || navigator.language);
+            state.preferredLocale = res.preferredLocale ? FakeDataGenerator.canonicalLocale(res.preferredLocale) : detectDefaultCountry();
+            if (firstRun) state.uiLang = detectDefaultUiLang();
             if (!Array.isArray(state.profiles)) state.profiles = [{ id: 'default', name: 'Standard Persona', mode: 'random' }];
-            if (!hasState) {
-                // İlk kurulum: ülke ve arayüz dili tarayıcıdan gelir
-                state.preferredLocale = detectDefaultCountry();
-                state.uiLang = detectDefaultUiLang();
-            }
             ensurePersonaData();
             if (!Array.isArray(state.noAutoSubmitSites)) state.noAutoSubmitSites = [];
+            if (firstRun) saveState(...SETTINGS_KEYS);
 
-            if (hasState) {
-                applyTheme(state.theme);
-                defaultLocale.value = state.preferredLocale;
-                smartEmail.checked = state.smartEmail;
-                matchPasswords.checked = state.matchPasswords;
-                checkAllBoxes.checked = !!state.checkAllBoxes;
-                consentBoxes.checked = state.consentBoxes !== false;
-                piiSafe.checked = !!state.piiSafe;
-                autoSubmit.checked = state.autoSubmit;
-                uiLangSelector.value = state.uiLang || 'en';
-                updateUILanguage(state.uiLang || 'en');
-                renderProfiles();
-                renderRules();
-
-                if (!state.onboardingComplete) {
-                    onboardingModal.style.display = "flex";
-                }
-            } else {
-                // First run
-                chrome.storage.local.set(state);
-                populateCountries();
-                piiSafe.checked = state.piiSafe;
-                checkAllBoxes.checked = state.checkAllBoxes;
-                consentBoxes.checked = state.consentBoxes !== false;
-                uiLangSelector.value = state.uiLang;
-                updateUILanguage(state.uiLang);
-                renderProfiles();
-                onboardingModal.style.display = "flex";
-            }
+            applyTheme(state.theme);
+            populateCountries();
+            smartEmail.checked = state.smartEmail;
+            matchPasswords.checked = state.matchPasswords;
+            checkAllBoxes.checked = !!state.checkAllBoxes;
+            consentBoxes.checked = state.consentBoxes !== false;
+            piiSafe.checked = !!state.piiSafe;
+            autoSubmit.checked = state.autoSubmit;
+            uiLangSelector.value = state.uiLang;
+            updateUILanguage(state.uiLang);
+            renderProfiles();
+            renderRules();
+            if (!state.onboardingComplete) onboardingModal.style.display = "flex";
         });
     }
 
     // Events
     countrySearch.oninput = (e) => populateCountries(e.target.value);
-    defaultLocale.onchange = saveState;
-    smartEmail.onchange = saveState;
-    matchPasswords.onchange = saveState;
-    checkAllBoxes.onchange = saveState;
-    consentBoxes.onchange = saveState;
-    piiSafe.onchange = saveState;
-    autoSubmit.onchange = saveState;
+    // Ülke yalnızca seçici değişince kaydedilir; arama süzmesi seçimi gizlese de kayıtlı ülke korunur
+    defaultLocale.onchange = () => {
+        state.preferredLocale = defaultLocale.value;
+        saveState('preferredLocale');
+    };
+    const TOGGLES = { smartEmail, matchPasswords, checkAllBoxes, consentBoxes, piiSafe, autoSubmit };
+    Object.entries(TOGGLES).forEach(([key, el]) => {
+        el.onchange = () => {
+            state[key] = el.checked;
+            saveState(key);
+        };
+    });
+
+    // Başka bir ayar sekmesi ülke veya profil değiştirirse bu sayfa da güncellenir
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area !== 'local') return;
+        if (changes.preferredLocale && changes.preferredLocale.newValue) {
+            state.preferredLocale = changes.preferredLocale.newValue;
+            populateCountries(countrySearch.value);
+        }
+        if (changes.profiles && Array.isArray(changes.profiles.newValue)) state.profiles = changes.profiles.newValue;
+        if (changes.activeProfileId && changes.activeProfileId.newValue) state.activeProfileId = changes.activeProfileId.newValue;
+        if (changes.profiles || changes.activeProfileId) renderProfiles();
+    });
 
     // Sözdizimi, sayfaya dokunmadan boş bir belge parçasında denenir; geçersiz seçici kuralı reddedilir
     function isValidSelector(selector) {
@@ -630,7 +627,7 @@ document.addEventListener('DOMContentLoaded', () => {
         else state.customRules.push(rule);
         exitRuleEditMode();
         renderRules();
-        saveState();
+        saveState('customRules');
     };
 
     ruleCancelBtn.addEventListener('click', exitRuleEditMode);
@@ -655,7 +652,7 @@ document.addEventListener('DOMContentLoaded', () => {
             removeBtn.onclick = () => {
                 state.noAutoSubmitSites.splice(idx, 1);
                 renderSites();
-                saveState();
+                saveState('noAutoSubmitSites');
             };
 
             row.append(code, removeBtn);
@@ -674,7 +671,7 @@ document.addEventListener('DOMContentLoaded', () => {
         siteInput.value = "";
         siteError.hidden = true;
         renderSites();
-        saveState();
+        saveState('noAutoSubmitSites');
     }
 
     siteAddBtn.addEventListener('click', addSite);
@@ -766,7 +763,7 @@ document.addEventListener('DOMContentLoaded', () => {
     closeOnboarding.onclick = () => {
         state.onboardingComplete = true;
         onboardingModal.style.display = "none";
-        saveState();
+        saveState('onboardingComplete');
     };
 
     // Nav Switcher

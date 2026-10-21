@@ -25,5 +25,8 @@
   },
   "menuUndo": {
     "message": "Deshacer relleno falso"
+  },
+  "menuSettings": {
+    "message": "Ajustes"
   }
 }

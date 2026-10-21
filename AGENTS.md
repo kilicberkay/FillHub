@@ -11,7 +11,8 @@ Tüm yollar depo köküne göredir; eklenti dosyaları `extension/` altındadır
 - `extension/manifest.json` — MV3 tanımı. İçerik betikleri manifestte tanımlı değildir; `background.js` içindeki `CONTENT_FILES` listesi,
   kullanıcı doldurmayı başlattığında `chrome.scripting` ile her çerçeveye (eksik olanlara) enjekte edilir.
   İzinler `storage`, `contextMenus`, `scripting` ve `activeTab` ile sınırlıdır; host izni (`<all_urls>`) yoktur.
-  Sekme erişimi yalnızca kullanıcı eylemiyle (kısayol, sağ tık menüsü, popup düğmesi) verilir ve sekmeden ayrılınca biter.
+  Araç çubuğu simgesinin açılır penceresi yoktur: tıklama `chrome.action.onClicked` ile formu hemen doldurur.
+  Sekme erişimi yalnızca kullanıcı eylemiyle (simge tıklaması, kısayol, sağ tık menüsü) verilir ve sekmeden ayrılınca biter.
 - `extension/scripts/locale-data.js` — `FillHubLocaleData`: 15 dilin havuzları (ad, soyad, Latin karşılıklar,
   UI havuzları) ve 15 ülkenin profilleri (şehir+posta öneki, telefon, adres şablonu, kimlik/IBAN belirtimi).
 - `extension/scripts/id-rules.js` — `FillHubIdRules`: kimlik/vergi algoritmaları (sağlama vs. biçim ayrımıyla).
@@ -24,20 +25,24 @@ Tüm yollar depo köküne göredir; eklenti dosyaları `extension/` altındadır
 - `extension/scripts/backup.js` — `FillHubBackup`: yedek dosyası üretimi ve içe aktarma doğrulaması (alan alan; boyut, biçim, seçici, tür, kimlik yapısı).
 - `extension/scripts/diagnostics.js` — `FillHubDiagnostics`: tanılama raporu; kişisel veri (ad, değer, etiket, profil adı, site adresi) içermez.
 - `extension/scripts/content-dates.js` — tarih alanlarının air-datepicker takvimiyle doldurulması (DOM sözleşmesi, gezinme, yıl atlama).
-- `extension/popup/popup.html`, `extension/popup/popup.js` — araç çubuğu açılır penceresi: ülke ve profil seçimi, Doldur, Geri al ve
-  özel kural seçicisi testi (Test düğmesi; yalnızca eşleşme sayısı okunur). Ayar sayfasının sekme erişimi olmadığı için seçici testi oradan
-  buraya taşındı. Stil `extension/options/options.css` ile paylaşılır.
-  Persona göçü (`migrateProfiles`) ve etkin kimlik (`activeIdentity`) burada; içerik betiği de bunları kullanır.
+- Persona göçü (`migrateProfiles`) ve etkin kimlik (`activeIdentity`) ayar sayfası ve içerik betiğindedir.
+  Ülke ve profil ayar sayfasından değiştirilir. Sayfada seçici testi yoktur; özel kurallar ayar sayfasında girilir.
 - `tools/verify-data.js` — bağımlılıksız denetim (`node tools/verify-data.js`): bilinen vektörler, harita
   bütünlüğü, 15 ülkede 300'er kişi, i18n anahtar eşleşmesi.
 - `extension/scripts/content.js` — doldurma motoru (captcha: yalnız vurgulama ve bildirim): alan tespiti (`identifyField`), değer yazma
   (`assignFieldValue`), dosya/select/radio/tarih-picker yolları, geri alma (`undoFill`),
   mesaj dinleyicisi.
-- `extension/scripts/background.js` — servis çalışanı: sağ tık menüleri (`chrome.i18n`), kısayollar, açılır pencere isteklerinin etkin sekmeye iletilmesi.
-  Hedef sekme `findTargetTab` ile bulunur; popup'ın kendi sekme ve pencere kimlikleri dışlanır (araç çubuğu popup'ı odağı alır).
+- `extension/scripts/background.js` — servis çalışanı: sağ tık menüleri (`chrome.i18n`, Ayarlar dahil), kısayollar ve
+  araç çubuğu simgesi tıklaması (`chrome.action.onClicked`). `default_popup` yoktur; simge tıklaması `runTabAction(tab, 'fill')` çağırır.
+  Menüler `onInstalled` içinde `await chrome.contextMenus.removeAll()` sonrası yeniden kurulur (güncellemede çift kimlik hatası olmasın).
+  `openSettings` hem sayfa menüsünde hem simgenin sağ tık menüsünde görünür (`contexts: ["all"]`) ve `chrome.runtime.openOptionsPage()` açar.
+  Doldurma ve geri alma `runInTab` ile her çerçeveye gider; doldurmada çerçeveler bildirim göstermez (`deferToast`), arka plan
+  sayıları toplayıp üst çerçeveye `fill_result` gönderir. Bildirimdeki Geri al `undo-all` mesajıyla her çerçeveyi geri alır.
+  "Bu alanı doldur" yalnız `info.frameId` çerçevesine gider. Tüm `executeScript` çağrıları `injectImmediately: true` kullanır:
+  varsayılan "boşta" beklemesi, hiç boşa geçmeyen bir çerçevede (ör. `about:blank#…` iframe) çağrıyı süresiz bekletir.
 - `extension/options/` — ayar sayfası (`generator.js` betik olarak yüklenir); persona/şablon yönetimi burada.
   - `ui.src.css` — tasarım kaynağı: `@theme` tokenları (marka skalası, gölgeler), `@utility` yardımcıları,
-    form taban kuralları, `@font-face`. `@source` ile `options.html`, `options.js` ve `../popup/popup.html`, `../popup/popup.js` taranır.
+    form taban kuralları, `@font-face`. `@source` ile `options.html` ve `options.js` taranır. Popup kaynağı yoktur.
   - `options.css` — **üretilmiş**, elle düzenlenmez: `npm run build:css` (Tailwind CLI 4.3.3, küçültülmüş).
     `ui.src.css`, `options.html` veya `options.js` sınıf içerdiğinde yeniden üretilmelidir.
   - `i18n.js` — ayar sayfası metinleri, 15 dil; her dilde aynı anahtar kümesi (`tools/verify-data.js` ve birim testi denetler).
@@ -68,9 +73,9 @@ Tüm yollar depo köküne göredir; eklenti dosyaları `extension/` altındadır
 - Dosya alanları `DataTransfer` + `File` ile doldurulur; `webkitdirectory` alanları atlanır.
   `multiple` alanlara iki dosya yazılır (`ad.pdf`, `ad-2.pdf`).
 - Dosya alanlarında görünürlük kontrolü uygulanmaz (gizli dosya alanı standarttır).
-- Üretilen tarihlerde yıl 2000 ile içinde bulunulan yıl arasından rastgele seçilir (`date`,
-  `datetime`; dolayısıyla `month`/`week` alanları da); ay 1-12, gün 1-28 aralığındadır.
-  Sabit "bu yıl" tekrarı yapılmaz.
+- Üretilen tarihler 2000 ile bugün arasındadır (`date`, `datetime`; dolayısıyla `month`/`week` alanları ve kişinin
+  `birthDate` değeri de): yıl rastgele seçilir, ay 1-12, gün 1-28 aralığındadır; içinde bulunulan yıl seçilirse ay ve
+  gün bugünü geçmez (gelecek tarih üretilmez). Sabit "bu yıl" tekrarı yapılmaz.
 - Geniş yıl aralığı aylık tıklama bütçesini aşar: uzak hedeflerde takvim önce yıl görünümüne
   atlanır (v3 klavye kısayolları `Shift+Ok` ±1 yıl, `Alt+Ok` ±10 yıl; v2'de başlıkla yıl
   görünümü + on yıl gezinmesi + yıl ve ay hücresi). Atlama başarısızsa ve hedef hâlâ
@@ -121,6 +126,14 @@ Tüm yollar depo köküne göredir; eklenti dosyaları `extension/` altındadır
 - Otomatik gönderim yalnız gerçek gönderim kontrollerine basar (`button[type=submit]`,
   `input[type=submit]`, `input[type=image]`, form içi tipsiz `button`); `role="button"` gibi sahte
   butonlar ve yıkıcı/ikincil metinli kontroller (İptal, Sil, Temizle, Reset...) dışarıda kalır.
+  Yıkıcı metin kelime sınırıyla eşleşir; "Reset password" ve "Geri bildirim" gibi gönderim ifadeleri (`SAFE_SUBMIT_TEXT`)
+  dışlanmaz. Düğme, son doldurmada en çok alanı değişen formdan (`filledForm`) seçilir; hiçbir alan bir forma bağlı
+  değilse sayfa genelinde aranır.
+- Görünmez reCAPTCHA (v3 ve görünmez v2 rozeti: `.grecaptcha-badge`, `data-size="invisible"`, `size=invisible`) görünür
+  captcha sayılmaz; captcha görünürlüğü `isElementVisible` ile denetlenir (CSS ile gizlenmiş rozet görünür değildir).
+- Onay kutusu ve radyo görünürlüğü `isFieldVisible` ile denetlenir: asıl girdi gizli (`opacity:0`, `display:none`)
+  olsa da bağlı etiketi görünüyorsa alan görünür sayılır (özel stilli kontroller).
+- Radyo grubu tarayıcıdaki gibi form + ad ile belirlenir; değişen her grup bir alan sayılır (`filledCount`).
 - Kullanıcıya görünen metinler ve kod yorumları Türkçe/İngilizce mevcut düzenle uyumlu tutulur.
 - Yerel çözümleme (`canonicalLocale`): çıplak dil kodu dildir (`ar`→`ar-EG`, `es`→`es-MX`, `pt`→`pt-BR`,
   `vi`→`vi-VN`); bölgeli kod bölgeyi korur (`es-AR`); çıplak ülke kodu yalnız dil değilse ülkedir (`us`→`en-US`).
@@ -144,6 +157,9 @@ Tüm yollar depo köküne göredir; eklenti dosyaları `extension/` altındadır
 - Alan tespiti sırası: `input.type` (email/tel/url/…) → `autocomplete` jetonu (`AUTOCOMPLETE_TYPES`) →
   `FIELD_PATTERNS` (her metin kaynağı ayrı denenir; etiket için `labelOwnText` kullanılır, `select` seçenek
   metinleri alan adına karışmaz). `taxId`, `idNumber`'dan önce denenir ("Vergi Kimlik No" → vergi).
+  `type="number"` alanlarda metin kuralları yine denenir; yalnız rakamla yazılabilen türler (`NUMERIC_TYPES`: telefon,
+  posta kodu, kimlik, vergi) kabul edilir, gerisi `number` olur. Bu alanlara değerin yalnız rakamları yazılır; kısıtsız
+  alanda rakam dizisi olduğu gibi kalır (baştaki sıfır korunur). Örnekler: `NUMBER_INPUT_CORPUS`.
 - `preferredLocale` seçildiğinde `country` select'i ISO2 veya İngilizce/yerel ad ile eşleşen seçeneği seçer
   (`selectOptionMatches`); `state` ve `phoneCode` select'leri de aynı yolla.
 - Ayar sayfasında tema `<html>` üzerindeki `.dark` sınıfıyla uygulanır; tercih `state.theme` olarak
@@ -154,7 +170,14 @@ Tüm yollar depo köküne göredir; eklenti dosyaları `extension/` altındadır
   boyutu bu yüzden `ui.src.css` içinde `html body` ile sabitlenir. Düz web sayfalarında görülmez.
 - Ayar sayfasında kullanıcı girdisi (ör. CSS seçici) `innerHTML` ile yazılmaz; `textContent` kullanılır.
 - Bildirim kartı (`showToast`) açık/koyu yüzeyini `settings.theme` ile seçer; sayfa stillerinden
-  bağımsız, inline stil kullanır.
+  bağımsız, inline stil kullanır. Metinler arayüz dilindendir (`settings.uiLang`, yoksa tarayıcı dili), veri ülkesinden
+  (`preferredLocale`) değil. Hiç alan doldurulmadıysa "alan bulunamadı" bildirimi gösterilir ve Geri al sunulmaz.
+  Yeni bildirim önceki bildirimin zamanlayıcısını iptal eder.
+- Ayar sayfası depolamaya yalnız değişen anahtarları yazar (`saveState('anahtar')`); durumun tamamı yazılmaz, çünkü
+  içerik betiği aynı depoya yazar (ülke, etkin profil, `lastFillReport`). Dış değişiklikler `storage.onChanged`
+  ile sayfaya yansır. Ülke yalnız ülke seçicisinin `change` olayında kaydedilir; arama süzmesi kaydı değiştirmez.
+- İlk kurulum ölçütü `uiLang` kaydının yokluğudur (depoda başka anahtar olsa da): ayar sayfası açılmadan doldurulmuş
+  kurulumlarda da ülke ve arayüz dili tespit edilip ayarlar yazılır.
 
 ## Doğrulama
 1. `npm run check` (her JS dosyasında `node --check`) ve `node tools/verify-data.js` (vektörler, harita bütünlüğü,
@@ -163,6 +186,8 @@ Tüm yollar depo köküne göredir; eklenti dosyaları `extension/` altındadır
    persona göçü, manifest/yerelleştirme/gizlilik/ayar sayfası kimlik denetimleri.
 3. `node --test tests/e2e`: gerçek Chromium'da uzantı yüklenir, form doldurulur ve değerler DOM'dan okunur.
    Chromium `CHROME_BIN` ile ya da Playwright önbelleğinden bulunur; yoksa atlanır. `npm test` hepsini koşturur.
+   Tarayıcı dili `--lang=en-US` ile sabittir (taze kurulum varsayılanları makinenin diline göre değişmez). Windows'ta
+   Playwright Chromium'u `%LOCALAPPDATA%\ms-playwright\chromium-*\chrome-win\chrome.exe` yolundadır; `CHROME_BIN` ile verilir.
 4. Alan tespiti bir etiketi yanlış tanırsa önce `tests/unit/field-corpus.mjs` içine o etiketi ekleyin, sonra kuralı düzeltin.
 5. Gerçek veri havuzu karşılaştırmalarında depolamaya açıkça `piiSafe: false` yazılır; taze kurulumda PII Safe açıktır.
 6. Ayar sayfası görünümü değişince `npm run build:css`, ardından `node tools/make-store-assets.mjs` ile ekran

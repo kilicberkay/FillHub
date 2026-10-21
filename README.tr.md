@@ -31,7 +31,7 @@
 
 | Diller | Tutarlılık | Kısayollar | Veri |
 |---|---|---|---|
-| 15 ülke | Her doldurmada tek ve tutarlı bir kişi | `Ctrl+Shift+F` doldurur, `Ctrl+Shift+U` geri alır | Toplanmaz |
+| 15 dil, 15 ülke profili | Her doldurmada tek ve tutarlı bir kişi | `Ctrl+Shift+F` doldurur, `Ctrl+Shift+U` geri alır | Toplanmaz |
 
 ---
 
@@ -66,20 +66,11 @@ Her doldurma **tutarlı tek bir kişi** üretir. Ad, soyad, e-posta, "e-postayı
   <tr>
     <td align="center" width="50%">
       <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="docs/images/tr/dark/popup.png">
-        <img src="docs/images/tr/light/popup.png" alt="Ülke, profil, Doldur ve Geri al düğmelerini içeren araç çubuğu penceresi" width="240">
-      </picture><br>
-      <sub>Araç çubuğu açılır penceresi</sub>
-    </td>
-    <td align="center" width="50%">
-      <picture>
         <source media="(prefers-color-scheme: dark)" srcset="docs/images/tr/dark/settings-profiles.png">
         <img src="docs/images/tr/light/settings-profiles.png" alt="Sabit test hesabının bulunduğu kimlik profilleri sayfası" width="100%">
       </picture><br>
       <sub>Kimlik profilleri</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="50%">
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="docs/images/tr/dark/settings-rules.png">
@@ -87,7 +78,9 @@ Her doldurma **tutarlı tek bir kişi** üretir. Ad, soyad, e-posta, "e-postayı
       </picture><br>
       <sub>Özel kurallar</sub>
     </td>
-    <td align="center" width="50%">
+  </tr>
+  <tr>
+    <td align="center" colspan="2">
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="docs/images/tr/dark/settings-general.png">
         <img src="docs/images/tr/light/settings-general.png" alt="Varsayılan ülke ve akıllı özelliklerin bulunduğu genel ayarlar" width="100%">
@@ -101,7 +94,7 @@ Her doldurma **tutarlı tek bir kişi** üretir. Ad, soyad, e-posta, "e-postayı
 
 ### Tek işlemle form doldurma
 
-`Ctrl+Shift+F` (macOS'ta `Command+Shift+F`) tuşlarına basın, araç çubuğundaki simgeyi açıp **Doldur** düğmesine basın ya da sağ tık menüsünden **Formu sahte verilerle doldur** seçeneğini kullanın. Açılır pencerede varsayılan ülke ve profili de seçebilirsiniz. Tek bir alan için **Bu alanı doldur** seçeneği vardır. **Geri al**, son doldurmadan önceki hâli geri yükler.
+`Ctrl+Shift+F` (macOS'ta `Command+Shift+F`) tuşlarına basın, araç çubuğundaki FillHub simgesine tıklayın ya da sağ tık menüsünden **Formu sahte verilerle doldur** seçeneğini kullanın. Varsayılan ülke ve profili ayar sayfasından değiştirin; sayfa, sağ tık menüsündeki **Ayarlar** ile (simgeye sağ tıklayarak da) açılır. Tek bir alan için **Bu alanı doldur** seçeneği vardır. **Geri al**, son doldurmadan önceki hâli geri yükler.
 
 ### 15 dil, 15 ülke
 
@@ -134,7 +127,7 @@ Güvenli mod **varsayılan olarak açıktır**. Kişisel tanımlayıcıları, te
 
 ### Akıllı alan tanıma
 
-Her alan; `autocomplete` değeri, `type`, etiket, `name` ve `id`, placeholder ve çevredeki metinden sınıflandırılır. Tanıma korpusu 15 dildeki 100'den fazla etiketi kapsar; bunların arasında `Soyadınız` (soyad) gibi, ad olarak okunmaması gereken zor etiketler de vardır. Açılır listeler, içerdikleri ülke, il ve telefon kodu seçenekleriyle eşleştirilir.
+Her alan; `type`, `autocomplete` değeri ve metinlerinden sınıflandırılır: `name`, `id`, placeholder, `title`, `aria-label`, `aria-labelledby` ve bağlı `<label>`. Sayı alanları (`type="number"`) da telefon, posta kodu veya kimlik alanı olarak tanınabilir ve yalnızca rakam alır. Tanıma korpusu 15 dildeki 100'den fazla etiketi kapsar; bunların arasında `Soyadınız` (soyad) gibi, ad olarak okunmaması gereken zor etiketler de vardır. Açılır listeler, içerdikleri ülke, il ve telefon kodu seçenekleriyle eşleştirilir.
 
 ### Kimlik profilleri
 
@@ -143,49 +136,55 @@ Bir profil, doldurmada kimin kullanılacağını belirler:
 - **Her doldurmada rastgele** (varsayılan): her seferinde yeni ve tutarlı bir kişi.
 - **Sabit kişi**: her seferinde aynı kişi; isterseniz "başka kişi üret" ile yenisini oluşturabilirsiniz.
 
+Bir profil değerleri de sabitleyebilir: ad, soyad, e-posta, telefon ve şifre. Sabit değerler profil aktifken her doldurmada kullanılır; böylece bir profil sabit bir test hesabını tutabilir. E-posta, sabit adlarla tutarlı kalır. Sabit değerler tarayıcıda şifrelenmeden saklanır; gerçek bir şifre girmeyin.
+
 Profilleri **Profiller** sayfasında oluşturun, düzenleyin ve değiştirin. Aktif profil her zaman en üstte gösterilir.
 
 ### Özel kurallar
 
-Yerleşik tanıma bir alanı kaçırırsa, **Özel Kurallar** sayfasında bir CSS seçicisini bir veri türüne eşleyebilirsiniz. Kurallar sırayla denenir ve ilk eşleşen kazanır. Araç çubuğu açılır penceresindeki **Bu sayfada dene** düğmesi, doldurmadan önce seçicinin kaç alanla eşleştiğini gösterir.
+Yerleşik tanıma bir alanı kaçırırsa, **Özel Kurallar** sayfasında bir CSS seçicisini bir veri türüne eşleyebilirsiniz. Kurallar sırayla denenir ve ilk eşleşen kazanır.
 
 ### Akıllı form davranışı
 
 - **Akıllı e-posta bağlantısı**: e-posta alanları üretilen ada uyar.
 - **Şifreleri eşleştir**: "şifreyi tekrar yazın" alanları aynı değeri alır.
 - **Onay kutuları** (şartlar, gizlilik, KVKK) işaretlenir; **pazarlama kutuları** (bülten, kampanya) işaretsiz kalır. Zorunlu kutular her zaman işaretlenir. Diğer kutular rastgele ayarlanır; **Tüm onay kutularını işaretle** açıksa hepsi işaretlenir. **Onay kutularını işaretle** ayarını kapatırsanız onay kutuları da rastgele politikaya girer.
-- **Radyo grupları** yalnızca bir seçenek alır.
+- **Radyo grupları** yalnızca bir seçenek alır. Asıl girdiyi görünen bir etiketin arkasına gizleyen özel stilli onay kutuları ve radyolar da doldurulur.
 - **HTML kısıtları** uygulanır: `pattern`, `minlength`, tarih ve saat alanlarının `min` ve `max` sınırları.
 - **Tarih alanları** 2000 ile bugün arasında tarihler alır.
 - **Metin alanları**, seçilen ülke profilinin dilinde örnek cümleler alır. Uzun cümleler çok satırlı alanlara, değerler alanın `maxlength` sınırına kırpılarak yazılır.
 - **URL alanları** gerçek sitelere değil, ayrılmış örnek alan adlarına bağlantılar alır.
 - **Dosya alanları** üretilmiş bir dosya alır.
-- **Otomatik gönderim** (varsayılan olarak kapalı) doldurmadan sonra gerçek gönderim düğmesine basar. İptal, Sil gibi sahte veya yıkıcı düğmelere hiçbir zaman basılmaz.
+- **Otomatik gönderim** (varsayılan olarak kapalı) doldurmadan sonra, doldurulan formun gerçek gönderim düğmesine basar; sayfadaki başka bir forma (ör. arama kutusu) basmaz. İptal, Sil gibi sahte veya yıkıcı düğmelere hiçbir zaman basılmaz. **Genel** sayfasında siteler otomatik gönderimin dışında tutulabilir; bu sitelerde alanlar yine doldurulur.
 - **Aynı kökenli iframe içinde çalışır**, devre dışı ve salt okunur alanları atlar, yazdığı değerleri React ve Vue gibi çerçevelerin durumuyla senkron tutar. Çapraz kökenli iframe'ler `activeTab` izninin dışındadır ve doldurulmaz.
 
 ### Captcha'lara asla tıklanmaz
 
-FillHub captcha'ya tıklamaz, çözmez ve captcha API'lerini çağırmaz. Sayfada görünür bir reCAPTCHA, hCaptcha veya Turnstile varsa FillHub onu çerçeveler, bir bildirim gösterir ve doğrulamayı sizin tamamlamanızı bekler. Sayfayı captcha'ya kaydırmaz ve odağı oraya taşımaz.
+FillHub captcha'ya tıklamaz, çözmez ve captcha API'lerini çağırmaz. Sayfada görünür bir reCAPTCHA, hCaptcha veya Turnstile varsa FillHub onu çerçeveler, bir bildirim gösterir, doğrulamayı sizin tamamlamanızı bekler ve otomatik gönderim yapmaz. Sayfayı captcha'ya kaydırmaz ve odağı oraya taşımaz. Görünmez reCAPTCHA (v3 ve görünmez v2 rozeti) kullanıcıdan bir şey istemediği için görünür captcha sayılmaz.
 
 ### Ayarlar
 
-- **Genel**: varsayılan ülke, akıllı özellikler ve güvenli mod.
-- **Profiller**: kimlik profilleri (yukarıya bakın).
+- **Genel**: varsayılan ülke, akıllı özellikler, güvenli mod, otomatik gönderim ve site istisnaları, ayar yedeği (JSON dosyasına dışa aktarma ve dosyadan içe aktarma) ve tanılama raporu. Rapor yalnızca sayıları ve ayar bayraklarını içerir; değer, etiket, profil adı veya adres içermez.
+- **Profiller**: kimlik profilleri ve sabit değerler (yukarıya bakın).
 - **Özel Kurallar**: seçici-tür kuralları.
-- **Hakkında**: sürüm ve proje bilgileri.
+- **Hakkında**: sürüm, proje bilgileri ve arayüz dili (15 dil).
 - **Destek ol**: projeyi nasıl destekleyebileceğiniz.
+
+Üst bilgideki düğme açık ve koyu tema arasında geçiş yapar. Sayfadaki bildirimler aynı arayüz dilini ve temayı kullanır.
 ## Kurulum
 
 ### Chrome Web Store (önerilen)
 
 **[FillHub'ı Chrome'a ekleyin](https://chromewebstore.google.com/detail/fillhub/chkkiamcnmilalgbokfofnhhlckmaihi)**
 
+Mağaza güncellemeleri Google incelemesinden geçtiği için mağazadaki sürüm [son sürümün](https://github.com/kilicberkay/FillHub/releases/latest) gerisinde kalabilir. En yeni paket her zaman sürüm sayfasındadır.
+
 ### Kaynaktan (geliştirici modu)
 
 1. Depoyu klonlayın ya da [Sürümler sayfası](https://github.com/kilicberkay/FillHub/releases) üzerinden en son `fillhub-*.zip` dosyasını indirip açın.
 2. `chrome://extensions` adresini açın ve **Geliştirici modu**nu etkinleştirin.
 3. **Paketlenmemiş öğe yükle** düğmesine tıklayın ve `extension/` klasörünü (içinde `manifest.json` bulunan klasör) seçin.
-4. Herhangi bir form içeren sayfayı açın ve `Ctrl+Shift+F` tuşlarına basın.
+4. Herhangi bir form içeren sayfayı açın ve `Ctrl+Shift+F` tuşlarına basın ya da araç çubuğundaki FillHub simgesine tıklayın.
 
 Chrome 116 veya üzeri, ya da Manifest V3 destekleyen Chromium tabanlı bir tarayıcı gerekir.
 
@@ -193,12 +192,15 @@ Chrome 116 veya üzeri, ya da Manifest V3 destekleyen Chromium tabanlı bir tara
 
 | İşlem | Kısayol | Menü veya araç çubuğu |
 |---|---|---|
-| Tüm formu doldur | `Ctrl+Shift+F` (macOS: `Command+Shift+F`) | Araç çubuğu açılır penceresi → *Doldur* veya sağ tık → *Formu sahte verilerle doldur* |
+| Tüm formu doldur | `Ctrl+Shift+F` (macOS: `Command+Shift+F`) | FillHub simgesine tıkla veya sağ tık → *Formu sahte verilerle doldur* |
 | Odaklanılan alanı doldur | yok | Alana sağ tık → *Bu alanı doldur* |
+| Ayarları aç | yok | Sağ tık → *Ayarlar* (araç çubuğu simgesine sağ tıklandığında da) |
 | Kaos modu (fuzz testleri için olağandışı değerler) | `Ctrl+Shift+Y` | yok |
 | Son doldurmayı geri al | `Ctrl+Shift+U` | Sağ tık → *Sahte doldurmayı geri al* |
 
 Kısayollar `chrome://extensions/shortcuts` adresinden değiştirilebilir.
+
+Önceki sürümlerde ülke ve profil için araç çubuğu açılır penceresi vardı. 1.4.1'den itibaren simge sayfayı doğrudan doldurur; aynı seçenekler ayar sayfasındadır.
 
 ## Veri nasıl üretilir
 
@@ -233,7 +235,7 @@ FillHub, ülkesinin genel sağlama algoritmasını geçen kimlik numaraları ür
 
 - **Veri toplanmaz.** FillHub'da analitik, telemetri, hesap veya sunucu yoktur. Hiçbir şey tarayıcınızdan çıkmaz.
 - **Ayarlar yerel kalır**, `chrome.storage.local` içinde saklanır.
-- **İzinler minimumda tutulur**: `storage` (ayarlar), `contextMenus` (sağ tık öğeleri), `scripting` (doldurma betiklerini yalnızca siz başlattığınızda enjekte eder) ve `activeTab` (yalnızca kısayola, açılır pencere düğmesine veya menü öğesine bastığınızda, yalnızca o sekme için). Tüm sitelere erişim yoktur; kullanmadığınız sayfalarda hiçbir betik çalışmaz.
+- **İzinler minimumda tutulur**: `storage` (ayarlar), `contextMenus` (Ayarlar dahil sağ tık öğeleri), `scripting` (doldurma betiklerini yalnızca siz başlattığınızda enjekte eder) ve `activeTab` (yalnızca araç çubuğu simgesine tıkladığınızda, kısayola bastığınızda veya menü öğesini kullandığınızda, yalnızca o sekme için). Tüm sitelere erişim yoktur; kullanmadığınız sayfalarda hiçbir betik çalışmaz.
 - **Üretilen veriler test içindir.** Güvenli mod varsayılan olarak açıktır. Üretilen verileri gerçek uygulamalarda, satın almalarda veya kimlik beyanlarında kullanmayın.
 
 Tam politika: [PRIVACY.md](PRIVACY.md).
@@ -242,7 +244,7 @@ Tam politika: [PRIVACY.md](PRIVACY.md).
 
 ```mermaid
 flowchart LR
-    A["Kısayol, araç çubuğu açılır penceresi<br/>veya sağ tık menüsü"] --> B["Servis çalışanı<br/>scripts/background.js"]
+    A["Araç çubuğu simgesi, kısayol<br/>veya sağ tık menüsü"] --> B["Servis çalışanı<br/>scripts/background.js"]
     B -->|"fill · fill_field · undo"| C["Kullanıldığında enjekte edilen içerik betiği<br/>scripts/content.js"]
     S[("chrome.storage.local<br/>ayarlar ve profiller")] --> C
     C --> D["Alan tanıma<br/>scripts/field-detect.js"]
@@ -260,6 +262,8 @@ Tasarım ayrıntıları [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) dosyasında
 npm ci
 npm test              # tüm denetimler, tarayıcı testleri dahil (Chromium gerekir)
 npm run test:quick    # tarayıcı testleri hariç tüm denetimler
+npm run check         # her JavaScript dosyasında sözdizimi denetimi
+npm run verify        # veri denetimi: kimlik vektörleri, harita bütünlüğü, ülke başına 300 kişi, çeviriler
 npm run build         # Chrome Web Store için dist/fillhub-<sürüm>.zip
 npm run build:css     # arayüz değişince options/options.css dosyasını yeniden üretir
 ```
@@ -276,7 +280,6 @@ FillHub/
 │   ├── _locales/        Yerelleştirilmiş ad, açıklama, kısayol ve menü metinleri (15 dil)
 │   ├── scripts/         Servis çalışanı, içerik betikleri, üreteç, tanıma, veri
 │   ├── options/         Ayar sayfası: HTML, JavaScript, çeviriler, Tailwind kaynağı ve çıktısı
-│   ├── popup/           Araç çubuğu açılır penceresi: ülke, profil, Doldur ve Geri al
 │   └── icons/           Araç çubuğu ve mağaza simgeleri (vektör kaynak: logo.svg)
 ├── tests/               Birim testleri (tests/unit) ve tarayıcı testleri (tests/e2e)
 ├── tools/               Sözdizimi denetimi, veri doğrulama, zip derleme, mağaza görseli üreteci

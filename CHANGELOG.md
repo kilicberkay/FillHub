@@ -3,7 +3,53 @@
 All notable changes to FillHub are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased]
+## [1.4.1] - 2026-10-21
+
+### Fixed
+- A fill never finished on a page with an `about:blank#…` iframe: script injection waited for that frame to
+  become idle, which it never does. Scripts are now injected without waiting.
+- The settings page wrote all of its settings on every change, so a country or profile changed elsewhere, and
+  the last fill summary, were reset while the page was open. It now writes only the setting that changed and
+  follows changes made elsewhere.
+- Searching the country list on the settings page could clear or change the saved country.
+- The settings page skipped its first-run setup (country and interface language from the browser) when FillHub
+  had been used before the page was ever opened.
+- Generated dates, including the birth date behind CURP, NIR and Chinese ID numbers, could be later than today.
+- An invisible reCAPTCHA badge (v3 or invisible v2), or a captcha hidden with CSS, counted as a visible captcha:
+  auto-submit never ran and the notice asked the user to complete a captcha that was not there.
+- Auto-submit clicked the first submit button on the page, which could belong to another form such as a search
+  box. It now submits the form that was filled.
+- Submit buttons such as "Reset password" or "Geri bildirim gönder" were treated as destructive because a word in
+  them matched part of the destructive list. Destructive words now match as whole words.
+- Custom-styled checkboxes and radios that hide the real input behind a visible label were not filled, so
+  required consent boxes stayed unchecked.
+- The notice said "All fields filled" and offered Undo on pages with nothing to fill. It now says that no
+  fillable fields were found. The counts come from every frame of the page.
+- Undo in the notice restored only the top frame. It now restores every frame, same-origin iframes included.
+- Radio groups were not counted, so a page with only radio buttons reported no fields and was not auto-submitted.
+  Radios with the same name in different forms were treated as one group.
+- "Fill this field" was sent to every frame and ignored a focused field inside a shadow root. It now goes to the
+  frame that was right-clicked and finds the field inside shadow roots.
+- Number inputs (`type="number"`) labelled as phone or postal code received a random number from 0 to 99. They
+  now receive the digits of a phone number or postal code.
+- The notice used the language of the data country instead of the interface language.
+- Undo restored only the first selected option of a multi-select list.
+- A second fill within three seconds left the first fill's watcher for new fields running.
+- A new notice could be hidden early by the previous notice's timer.
+
+### Changed
+- Clicking the toolbar icon fills the form immediately. The toolbar popup is gone: there is no Fill button and
+  no "cannot fill this page" message from a window that could not see the tab. Country and profile are changed
+  on the settings page.
+- Settings opens from **Settings** in the right-click menu, both on the page and on the toolbar icon.
+- README, Turkish README, store listings and architecture notes describe pinned profile values, site
+  exceptions, backup, diagnostics, the interface language and the field sources accurately. The Turkish store
+  listing gains the missing `scripting` justification, and the custom rules screenshot caption is corrected.
+- Browser tests run with the browser language set to `en-US`, so results do not depend on the machine's language.
+
+### Removed
+- The toolbar popup, including the "Test on this page" selector check. Custom rules are still added and edited
+  on the settings page. The popup screenshots are removed from the README.
 
 ## [1.4.0] - 2026-10-19
 

@@ -9,8 +9,6 @@
 
 @source './options.html';
 @source './options.js';
-@source '../popup/popup.html';
-@source '../popup/popup.js';
 
 @custom-variant dark (&:where(.dark, .dark *));
 

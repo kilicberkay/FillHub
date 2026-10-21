@@ -44,7 +44,8 @@ function freePort() {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // Uzantı klasörüyle Chromium başlatır; { port, close(), browserWs } döner
-export async function launchWithExtension(extensionDir, { headless = true, width = 1280, height = 800 } = {}) {
+// lang: tarayıcı dili (navigator.language); verilmezse işletim sisteminin dili kullanılır
+export async function launchWithExtension(extensionDir, { headless = true, width = 1280, height = 800, lang = null } = {}) {
     const chrome = findChrome();
     if (!chrome) throw new Error('Chromium bulunamadı (CHROME_BIN ayarlayın)');
     const port = await freePort();
@@ -67,6 +68,7 @@ export async function launchWithExtension(extensionDir, { headless = true, width
         `--load-extension=${extensionDir}`,
         `--disable-extensions-except=${extensionDir}`,
         `--window-size=${width},${height}`,
+        lang ? `--lang=${lang}` : '',
         'about:blank',
     ].filter(Boolean);
     const proc = spawn(chrome, args, { stdio: ['ignore', 'ignore', 'pipe'] });

@@ -73,7 +73,8 @@ export async function startEnv() {
     const hostBase = `http://fillhub.test:${srv.address().port}/form.html`;
 
     // FILLHUB_EXT_DIR: açılmış paket kopyası (ör. dist/fillhub-*.zip çıktısı) de sınanabilir
-    const browser = await launchWithExtension(process.env.FILLHUB_EXT_DIR || EXT, {});
+    // Tarayıcı dili sabittir: taze kurulum varsayılanları (arayüz dili, ülke) makinenin diline göre değişmez
+    const browser = await launchWithExtension(process.env.FILLHUB_EXT_DIR || EXT, { lang: 'en-US' });
     const cdp = await new Cdp(browser.browserWs).connect();
 
     // Yalnızca bu uzantının servis çalışanı. Tarayıcı --disable-extensions-except ile açıldığı için

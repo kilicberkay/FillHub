@@ -106,6 +106,22 @@ test('tarihler 2000 ile bu yıl arasında, ay 1-12, gün 1-28', () => {
     }
 });
 
+test('tarihler ve doğum tarihi bugünü geçmez (bu yıl seçildiğinde de)', () => {
+    const today = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const todayIso = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+    const original = Math.random;
+    // Her çekilişte en büyük değer: bu yıl, aralığın son ayı ve son günü
+    Math.random = () => 0.999999;
+    try {
+        assert.ok(G.generate('date', 'en-US', {}) <= todayIso, 'tarih gelecekte olmamalı');
+        assert.ok(G.generate('datetime', 'en-US', {}).slice(0, 10) <= todayIso, 'tarih-saat gelecekte olmamalı');
+        assert.ok(G.createPerson('mx').birthDate <= todayIso, 'doğum tarihi gelecekte olmamalı');
+    } finally {
+        Math.random = original;
+    }
+});
+
 test('HTML pattern kuralı önce karşılanır (\\d{11} → 11 rakam)', () => {
     const v = G.generate('text', 'tr-TR', { pattern: '\\d{11}' });
     assert.match(v, /^\d{11}$/);

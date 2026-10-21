@@ -25,5 +25,8 @@
   },
   "menuUndo": {
     "message": "নকল পূরণ পূর্বাবস্থায় ফেরান"
+  },
+  "menuSettings": {
+    "message": "সেটিংস"
   }
 }

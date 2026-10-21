@@ -25,5 +25,8 @@
   },
   "menuUndo": {
     "message": "撤销虚构数据填写"
+  },
+  "menuSettings": {
+    "message": "设置"
   }
 }

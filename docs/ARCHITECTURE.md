@@ -8,17 +8,16 @@ files in the repository are loaded as they are. npm is used only for development
 | Part | Files | Responsibility |
 |---|---|---|
 | Manifest | `extension/manifest.json` | Name and description via `__MSG_…__`, permissions (`storage`, `contextMenus`, `scripting`, `activeTab`), shortcuts; no content scripts are declared and no host permission is requested |
-| Service worker | `extension/scripts/background.js` | Context menus (localized with `chrome.i18n`), shortcut commands, requests from the toolbar popup; forwards `fill`, `fill_field`, `undo` to the active tab together with its host (used by site exceptions) |
-| Toolbar popup | `extension/popup/popup.html`, `extension/popup/popup.js` | Default country and profile selection (saved to settings), Fill and Undo buttons, and the custom-rule selector test; shares `extension/options/options.css` and `extension/options/i18n.js` |
+| Service worker | `extension/scripts/background.js` | Toolbar icon click, context menus (localized with `chrome.i18n`, including Settings), and shortcut commands; sends `fill` and `undo` to every frame of the tab together with its host (used by site exceptions), sums the replies and asks the top frame to show the result; sends `fill_field` only to the frame that was right-clicked |
 | Backup | `extension/scripts/backup.js` (`FillHubBackup`) | Builds the export file and validates imported files field by field; the options page writes the result to storage |
 | Site exceptions | `extension/scripts/site-rules.js` (`FillHubSiteRules`) | Normalizes host names and matches a page against the list of sites where auto-submit is off (subdomains included) |
 | Diagnostics | `extension/scripts/diagnostics.js` (`FillHubDiagnostics`) | Builds the downloadable report from settings flags, counts and the last fill summary; never includes names, values, labels, profile names or site addresses |
 | Locale data | `extension/scripts/locale-data.js` (`FillHubLocaleData`) | 15 language pools with Latin counterparts, 15 country profiles (cities, postal formats, phone rules, address templates, identity and IBAN specs) |
 | Identity rules | `extension/scripts/id-rules.js` (`FillHubIdRules`) | Generators and validators for identity numbers; test vectors; PII sentinel values |
-| Field detection | `extension/scripts/field-detect.js` (`FillHubDetect`) | Classifies a field from `autocomplete`, `type`, label, `name`/`id`, placeholder; priority-ordered rules; Turkish, Latin and non-Latin token matching |
+| Field detection | `extension/scripts/field-detect.js` (`FillHubDetect`) | Classifies a field from `type`, `autocomplete`, label, `name`/`id`, placeholder, `title`, `aria-label`; priority-ordered rules; number inputs accept only digit types (phone, postal code, ID); Turkish, Latin and non-Latin token matching |
 | Generator | `extension/scripts/generator.js` (`FakeDataGenerator`) | Locale resolution, `createPerson`, value per field type, PII Safe values, persona migration |
 | Content script | `extension/scripts/content.js` | Walks each accessible frame and shadow root, fills fields, handles checkboxes, radios, selects, dates, files, undo, toast, captcha notice |
-| Settings page | `extension/options/options.html`, `extension/options/options.js`, `extension/options/i18n.js` | Profiles, custom rules, general settings, about, support; 15 interface languages |
+| Settings page | `extension/options/options.html`, `extension/options/options.js`, `extension/options/i18n.js` | Profiles, custom rules, general settings, about, support; 15 interface languages; opened from the right-click menu |
 | Styles | `extension/options/ui.src.css` → `extension/options/options.css` | Tailwind CSS 4 build (`npm run build:css`); generated file is not edited by hand |
 
 Load order (`CONTENT_FILES` in `extension/scripts/background.js`; the service worker injects them on demand): locale data → identity rules → field detection →
@@ -34,8 +33,8 @@ sequenceDiagram
     participant CS as Content script (per frame)
     participant G as Generator
     participant P as Page
-    U->>SW: shortcut, toolbar popup or menu
-    SW->>CS: fill / fill_field / undo (tabs.sendMessage)
+    U->>SW: toolbar icon, shortcut or menu
+    SW->>CS: fill / undo to every frame, fill_field to one frame (tabs.sendMessage)
     CS->>CS: read settings, migrate legacy profiles
     CS->>G: createPerson (or fixed profile identity)
     loop each field
@@ -43,10 +42,16 @@ sequenceDiagram
         CS->>G: generate value for the type
         CS->>P: setNativeValue + input/change events
     end
-    CS->>P: show toast; highlight a visible captcha if present
+    CS->>P: highlight a visible captcha if present
+    CS-->>SW: filled count, submitted, captcha (per frame)
+    SW->>CS: fill_result with the totals (top frame only)
+    CS->>P: show toast in the interface language
 ```
 
-1. The service worker forwards the action to the active tab; `fill_field` targets the focused field.
+1. The service worker sends the action to every frame of the active tab; `fill_field` goes only to the frame
+   that was right-clicked and targets its focused field (inside a shadow root too). Scripts are injected with
+   `injectImmediately: true`: waiting for every frame to become idle would hang on a frame that never does
+   (an `about:blank#…` iframe, for example).
 2. The content script reads settings from `chrome.storage.local`. Legacy persona presets are migrated
    in memory, so the first fill after an update already behaves correctly.
 3. For a full fill, one person is created per fill unless a fixed profile is active. The person is a
@@ -66,7 +71,8 @@ sequenceDiagram
 ## Captchas
 
 The content script never clicks, solves, or calls reCAPTCHA, hCaptcha, or Turnstile APIs. It only looks
-for visible captcha elements after a fill, outlines the first one, and shows a notice. It never scrolls to the
+for visible captcha elements after a fill, outlines the first one, and shows a notice. Invisible reCAPTCHA
+(v3 and the invisible v2 badge) asks nothing of the user and is not counted, and neither is a widget hidden with CSS. It never scrolls to the
 captcha or moves focus there. Before a fill starts, the service worker checks every frame of the tab for a visible
 captcha and passes the result to all frames, so a captcha in any frame stops auto-submit in all of them. A captcha
 that appears only after the fill, in a frame other than the form's own, is not seen.
@@ -92,13 +98,16 @@ that gets published is the one that is tested.
 ## Host access
 
 The manifest asks for `storage`, `contextMenus`, `scripting` and `activeTab`. There is no host permission.
-`activeTab` gives access to the current tab only after a user gesture: a keyboard shortcut, the context menu, or
-the toolbar popup's Fill or Test button. Access ends when the user leaves the tab.
+`activeTab` gives access to the current tab only after a user gesture: a click on the toolbar icon (which fills
+immediately), a keyboard shortcut, or a context menu item. Access ends when the user leaves the tab.
 
 Consequences in the code:
 
-- Every action reads the active tab with `chrome.tabs.query({ active: true })` in the service worker, after
-  the gesture. The settings page has no tab access, so the selector test lives in the toolbar popup.
+- The toolbar icon has no popup. `chrome.action.onClicked` hands the tab it was clicked on to the same
+  `runTabAction` path as a shortcut or menu item; that click is what grants `activeTab`. Changing the country
+  or profile is done on the settings page, which opens with **Settings** in the right-click menu (the same item
+  also appears when the toolbar icon is right-clicked).
+- Shortcuts and menu items act on the tab they were used in.
 - The e2e harness grants the permission the way a user does: `Ctrl+Shift+U` (Undo) on the form tab, then the
   fill runs against that tab. Chrome hides a tab's URL from extensions until such a gesture, so the harness
   finds the form tab among the active tabs, not by URL.

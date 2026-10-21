@@ -25,5 +25,8 @@
   },
   "menuUndo": {
     "message": "Annuler le remplissage fictif"
+  },
+  "menuSettings": {
+    "message": "Paramètres"
   }
 }

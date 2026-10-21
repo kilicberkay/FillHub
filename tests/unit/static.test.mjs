@@ -17,8 +17,30 @@ test('manifest: MV3, izinler storage, contextMenus, scripting ve activeTab; host
     assert.equal(manifest.manifest_version, 3);
     assert.deepEqual(manifest.permissions.slice().sort(), ['activeTab', 'contextMenus', 'scripting', 'storage']);
     assert.equal(manifest.content_scripts, undefined, 'içerik betikleri otomatik enjekte edilmemeli');
-    // Sekme erişimi yalnızca kullanıcı eylemiyle (kısayol, menü, popup) verilir; kalıcı host izni yoktur
+    // Sekme erişimi yalnızca kullanıcı eylemiyle (kısayol, menü, simge) verilir; kalıcı host izni yoktur
     assert.equal(manifest.host_permissions, undefined, 'host_permissions olmamalı (activeTab kullanılır)');
+});
+
+test('manifest: araç çubuğu simgesi açılır pencere açmaz, tıklama doğrudan doldurur', () => {
+    assert.equal(manifest.action.default_popup, undefined, 'varsayılan popup olmamalı');
+    assert.equal(manifest.action.default_title, '__MSG_actionTitle__');
+    assert.ok(!existsSync(join(EXT, 'popup')), 'popup klasörü kalmamalı');
+    const bg = read('scripts/background.js');
+    assert.match(bg, /chrome\.action\.onClicked\.addListener/, 'simge tıklaması dinlenmeli');
+    assert.match(bg, /runTabAction\(tab, 'fill'\)/, 'simge tıklaması formu doldurmalı');
+});
+
+test('sağ tık menüsü: Ayarlar öğesi ayar sayfasını açar (15 dilde başlık)', () => {
+    const bg = read('scripts/background.js');
+    assert.match(bg, /id: "openSettings"/, 'Ayarlar menü öğesi yok');
+    assert.match(bg, /chrome\.i18n\.getMessage\('menuSettings'\)/, 'menü başlığı yerelleştirilmeli');
+    assert.match(bg, /chrome\.runtime\.openOptionsPage\(\)/, 'menü ayar sayfasını açmalı');
+    const dirs = readdirSync(join(EXT, '_locales'));
+    assert.equal(dirs.length, 15);
+    for (const dir of dirs) {
+        const msgs = JSON.parse(read(`_locales/${dir}/messages.json`));
+        assert.ok(msgs.menuSettings && msgs.menuSettings.message.trim(), `${dir}: menuSettings boş`);
+    }
 });
 
 test('manifest: sürüm biçimi ve ad yerelleştirmesi (varsayılan dilde FillHub)', () => {
@@ -63,15 +85,6 @@ test('options.js her getElementById çağrısı options.html içinde bir id bulu
     assert.ok(ids.length > 20, `beklenenden az id: ${ids.length}`);
     const missing = [...new Set(ids)].filter((id) => !html.includes(`id="${id}"`));
     assert.deepEqual(missing, []);
-});
-
-test('popup.js her getElementById çağrısı popup.html içinde bir id bulur', () => {
-    const js = read('popup/popup.js');
-    const html = read('popup/popup.html');
-    const ids = [...js.matchAll(/getElementById\(['"]([^'"]+)['"]\)/g)].map((m) => m[1]);
-    assert.ok(ids.length >= 8, `beklenenden az id: ${ids.length}`);
-    const missing = [...new Set(ids)].filter((id) => !html.includes(`id="${id}"`));
-    assert.deepEqual(missing, [], 'popup.js var olmayan bir id arıyor');
 });
 
 test('ayar sayfası: yalnızca yerel betik yüklenir (uzak kod yok)', () => {
@@ -123,10 +136,12 @@ test('captcha: içerik betiği captcha\'ya tıklamaz, çözmez ve doğrulama API
     for (const re of banned) assert.ok(!re.test(src), `captcha etkileşimi var: ${re}`);
 });
 
-test('toast: geri al düğmesi etiketi tarayıcı dilinden değil, ayarlardaki dilden gelir; 15 dilde menuUndo ile aynı', () => {
+test('toast: bildirim metinleri ayarlardaki arayüz dilinden gelir (veri ülkesinden değil); geri al etiketi 15 dilde menuUndo ile aynı', () => {
     const src = read('scripts/content.js');
     assert.ok(!/chrome\.i18n\.getMessage\('menuUndo'\)/.test(src), 'düğme etiketi tarayıcı dilinden alınıyor');
-    assert.match(src, /getLocalizedMessage\(settings\.preferredLocale, 'undoLabel'\)/);
+    assert.match(src, /return settings\.uiLang \|\| navigator\.language/, 'bildirim dili arayüz dilinden gelmeli');
+    assert.match(src, /getLocalizedMessage\(lang, 'undoLabel'\)/);
+    assert.ok(!/getLocalizedMessage\(settings\.preferredLocale/.test(src), 'bildirim dili veri ülkesinden alınmamalı');
     const dirs = readdirSync(join(EXT, '_locales'));
     assert.equal(dirs.length, 15);
     for (const dir of dirs) {

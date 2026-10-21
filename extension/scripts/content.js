@@ -114,6 +114,7 @@ function snapshotField(el) {
         value: el.value,
         checked: el.checked,
         selectedIndex: el.selectedIndex,
+        selected: el.tagName === 'SELECT' ? [...el.options].map(o => o.selected) : undefined,
         files: el.files ? Array.from(el.files) : null,
         text: isRichEditable(el) ? el.textContent : undefined
     });
@@ -130,6 +131,10 @@ function clampTextValue(input, value) {
 }
 
 function clampNumberValue(input, value) {
+    // Kısıtsız alana rakam dizisi olduğu gibi yazılır: telefon gibi uzun numaralar ve baştaki sıfır korunur
+    if (/^\d+$/.test(String(value)) && input.min === '' && input.max === '' && ['', 'any', '1'].includes(input.getAttribute('step') || '')) {
+        return String(value);
+    }
     let num = Number(value);
     if (!Number.isFinite(num)) num = 0;
     const min = input.min === '' ? null : Number(input.min);
@@ -194,9 +199,9 @@ function fillNativeTypedInput(input, settings) {
         case 'time':
             return assignFieldValue(input, FakeDataGenerator.generate('datetime', locale, context).split('T')[1]);
         case 'month':
-            return assignFieldValue(input, FakeDataGenerator.generate('date', locale).slice(0, 7));
+            return assignFieldValue(input, FakeDataGenerator.generate('date', locale, context).slice(0, 7));
         case 'week': {
-            const [y, m, d] = FakeDataGenerator.generate('date', locale).split('-').map(Number);
+            const [y, m, d] = FakeDataGenerator.generate('date', locale, context).split('-').map(Number);
             const parts = isoWeekParts(new Date(y, m - 1, d));
             return assignFieldValue(input, `${parts.year}-W${String(parts.week).padStart(2, '0')}`);
         }
@@ -416,29 +421,39 @@ function collectFields(container, settings) {
     inputs.forEach(input => {
         const type = identifyField(input, settings.customRules);
         if (type !== 'firstName' && type !== 'lastName') return;
-        if (!isElementVisible(input)) return;
+        if (!isFieldVisible(input)) return;
         handledNames.add(input);
         fillField(input, settings);
     });
 
-    // Radio groups are resolved as a whole: exactly one enabled radio per group
-    const radioGroups = new Map();
+    // Radio groups are resolved as a whole: exactly one enabled radio per group.
+    // Grup, tarayıcıdaki gibi form + ad ile belirlenir: farklı formlarda aynı adı taşıyan radyolar ayrı gruptur.
+    const radioGroups = new Map(); // form (ya da null) → ad → radyolar
     queryFields(container, 'input[type="radio"][name]').forEach(r => {
-        if (!radioGroups.has(r.name)) radioGroups.set(r.name, []);
-        radioGroups.get(r.name).push(r);
+        const byName = radioGroups.get(r.form) || new Map();
+        radioGroups.set(r.form, byName);
+        if (!byName.has(r.name)) byName.set(r.name, []);
+        byName.get(r.name).push(r);
     });
-    radioGroups.forEach(list => {
-        const enabled = list.filter(r => !isControlDisabled(r) && isElementVisible(r));
+    radioGroups.forEach(byName => byName.forEach(list => {
+        const enabled = list.filter(r => !isControlDisabled(r) && isFieldVisible(r));
         if (!enabled.length) return;
         const pick = enabled[Math.floor(Math.random() * enabled.length)];
+        let changed = false;
         list.forEach(r => {
             if (r.checked !== (r === pick)) {
                 snapshotField(r);
                 setNativeChecked(r, r === pick);
                 dispatchFieldEvents(r);
+                changed = true;
             }
         });
-    });
+        // Grup tek alan sayılır (sonuç sayısı, otomatik gönderim ve tanılama)
+        if (changed) {
+            filledCount++;
+            fillStats.detected.radio = (fillStats.detected.radio || 0) + 1;
+        }
+    }));
 
     inputs.forEach(input => {
         // Names were filled by the pre-scan pass so e-mails can link to them
@@ -529,7 +544,7 @@ function fillField(input, settings, checkVisibility = true) {
         return fillFileInput(input, sessionData);
     }
 
-    if (checkVisibility && !isElementVisible(input)) return false;
+    if (checkVisibility && !isFieldVisible(input)) return false;
 
     if (input.type === 'radio' || input.type === 'checkbox') {
         // Her doldurma temiz sayfa: kutu hedef duruma getirilir (birikme yok). Karar sırası:
@@ -618,6 +633,11 @@ function fillField(input, settings, checkVisibility = true) {
     // Parola, eşleşen onay alanı için oturumda tutulur
     if (type === 'password') sessionData.password = val;
 
+    // Sayı alanına yalnız rakam yazılabilir: telefon, posta kodu gibi değerlerin biçim işaretleri atılır
+    if (input.type === 'number' && type !== 'number') {
+        val = String(val).replace(/\D/g, '') || FakeDataGenerator.generate('number', settings.preferredLocale, {});
+    }
+
     assignFieldValue(input, val);
     return true;
 }
@@ -625,7 +645,11 @@ function fillField(input, settings, checkVisibility = true) {
 // Fills fields that frameworks render shortly after the initial fill pass
 const DYNAMIC_SCAN_WINDOW_MS = 3000;
 
+let dynamicObserver = null;
+
 function observeDynamicFields(settings) {
+    // Art arda doldurmada önceki doldurmanın gözlemcisi kapatılır; alanlar yalnız son doldurmanın ayarlarıyla dolar
+    if (dynamicObserver) dynamicObserver.disconnect();
     if (!document.body) return;
     const observer = new MutationObserver(records => {
         records.forEach(record => record.addedNodes.forEach(node => {
@@ -634,6 +658,7 @@ function observeDynamicFields(settings) {
         drainTasks();
     });
     observer.observe(document.body, { childList: true, subtree: true });
+    dynamicObserver = observer;
     setTimeout(() => observer.disconnect(), DYNAMIC_SCAN_WINDOW_MS);
 }
 
@@ -659,6 +684,8 @@ function undoFill() {
                 const transfer = new DataTransfer();
                 (snap.files || []).forEach(file => transfer.items.add(file));
                 el.files = transfer.files;
+            } else if (el.tagName === 'SELECT' && snap.selected) {
+                [...el.options].forEach((o, i) => { o.selected = !!snap.selected[i]; });
             } else if (el.tagName === 'SELECT') {
                 el.selectedIndex = typeof snap.selectedIndex === 'number' ? snap.selectedIndex : -1;
             } else if (el.tagName === 'INPUT' && (el.type === 'checkbox' || el.type === 'radio')) {
@@ -704,10 +731,21 @@ function isElementVisible(el) {
     return rect.width > 0 && rect.height > 0;
 }
 
+// Özel stilli onay kutuları ve radyolar asıl girdiyi gizler (opacity:0, display:none, boyutsuz);
+// kullanıcı görünen etikete tıklar. Bu yüzden bağlı etiketi görünen kutu da görünür sayılır.
+function isFieldVisible(el) {
+    if (isElementVisible(el)) return true;
+    if (el.type !== 'checkbox' && el.type !== 'radio') return false;
+    return [...(el.labels || [])].some(isElementVisible);
+}
+
 // Otomatik gönderim yalnız gerçek gönderim kontrollerine basar: rol tabanlı sahte butonlar ve
 // yıkıcı/ikincil eylemler (İptal, Sil, Temizle...) dışarıda kalır
 const SUBMIT_BUTTON_SELECTOR = 'button[type="submit"], input[type="submit"], input[type="image"], form button:not([type])';
-const DESTRUCTIVE_BUTTON_TEXT = /cancel|iptal|delete|remove|discard|reset|sil|temizle|vazgeç|vazgec|abort|kapat|geri|close/i;
+// Kelime olarak eşleşir: "Disclose", "Preset", "Basil" gibi kelimelerin içindeki parçalar düğmeyi dışlamaz
+const DESTRUCTIVE_BUTTON_TEXT = /(?<![\p{L}\p{N}])(cancel|iptal|delete|remove|discard|reset|sil|temizle|vazgeç|vazgec|abort|kapat|geri|close)(?![\p{L}\p{N}])/iu;
+// Yıkıcı bir kelime içerse de gönderim olan ifadeler: parola sıfırlama ve geri bildirim formları
+const SAFE_SUBMIT_TEXT = /reset\s+(my\s+|your\s+)?password|password\s+reset|geri\s+bildirim/iu;
 
 function autoSubmitLabel(control) {
     const text = control.tagName === 'INPUT'
@@ -719,10 +757,33 @@ function autoSubmitLabel(control) {
 // Captcha ile ilgili düğmeler ("Ben robot değilim" gibi) hiçbir koşulda otomatik tıklanmaz
 const CAPTCHA_BUTTON_TEXT = /captcha|recaptcha|hcaptcha|turnstile|robot|not a human|insan değil/i;
 
-function autoSubmitForm(container) {
-    const usable = [...container.querySelectorAll(SUBMIT_BUTTON_SELECTOR)]
+function isDestructiveLabel(label) {
+    return DESTRUCTIVE_BUTTON_TEXT.test(label) && !SAFE_SUBMIT_TEXT.test(label);
+}
+
+// Gönderilecek form: son doldurmada en çok alanı değişen form. Alanların hiçbiri bir forma bağlı değilse
+// (form öğesi kullanmayan sayfalar) null döner ve gönderim düğmesi sayfa genelinde aranır.
+function filledForm() {
+    const counts = new Map();
+    fillSnapshot.forEach((snap, el) => {
+        if (el.form) counts.set(el.form, (counts.get(el.form) || 0) + 1);
+    });
+    let best = null;
+    counts.forEach((count, form) => { if (!best || count > counts.get(best)) best = form; });
+    return best;
+}
+
+// Formun gönderim kontrolleri: form="…" niteliğiyle dışarıda duranlar dahil (input[type=image] form.elements'te yer almaz)
+function submitControlsOf(form) {
+    const own = [...form.elements].filter(el => el.matches('button[type="submit"], input[type="submit"], button:not([type])'));
+    return [...own, ...form.querySelectorAll('input[type="image"]')];
+}
+
+function autoSubmitForm(form) {
+    const controls = form ? submitControlsOf(form) : [...document.querySelectorAll(SUBMIT_BUTTON_SELECTOR)];
+    const usable = controls
         .filter(el => !el.disabled
-            && !DESTRUCTIVE_BUTTON_TEXT.test(autoSubmitLabel(el))
+            && !isDestructiveLabel(autoSubmitLabel(el))
             && !CAPTCHA_BUTTON_TEXT.test(autoSubmitLabel(el))
             && !CAPTCHA_SELECTORS.some(selector => el.closest(selector)));
     const submitBtn = usable.find(el => (el.getAttribute('type') || 'submit').toLowerCase() === 'submit') || usable[0];
@@ -738,6 +799,8 @@ const TOAST_THEMES = {
     dark: { background: 'rgba(24, 24, 27, 0.9)', color: '#f4f4f5', border: '1px solid rgba(255, 255, 255, 0.1)', shadow: '0 24px 48px -32px rgba(0, 0, 0, 0.9)' },
     light: { background: 'rgba(255, 255, 255, 0.95)', color: '#18181b', border: '1px solid #e4e4e7', shadow: '0 18px 40px -24px rgba(24, 24, 27, 0.35)' }
 };
+
+let toastTimer = null;
 
 // action: isteğe bağlı { label, onClick } düğmesi. Odak almaz; yalnızca kullanıcı tıklarsa çalışır.
 function showToast(message, theme, action) {
@@ -779,7 +842,9 @@ function showToast(message, theme, action) {
     }
     toast.style.transform = 'translateY(0)';
     toast.style.opacity = '1';
-    setTimeout(() => {
+    // Yeni bildirim kendi süresini alır; önceki bildirimin zamanlayıcısı onu erken kapatmaz
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
         toast.style.transform = 'translateY(100px)';
         toast.style.opacity = '0';
     }, 3000);
@@ -792,14 +857,56 @@ const CAPTCHA_SELECTORS = [
     'iframe[src*="recaptcha"]', 'iframe[src*="hcaptcha"]', 'iframe[src*="challenges.cloudflare.com"]'
 ];
 
+// Görünmez reCAPTCHA (v3 ve "invisible" v2) kullanıcıdan bir şey istemez: rozeti captcha sayılmaz
+function isInvisibleCaptcha(el) {
+    return el.closest('.grecaptcha-badge, [data-size="invisible"]') !== null
+        || /[?&]size=invisible(&|$)/.test(el.getAttribute('src') || '');
+}
+
 function findVisibleCaptcha() {
     for (const selector of CAPTCHA_SELECTORS) {
         for (const el of document.querySelectorAll(selector)) {
-            const rect = el.getBoundingClientRect();
-            if (rect.width > 0 && rect.height > 0) return el;
+            if (!isInvisibleCaptcha(el) && isElementVisible(el)) return el;
         }
     }
     return null;
+}
+
+// Bildirimler arayüz dilinde gösterilir (ayar sayfası ile aynı); dil seçilmemişse tarayıcı dili
+function toastLanguage(settings) {
+    return settings.uiLang || navigator.language || 'en';
+}
+
+// Doldurma sonucu bildirimi. Sayılar arka plandan geldiğinde tüm çerçevelerin toplamıdır.
+// Görünür captcha varsa doğrulamayı kullanıcı tamamlar: yalnız uyarı gösterilir.
+function showFillToast(settings, { filled, submitted, captcha, chaos }) {
+    const lang = toastLanguage(settings);
+    if (captcha) {
+        showToast(getLocalizedMessage(lang, 'captcha'), settings.theme);
+        return;
+    }
+    if (!filled) {
+        showToast(getLocalizedMessage(lang, 'noFields'), settings.theme);
+        return;
+    }
+    // Gönderim istenmediyse bildirimde "Geri al" sunulur; gönderilmiş bir formu geri almak mümkün değildir
+    const undoAction = submitted ? undefined : {
+        label: getLocalizedMessage(lang, 'undoLabel'),
+        onClick: async () => {
+            // Arka plan geri almayı her çerçeveye iletir; ulaşılamazsa en azından bu çerçeve geri alınır
+            const reply = await chrome.runtime.sendMessage({ type: 'undo-all' }).catch(() => null);
+            if (!reply || reply.status !== 'success') undoFill();
+            showToast(getLocalizedMessage(lang, 'undo'), settings.theme);
+        }
+    };
+    showToast(getLocalizedMessage(lang, chaos ? 'chaos' : 'filled'), settings.theme, undoAction);
+}
+
+// Gölge DOM içindeki odaklı alan: belgenin activeElement'i gölge kökün sahibidir, asıl alan kökün içindedir
+function deepActiveElement() {
+    let el = document.activeElement;
+    while (el && el.shadowRoot && el.shadowRoot.activeElement) el = el.shadowRoot.activeElement;
+    return el;
 }
 
 // Captcha'ya kaydırma ya da odaklanma yapılmaz; yalnızca öğe işaretlenir (sayfada zaten görünüyorsa fark edilir)
@@ -815,7 +922,7 @@ function highlightCaptcha(el) {
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (!['fill', 'fill_chaos', 'fill_field', 'undo'].includes(request.action)) return;
+    if (!['fill', 'fill_chaos', 'fill_field', 'undo', 'fill_result'].includes(request.action)) return;
 
     let responded = false;
     const respond = (payload) => {
@@ -827,6 +934,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     (async () => {
         const startedAt = Date.now();
         const settings = await chrome.storage.local.get(null);
+        // Arka plan tüm çerçevelerin sonucunu topladıktan sonra bildirimi üst çerçeveye gösterir
+        if (request.action === 'fill_result') {
+            if (window.top === window) showFillToast(settings, request);
+            respond({ status: 'success' });
+            return;
+        }
         // Yeni kurulum varsayılanları: gizlilik öncelikli + tarayıcı dili
         if (settings.piiSafe === undefined) settings.piiSafe = true;
         if (!settings.preferredLocale) settings.preferredLocale = FakeDataGenerator.canonicalLocale(navigator.language);
@@ -842,7 +955,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
 
         if (request.action === 'fill_field') {
-            const target = document.activeElement;
+            const target = deepActiveElement();
             if (!target || (!['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) && !isRichEditable(target))) {
                 respond({ status: 'skipped' });
                 return;
@@ -867,22 +980,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         // (sayfa alan adı arka plandan gelir; iframe'ler üst sayfanın kuralına tabidir)
         const siteExcluded = FillHubSiteRules.matchesSite(request.pageHost || location.hostname, settings.noAutoSubmitSites);
         const submitRequested = !!(settings.autoSubmit && request.action === 'fill' && filledCount > 0 && !captchaOnPage && !siteExcluded);
-        if (window.top === window) {
-            if (captchaOnPage) {
-                showToast(getLocalizedMessage(settings.preferredLocale, 'captcha'), settings.theme);
-            } else {
-                // Gönderim istenmediyse bildirimde "Geri al" sunulur; gönderilmiş bir formu geri almak mümkün değildir
-                const undoAction = submitRequested ? undefined : {
-                    label: getLocalizedMessage(settings.preferredLocale, 'undoLabel'),
-                    onClick: () => {
-                        undoFill();
-                        showToast(getLocalizedMessage(settings.preferredLocale, 'undo'), settings.theme);
-                    }
-                };
-                showToast(getLocalizedMessage(settings.preferredLocale, request.action === 'fill_chaos' ? 'chaos' : 'filled'), settings.theme, undoAction);
-            }
+        // Arka plan üzerinden gelen isteklerde (deferToast) bildirim, tüm çerçevelerin toplamıyla sonradan gösterilir
+        if (window.top === window && !request.deferToast) {
+            showFillToast(settings, { filled: filledCount, submitted: submitRequested, captcha: captchaOnPage, chaos: request.action === 'fill_chaos' });
         }
-        if (submitRequested) autoSubmitForm(document);
+        if (submitRequested) autoSubmitForm(filledForm());
         // Tanılama özeti yalnızca üst çerçeveden yazılır; sayılar ve bayraklar içerir, değer ya da adres içermez
         if (window.top === window && request.action === 'fill') {
             chrome.storage.local.set({
@@ -897,7 +999,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 }
             });
         }
-        respond({ status: 'success', filled: filledCount });
+        respond({ status: 'success', filled: filledCount, submitted: submitRequested, captcha: captchaOnPage });
     })().catch((e) => {
         console.debug('[FillHub] doldurma hatası:', e);
         respond({ status: 'error' });
@@ -925,6 +1027,23 @@ function getLocalizedMessage(localeLiteral, key = 'filled') {
             'ur': 'تمام فیلڈز درستگی سے بھر دیے گئے۔',
             'id': 'Semua kolom diisi dengan tepat.',
             'vi': 'Đã điền tất cả các trường một cách chính xác.'
+        },
+        noFields: {
+            'tr': 'Bu sayfada doldurulabilir alan bulunamadı.',
+            'en': 'No fillable fields found on this page.',
+            'es': 'No se encontraron campos para rellenar en esta página.',
+            'fr': 'Aucun champ à remplir sur cette page.',
+            'de': 'Auf dieser Seite wurden keine ausfüllbaren Felder gefunden.',
+            'pt': 'Nenhum campo para preencher nesta página.',
+            'ru': 'На этой странице не найдено полей для заполнения.',
+            'zh': '此页面上未找到可填充的字段。',
+            'ja': 'このページに入力できるフィールドが見つかりません。',
+            'ar': 'لم يُعثر على حقول قابلة للملء في هذه الصفحة.',
+            'hi': 'इस पेज पर भरने योग्य कोई फ़ील्ड नहीं मिला।',
+            'bn': 'এই পৃষ্ঠায় পূরণযোগ্য কোনো ক্ষেত্র পাওয়া যায়নি।',
+            'ur': 'اس صفحے پر بھرنے کے قابل کوئی فیلڈ نہیں ملا۔',
+            'id': 'Tidak ada kolom yang dapat diisi di halaman ini.',
+            'vi': 'Không tìm thấy trường nào có thể điền trên trang này.'
         },
         chaos: {
             'tr': 'CHAOS MODE',

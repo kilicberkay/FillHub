@@ -1,8 +1,8 @@
-// README için ekran görüntüleri: ayar sayfaları (dolu profil ve kurallarla), araç çubuğu açılır penceresi, doldurma ekranı.
+// README için ekran görüntüleri: ayar sayfaları (dolu profil ve kurallarla) ve doldurma ekranı.
 // Gereksinim: Chromium (CHROME_BIN veya Playwright önbelleği) ve ImageMagick (magick).
 // Çıktı: docs/images/{light,dark}/ (İngilizce) ve docs/images/tr/{light,dark}/ (Türkçe); fill-form.png her dilde.
 import { createRequire } from 'node:module';
-import { mkdirSync, rmSync, existsSync, writeFileSync } from 'node:fs';
+import { mkdirSync, rmSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { startEnv, setStorage, openForm, send, closeForm, ROOT } from '../tests/e2e/harness.mjs';
 import { PageSession, wait } from './lib/browser.mjs';
@@ -22,7 +22,7 @@ const LANGS = [
     { dir: join(IMAGES, 'tr'), uiLang: 'tr', locale: 'tr-TR', fixture: 'tr' },
 ];
 
-// Ayar sayfası ve açılır pencere dolu görünsün diye örnek profil ve kurallar; kimlikler üreticiden gelir
+// Ayar sayfası dolu görünsün diye örnek profil ve kurallar; kimlikler üreticiden gelir
 function seedState(lang, theme) {
     return {
         uiLang: lang.uiLang, theme, onboardingComplete: true, preferredLocale: lang.locale, piiSafe: true,
@@ -40,24 +40,8 @@ function seedState(lang, theme) {
     };
 }
 
-// Açılır pencere 320 px genişliktedir (w-80); 2× ölçekte, yalnızca gövde kadar alınır
-async function popupShot(env, file) {
-    const page = await PageSession.open(env.cdp, `chrome-extension://${env.extId}/popup/popup.html`);
-    try {
-        await page.waitFor('document.getElementById("popupCountry").options.length > 0', 10000);
-        await wait(300);
-        const height = await page.eval('Math.ceil(document.body.getBoundingClientRect().height)');
-        const { data } = await page.cdp.send('Page.captureScreenshot', {
-            format: 'png', clip: { x: 0, y: 0, width: 320, height, scale: 2 },
-        }, page.sid);
-        writeFileSync(file, Buffer.from(data, 'base64'));
-    } finally {
-        await page.close();
-    }
-}
-
 async function main() {
-    // Önceki ayar ve açılır pencere görüntüleri (kaldırılan Destek sayfası dahil) silinir; yenileri üretilir
+    // Önceki ayar görüntüleri (kaldırılan Destek sayfası dahil) silinir; yenileri üretilir
     for (const lang of LANGS) {
         for (const theme of ['light', 'dark']) rmSync(join(lang.dir, theme), { recursive: true, force: true });
     }
@@ -82,10 +66,6 @@ async function main() {
                 } finally {
                     await page.close();
                 }
-                await setStorage(env, seedState(lang, theme));
-                const popup = join(out, 'popup.png');
-                await popupShot(env, popup);
-                frameImage(popup);
             }
 
             // Doldurma ekranı (tema bağımsız); kaydırma çubuğu gizlenir
@@ -101,7 +81,7 @@ async function main() {
             } finally {
                 await closeForm(form);
             }
-            if (!existsSync(join(lang.dir, 'light', 'popup.png'))) throw new Error('açılır pencere görüntüsü oluşmadı');
+            if (!existsSync(join(lang.dir, 'light', 'settings-general.png'))) throw new Error('ayar sayfası görüntüsü oluşmadı');
         }
     } finally {
         await env.close();

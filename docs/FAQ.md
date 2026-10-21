@@ -54,10 +54,16 @@ Dates are spread across that range so that tests do not depend on a single year.
 Only if **Auto-Submit Form** is on (it is off by default). Even then, FillHub clicks only real submit
 controls. Buttons such as Cancel, Delete, or Reset are never clicked.
 
-## Why does FillHub say it cannot fill this page?
+## Why does nothing happen on some pages?
 
 Chrome does not let extensions run on its own pages, such as `chrome://` pages, the Chrome Web Store, and the
 new tab page. Open a regular web page with a form and try again.
+
+## How do I change the default country or profile?
+
+Open the settings page with **Settings** in the right-click menu; the same item appears when you right-click
+the toolbar icon. Choose the country in **General** and the identity in **Profiles**. The toolbar icon fills the
+page directly and has no popup, so the country and profile are changed only here.
 
 ## Does it work in Firefox or Safari?
 
@@ -73,7 +79,7 @@ current page.
 ## A shortcut does not work.
 
 Another extension or the operating system may already use it. Change it at `chrome://extensions/shortcuts`.
-You can always use the toolbar popup or the right-click menu instead.
+You can always click the toolbar icon or use the right-click menu instead.
 
 ## How do I reset the settings?
 

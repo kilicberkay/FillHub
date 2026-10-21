@@ -16,8 +16,8 @@ that your data stays on your device.
   for test accounts only.
 - **Backups are files you control.** Exporting settings writes a JSON file to your computer; importing
   reads a file you choose. Nothing is uploaded.
-- **Reads form fields only when you ask it to fill.** FillHub acts when you press a shortcut, use
-  the context menu, or press Fill in the toolbar popup. It reads the labels and names of form fields on the
+- **Reads form fields only when you ask it to fill.** FillHub acts when you click the toolbar icon, press a
+  shortcut, or use the context menu. It reads the labels and names of form fields on the
   page you are viewing in order to choose a fake value for each field, and writes values back to
   those fields.
 - **Does not store the values it writes into form fields**, except the previous values that the Undo
@@ -29,9 +29,9 @@ that your data stays on your device.
 | Permission | Why |
 |---|---|
 | `storage` | Saves your settings locally. |
-| `contextMenus` | Adds the "Fill form with fake data", "Fill this field" and "Undo fake fill" items to the right-click menu. |
+| `contextMenus` | Adds the "Fill form with fake data", "Fill this field", "Undo fake fill" and "Settings" items to the right-click menu (the toolbar icon's menu uses the same items). |
 | `scripting` | Injects the fill scripts into a page only after you start a fill. Pages you do not fill run no FillHub code. |
-| `activeTab` | Access to the tab you are looking at, granted only when you press a shortcut, the popup's Fill or Test button, or a context menu item, and only for that tab. Lets FillHub fill forms on that page, including same-origin iframes. Cross-origin iframes are outside this permission. No access to other sites. |
+| `activeTab` | Access to the tab you are looking at, granted only when you click the toolbar icon, press a shortcut, or use a context menu item, and only for that tab. Lets FillHub fill forms on that page, including same-origin iframes. Cross-origin iframes are outside this permission. No access to other sites. |
 
 ## Fake data
 

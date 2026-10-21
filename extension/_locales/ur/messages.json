@@ -25,5 +25,8 @@
   },
   "menuUndo": {
     "message": "جعلی بھرائی واپس کریں"
+  },
+  "menuSettings": {
+    "message": "ترتیبات"
   }
 }

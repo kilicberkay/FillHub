@@ -25,5 +25,8 @@
   },
   "menuUndo": {
     "message": "Desfazer preenchimento fictício"
+  },
+  "menuSettings": {
+    "message": "Configurações"
   }
 }

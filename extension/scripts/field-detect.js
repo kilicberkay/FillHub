@@ -89,16 +89,17 @@ const FillHubDetect = (() => {
 
     // input.type sinyalleri: metin tabanlı kurallardan önce gelir
     const TYPE_SIGNALS = {
-        email: 'email', tel: 'phone', url: 'url', number: 'number', password: 'password',
+        email: 'email', tel: 'phone', url: 'url', password: 'password',
         date: 'date', 'datetime-local': 'datetime'
     };
 
-    // Alan türü: önce input.type, sonra autocomplete, sonra metin kaynakları (öncelik sırasıyla).
-    // Tanınmazsa null döner; çağıran select/text/date gibi yapısal yedekleri uygular.
-    function classify(sources, meta) {
-        const info = meta || {};
-        if (TYPE_SIGNALS[info.inputType]) return TYPE_SIGNALS[info.inputType];
-        const ac = String(info.autocomplete || '').trim().split(/\s+/).pop().toLowerCase();
+    // Sayı alanına (type="number") yalnız rakamla yazılabilen türler: telefon, posta kodu ve kimlik numaraları
+    // etiketten tanınır; diğer her şey sayı olarak kalır
+    const NUMERIC_TYPES = new Set(['phone', 'zip', 'idNumber', 'taxId', 'number']);
+
+    // autocomplete jetonu, sonra metin kaynakları (öncelik sırasıyla)
+    function classifyByText(sources, autocomplete) {
+        const ac = String(autocomplete || '').trim().split(/\s+/).pop().toLowerCase();
         if (AUTOCOMPLETE_TYPES[ac]) return AUTOCOMPLETE_TYPES[ac];
         const tokenSets = (sources || []).map(tokenize).filter(t => t.length > 0);
         for (const rule of RULES) {
@@ -109,6 +110,16 @@ const FillHubDetect = (() => {
             }
         }
         return null;
+    }
+
+    // Alan türü: önce input.type, sonra autocomplete, sonra metin kaynakları (öncelik sırasıyla).
+    // Tanınmazsa null döner; çağıran select/text/date gibi yapısal yedekleri uygular.
+    function classify(sources, meta) {
+        const info = meta || {};
+        if (TYPE_SIGNALS[info.inputType]) return TYPE_SIGNALS[info.inputType];
+        const detected = classifyByText(sources, info.autocomplete);
+        if (info.inputType === 'number') return NUMERIC_TYPES.has(detected) ? detected : 'number';
+        return detected;
     }
 
     // Onay kutusu sınıfı: 'marketing' (bülten, tanıtım), 'consent' (şartlar, gizlilik, KVKK, açık rıza) ya da 'other'.
