@@ -6,7 +6,7 @@ import { mkdirSync, rmSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { startEnv, setStorage, openForm, send, closeForm, ROOT } from '../tests/e2e/harness.mjs';
 import { PageSession, wait } from './lib/browser.mjs';
-import { HIDE_SCROLLBARS, frameImage } from './lib/capture.mjs';
+import { HIDE_SCROLLBARS, frameImage, pngSize } from './lib/capture.mjs';
 
 const require = createRequire(import.meta.url);
 const FakeDataGenerator = require(join(ROOT, 'extension', 'scripts', 'generator.js'));
@@ -61,7 +61,7 @@ async function main() {
                         await wait(900);
                         const file = join(out, `${p.name}.png`);
                         await page.screenshot(file);
-                        frameImage(file);
+                        await frameImage(env.cdp, file, { ...pngSize(file), dark: theme === 'dark' });
                     }
                 } finally {
                     await page.close();
@@ -77,7 +77,7 @@ async function main() {
                 await wait(400);
                 const file = join(lang.dir, 'fill-form.png');
                 await form.page.screenshot(file);
-                frameImage(file);
+                await frameImage(env.cdp, file, { ...pngSize(file), dark: false });
             } finally {
                 await closeForm(form);
             }

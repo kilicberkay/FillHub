@@ -3,6 +3,11 @@
 All notable changes to FillHub are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.3] - 2026-10-25
+
+### Changed
+- The settings page uses the same layout as CaptureHub: a rounded sidebar card with the version and open-source label, a theme button and a heart in the top bar, and section cards.
+
 ## [1.4.2] - 2026-10-25
 
 Store listing only; the extension code is unchanged.
