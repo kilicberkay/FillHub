@@ -23,10 +23,11 @@ function makeIcon() {
     try {
         execFileSync('rsvg-convert', ['-w', '96', '-h', '96', '-o', art, svg]);
         execFileSync('magick', [art, '-background', 'none', '-gravity', 'center', '-extent', '128x128', icon]);
-        rmSync(art);
         return 'store-icon-128.png';
     } catch (e) {
         return `simge atlandı (rsvg-convert/magick gerekli): ${e.message.split('\n')[0]}`;
+    } finally {
+        rmSync(art, { force: true });
     }
 }
 
