@@ -60,7 +60,7 @@ Tüm yollar depo köküne göredir; eklenti dosyaları `extension/` altındadır
   `form-en.html` (EN) sağlar; uzantının servis çalışanı üzerinden komut gönderir.
 - `tools/` — `check-syntax.js`, `run-tests.js`, `verify-data.js`, `build.js` (zip), `make-store-assets.mjs`
   (mağaza görselleri), `lib/browser.mjs` (CDP istemcisi).
-- `store/` — Chrome Web Store materyali: ilan metinleri (EN/TR), izin gerekçeleri, görseller. Pakete girmez.
+- `store/` — Chrome Web Store materyali: ilan metinleri (15 dil, `listing/<locale>.md`), izin gerekçeleri, görseller. Pakete girmez.
 - `docs/ARCHITECTURE.md`, `docs/THIRD_PARTY_NOTICES.md`, `.github/CONTRIBUTING.md`, `.github/SECURITY.md`, `PRIVACY.md`, `CHANGELOG.md`, `LICENSE` (MIT).
 - `.github/` — CI (`ci.yml`), yayın (`release.yml`), şablonlar, `FUNDING.yml`.
 

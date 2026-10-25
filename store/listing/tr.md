@@ -7,7 +7,7 @@
 
 **Kategori:** Geliştirici Araçları
 
-**Dil:** Türkçe (ad ve özet 14 dilde ayrıca yerelleştirilmiştir)
+**Dil:** Türkçe (ad, özet ve açıklama 14 dilde ayrıca yerelleştirilmiştir)
 
 **Tek amaç:** Geçerli web sayfasındaki form alanlarını sahte test verisiyle doldurmak.
 
@@ -48,6 +48,7 @@ Nasıl kullanılır
 2. Ctrl+Shift+F (macOS'ta Command+Shift+F) tuşlarına basın ya da araç çubuğundaki FillHub simgesine tıklayın. Form hemen doldurulur.
 3. Geri almak için Ctrl+Shift+U tuşlarına basın.
 4. Kaos modu (uç değerlerle test) için Ctrl+Shift+Y tuşlarına basın.
+
 Kısayollar chrome://extensions/shortcuts adresinden değiştirilebilir.
 Tek bir alanı doldurmak için alana sağ tıklayıp "Bu alanı doldur" seçeneğini kullanın.
 

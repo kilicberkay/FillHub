@@ -7,7 +7,7 @@ Fill web forms with realistic, consistent fake data in 15 languages. Privacy-saf
 
 **Category:** Developer Tools
 
-**Language:** English (default); localized name and short description in 14 more languages
+**Language:** English (default); localized name, summary, and description in 14 more languages
 
 **Single purpose:** Fill the form fields on the current web page with fake test data.
 
@@ -50,6 +50,7 @@ How to use
 2. Press Ctrl+Shift+F (Command+Shift+F on macOS), or click the FillHub icon in the toolbar. The form fills immediately.
 3. Press Ctrl+Shift+U to undo.
 4. Press Ctrl+Shift+Y for chaos mode (unusual values for fuzz tests).
+
 Shortcuts can be changed at chrome://extensions/shortcuts.
 Right-click a single field and choose "Fill this field" to fill only that field.
 

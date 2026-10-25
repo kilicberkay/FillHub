@@ -7,7 +7,8 @@ the extension package itself (see `tools/build.js`).
 
 | Path | Purpose |
 |---|---|
-| `listing/en.md`, `listing/tr.md` | Store name, summary, description, single purpose, permission justifications |
+| `listing/<locale>.md` (15 languages, one file per `extension/_locales/` folder) | Store summary and description per language |
+| `listing/en.md`, `listing/tr.md` | Also the single purpose and permission justifications (English and Turkish) |
 | `privacy-policy.md` | Privacy policy text for the store form (also in `PRIVACY.md`) |
 | `assets/store-icon-128.png` | Store icon (96 px artwork with 16 px transparent padding) |
 | `assets/promo-small-440x280.png` | Small promotional tile |
@@ -27,7 +28,9 @@ node tools/make-store-assets.mjs   # needs Chromium, rsvg-convert, and ImageMagi
 1. Build the package: `npm run build`. The archive is `dist/fillhub-<version>.zip`.
 2. Open the [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole) and
    create a new item. Upload the zip.
-3. Fill in the listing from `listing/en.md` (default language) and `listing/tr.md` (Turkish).
+3. Fill in the listing from `listing/en.md` (default language). For each other language, paste the description
+   from `listing/<locale>.md`. The summary comes from the extension's `extDescription`, which must match the
+   summary in every listing file.
 4. Upload the icon, promotional tiles, and screenshots from `assets/`.
 5. In **Privacy practices**, declare: no data collected, no data sold or transferred, no remote code.
    Give the permission justifications from the listing. Use the privacy policy URL
@@ -46,3 +49,4 @@ node tools/make-store-assets.mjs   # needs Chromium, rsvg-convert, and ImageMagi
 - `extension/manifest.json` version is higher than the published version.
 - The screenshots match the current UI.
 - The store description and the README describe the same features.
+- The summary in every `listing/<locale>.md` equals `extDescription` in `extension/_locales/<locale>/messages.json`.
