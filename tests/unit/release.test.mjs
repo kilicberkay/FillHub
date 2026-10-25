@@ -86,21 +86,24 @@ function pngSize(path) {
     return { w: b.readUInt32BE(16), h: b.readUInt32BE(20) };
 }
 
-test('mağaza görselleri doğru boyutta', () => {
-    const expect = [
+test('mağaza görselleri: her dil için tanıtım kutuları ve ekran görüntüleri doğru boyutta', () => {
+    const expected = [
         ['store/assets/store-icon-128.png', 128, 128],
-        ['store/assets/promo-small-440x280.png', 440, 280],
-        ['store/assets/promo-marquee-1400x560.png', 1400, 560],
         ['store/assets/social-preview-1280x640.png', 1280, 640],
     ];
-    for (const [f, w, h] of expect) {
+    const locales = readdirSync(join(EXT, '_locales')).sort();
+    for (const lang of locales) {
+        expected.push([`store/assets/promo/${lang}/promo-small-440x280.png`, 440, 280]);
+        expected.push([`store/assets/promo/${lang}/promo-marquee-1400x560.png`, 1400, 560]);
+    }
+    for (const [f, w, h] of expected) {
         assert.ok(existsSync(join(ROOT, f)), `eksik görsel: ${f}`);
         assert.deepEqual(pngSize(join(ROOT, f)), { w, h }, f);
     }
-    for (const lang of ['en', 'tr']) {
+    for (const lang of locales) {
         const dir = join(ROOT, 'store/assets/screenshots', lang);
         const shots = readdirSync(dir).filter((f) => f.endsWith('.png'));
-        assert.ok(shots.length >= 1 && shots.length <= 5, `${lang}: ekran görüntüsü sayısı ${shots.length}`);
+        assert.equal(shots.length, 5, `${lang}: ekran görüntüsü sayısı ${shots.length}`);
         for (const s of shots) assert.deepEqual(pngSize(join(dir, s)), { w: 1280, h: 800 }, `${lang}/${s}`);
     }
 });

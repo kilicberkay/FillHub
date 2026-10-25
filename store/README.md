@@ -10,18 +10,22 @@ the extension package itself (see `tools/build.js`).
 | `listing/<locale>.md` (15 languages, one file per `extension/_locales/` folder) | Store summary and description per language |
 | `listing/en.md`, `listing/tr.md` | Also the single purpose and permission justifications (English and Turkish) |
 | `privacy-policy.md` | Privacy policy text for the store form (also in `PRIVACY.md`) |
-| `assets/store-icon-128.png` | Store icon (96 px artwork with 16 px transparent padding) |
-| `assets/promo-small-440x280.png` | Small promotional tile |
-| `assets/promo-marquee-1400x560.png` | Marquee promotional image |
-| `assets/social-preview-1280x640.png` | GitHub social preview image (upload in repository settings) |
-| `assets/screenshots/en`, `assets/screenshots/tr` | 1280×800 screenshots, one set per language |
-| `assets/src/*.svg` | Templates for the promotional images |
+| `assets/store-icon-128.png` | Store icon (96 px artwork with 16 px transparent padding); the same for every language |
+| `assets/promo/<locale>/promo-small-440x280.png` | Small promotional tile, one per language |
+| `assets/promo/<locale>/promo-marquee-1400x560.png` | Marquee promotional image, one per language |
+| `assets/social-preview-1280x640.png` | GitHub social preview image in English (upload in repository settings) |
+| `assets/screenshots/<locale>/` | 1280×800 screenshots, five per language |
+| `assets/src/*.svg` | Templates for the promotional images; `@L1@`, `@L2@`, `@FOOTER@`, `@TAGLINE@`, `@FEATURES@` are replaced per language |
 
-Regenerate the images after UI changes:
+`<locale>` is one of the folders in `extension/_locales/`. Regenerate the images after UI changes:
 
 ```bash
-node tools/make-store-assets.mjs   # needs Chromium, rsvg-convert, and ImageMagick (magick)
+node tools/make-store-assets.mjs              # all 15 languages
+node tools/make-store-assets.mjs ja zh_CN     # only the given languages
 ```
+
+The generator needs Chromium and `rsvg-convert`. ImageMagick (`magick`) is optional and only rebuilds the icon. The
+machine needs fonts for every script the languages use (CJK, Arabic, Devanagari, Bengali).
 
 ## Publishing steps
 
@@ -31,7 +35,9 @@ node tools/make-store-assets.mjs   # needs Chromium, rsvg-convert, and ImageMagi
 3. Fill in the listing from `listing/en.md` (default language). For each other language, paste the description
    from `listing/<locale>.md`. The summary comes from the extension's `extDescription`, which must match the
    summary in every listing file.
-4. Upload the icon, promotional tiles, and screenshots from `assets/`.
+4. Upload the icon from `assets/store-icon-128.png`. For each language, upload the promotional tiles from
+   `assets/promo/<locale>/` and the screenshots from `assets/screenshots/<locale>/` in that language's listing.
+   The social preview is for the GitHub repository settings, not for the store.
 5. In **Privacy practices**, declare: no data collected, no data sold or transferred, no remote code.
    Give the permission justifications from the listing. Use the privacy policy URL
    `https://github.com/kilicberkay/FillHub/blob/main/PRIVACY.md`.

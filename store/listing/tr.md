@@ -13,64 +13,76 @@
 
 ## Açıklama
 
-FillHub, web formlarını gerçekçi ve tutarlı sahte verilerle doldurur. Geliştiriciler ve test uzmanları
-kayıt, ödeme ve veri girişi akışlarını elle test değeri yazmadan, gerçek insanların bilgilerini
-kullanmadan deneyebilir.
+FillHub, web formlarını gerçekçi ve tutarlı sahte test verileriyle doldurur. Geliştiriciler ve test
+uzmanları kayıt, ödeme ve veri girişi akışlarını elle test değeri yazmadan ve gerçek kişilerin
+bilgilerini kullanmadan test edebilir.
 
 Öne çıkanlar
 
-- 15 dil ve 15 ülke profili. Ad, adres, telefon, şirket ve kimlik numaraları her ülkenin biçimini izler.
-- Tutarlı kişi. Her doldurma tek bir kişi üretir; ad, soyad, e-posta, e-posta tekrarı, kullanıcı adı
-  ve telefon birbiriyle uyumludur.
-- Akıllı alan tespiti. Etiket, ad, autocomplete ipuçları ve giriş türleri birlikte değerlendirilir;
-  "Cep telefonu" ya da "Soyadınız" etiketli alan doğru değeri alır.
-- Güvenli mod (varsayılan olarak açık). Kişisel tanımlayıcılar, test verisi olduğu açıkça belli değerlerdir:
-  example.com e-postaları, yer tutucu telefonlar ve gerçek kullanım için tasarlanmamış test kimlik numaraları.
-- Kimlik profilleri. Her doldurmada yeni bir rastgele kişi ya da sabit bir kişi kullanılır. Bir profil ad, soyad,
-  e-posta, telefon ve şifreyi sabitleyebilir; böylece sabit bir test hesabını tutabilir.
-- Özel kurallar. Yerleşik tanıma bir alanı kaçırırsa bir CSS seçicisi bir veri türüne eşlenir. Kurallar
-  ayar sayfasında düzenlenir.
-- Onay kutuları (şartlar, gizlilik, KVKK) işaretlenir; pazarlama kutuları işaretsiz kalır.
-- Metin alanları, ülkenin dilinde örnek cümleler alır ve alanın en fazla uzunluğuna göre kırpılır.
-- Dosya alanları, kabul edilen türe uyan küçük bir üretilmiş dosya alır.
-- İsteğe bağlı otomatik gönderim (varsayılan olarak kapalı), doldurulan formun gerçek gönderim düğmesine basar.
-  İptal, Sil gibi yıkıcı düğmelere hiç basılmaz; siteler istisna listesine eklenebilir.
-- Captcha'lara asla tıklanmaz ve çözülmez. Görünür captcha işaretlenir, doğrulamayı siz tamamlarsınız ve form
-  otomatik gönderilmez.
-- Uç durumları denemek için kaos modu.
-- Geri al: son doldurmayı, doldurmadan önceki haline döndürür.
-- Ayarların yerel bir JSON dosyasına yedeklenmesi ve yalnızca sayı içeren tanılama raporu.
-- Aynı kökenli iframe içindeki formlarda çalışır; JavaScript çerçeveleriyle değer senkronizasyonunu korur. Çapraz kökenli iframe'ler activeTab izninin dışındadır ve doldurulmaz.
+- 15 dil ve 15 ülke profili. Ad, adres, telefon numarası, şirket adı ve kimlik numaraları her ülkenin
+  biçimine uyar.
+- Tutarlı kişi verisi. Her doldurma tek bir kişi üretir. Bu nedenle ad, soyad, e-posta, "e-posta
+  tekrarı" alanı, kullanıcı adı ve telefon numarası birbiriyle uyumludur.
+- Akıllı alan tespiti. FillHub her alanı tanımak için etiketi, alan adını, autocomplete ipuçlarını ve
+  giriş türünü birlikte değerlendirir. Etiketler yalnızca İngilizce değil, sayfanın dilinde de tanınır.
+  Örneğin "Cep telefonu" etiketli alana bir telefon numarası, "Soyadınız" etiketli alana bir soyadı
+  yazılır.
+- PII Safe modu (varsayılan olarak açık). Kişisel tanımlayıcılarda test verisi olduğu açıkça belli olan
+  değerler kullanılır: example.com e-posta adresleri, yer tutucu telefon numaraları ve gerçek kullanım
+  için tasarlanmamış test kimlik numaraları.
+- Kimlik profilleri. Her doldurmada yeni bir rastgele kişi ya da sabit bir kişi kullanılabilir. Bir
+  profil ad, soyad, e-posta, telefon numarası ve şifreyi sabitleyebilir; böylece her doldurmada aynı
+  test hesabı kullanılır.
+- Özel kurallar. Yerleşik tespit bir alanı tanımadığında bir CSS seçicisi bir veri türüyle
+  eşleştirilebilir. Kurallar ayar sayfasında düzenlenir.
+- Onay kutuları (kullanım şartları, gizlilik politikası ve KVKK onayı) işaretlenir. Pazarlama onay
+  kutuları işaretsiz kalır.
+- Metin alanlarına ülkenin dilinde örnek cümleler yazılır. Metin, alanın izin verdiği en fazla uzunluğa
+  göre kısaltılır.
+- Dosya alanlarına, kabul edilen dosya türüne uygun küçük bir dosya üretilip eklenir.
+- Otomatik gönderim (isteğe bağlı, varsayılan olarak kapalı) doldurulan formun gerçek gönderim
+  düğmesine tıklar. İptal veya Sil gibi yıkıcı düğmelere hiçbir zaman tıklanmaz. Belirli siteler
+  otomatik gönderimin dışında tutulabilir.
+- Captcha'lara hiçbir zaman tıklanmaz ve captcha'lar çözülmez. Görünür bir captcha çerçeveyle
+  işaretlenir ve doğrulamayı siz tamamlarsınız. Bu durumda form otomatik olarak gönderilmez.
+- Kaos modu, fuzz tarzı testler için alanlara olağan dışı değerler yazar.
+- Geri alma, formu son doldurmadan önceki durumuna döndürür.
+- Ayarlar yerel bir JSON dosyasına yedeklenebilir. Hata bildirimleri için hazırlanan tanılama raporu
+  sayıları ve temel ayarları içerir; ad, alan değeri veya site adresi içermez.
+- Aynı kökenli iframe'lerde çalışır ve değerleri JavaScript framework'leriyle senkronize tutar. Farklı
+  kökenli iframe'ler activeTab izninin kapsamı dışındadır ve doldurulmaz.
 
 Nasıl kullanılır
 
-1. Formu içeren bir sayfayı açın.
+1. Form içeren bir sayfa açın.
 2. Ctrl+Shift+F (macOS'ta Command+Shift+F) tuşlarına basın ya da araç çubuğundaki FillHub simgesine tıklayın. Form hemen doldurulur.
-3. Geri almak için Ctrl+Shift+U tuşlarına basın.
-4. Kaos modu (uç değerlerle test) için Ctrl+Shift+Y tuşlarına basın.
+3. Doldurmayı geri almak için Ctrl+Shift+U (macOS'ta Command+Shift+U) tuşlarına basın.
+4. Formu kaos modunda, fuzz testleri için olağan dışı değerlerle doldurmak üzere Ctrl+Shift+Y (macOS'ta Command+Shift+Y) tuşlarına basın.
 
 Kısayollar chrome://extensions/shortcuts adresinden değiştirilebilir.
-Tek bir alanı doldurmak için alana sağ tıklayıp "Bu alanı doldur" seçeneğini kullanın.
+Tek bir alanı doldurmak için alana sağ tıklayın ve "Bu alanı doldur" seçeneğini seçin.
 
 Gizlilik
 
-FillHub veri toplamaz. Ayarlar tarayıcınızda kalır; uzantı hiçbir veriyi geliştiriciye ya da üçüncü
-taraflara göndermez. Gizlilik politikası: https://github.com/kilicberkay/FillHub/blob/main/PRIVACY.md
+FillHub veri toplamaz ve ağ isteği yapmaz. Ayarlar yalnızca tarayıcınızda saklanır. Uzantı geliştiriciye
+veya üçüncü taraflara hiçbir veri göndermez. Gizlilik politikası:
+https://github.com/kilicberkay/FillHub/blob/main/PRIVACY.md
 
 Açık kaynak
 
-FillHub, MIT lisansıyla ücretsiz ve açık kaynaklıdır. Kaynak kod, sorunlar ve katkılar:
+FillHub, MIT lisansıyla ücretsiz ve açık kaynaklıdır. Kaynak kod, hata kayıtları ve katkılar:
 https://github.com/kilicberkay/FillHub
 
 Destek
 
-FillHub ücretsizdir. İşinize yardımcı oluyorsa geliştirmeyi GitHub Sponsors üzerinden destekleyebilirsiniz:
-https://github.com/sponsors/kilicberkay
+FillHub ücretsizdir. FillHub işinizde faydalı oluyorsa geliştirilmesini GitHub Sponsors üzerinden
+destekleyebilirsiniz: https://github.com/sponsors/kilicberkay
 
 Sorumlu kullanım
 
-FillHub test ve geliştirme içindir. Üretilen kimlik numaraları genel sağlama kurallarından geçebilir;
-bu nedenle üretilen verileri gerçek başvurularda, satın almalarda ya da kimlik beyanlarında kullanmayın.
+FillHub test ve geliştirme amaçlıdır. Üretilen kimlik numaraları herkese açık sağlama (checksum)
+kurallarından geçebilir. Üretilen verileri gerçek başvurularda, satın almalarda veya kimlik doğrulamada
+kullanmayın.
 
 ## İzin gerekçeleri
 

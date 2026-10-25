@@ -51,9 +51,20 @@ const FIXTURES = {
     'frames-cross-origin': readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'frames-cross-origin.html')),
     'cross-frame': readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-cross-frame.html')),
     'no-fields': readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'no-fields.html')),
+    de: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-de.html')),
+    fr: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-fr.html')),
+    es: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-es.html')),
+    pt: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-pt.html')),
+    ru: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-ru.html')),
+    id: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-id.html')),
+    vi: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-vi.html')),
+    hi: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-hi.html')),
+    bn: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-bn.html')),
+    ur: readFileSync(join(ROOT, 'tests', 'e2e', 'fixtures', 'form-ur.html')),
 };
 // ?page=<anahtar> ile seçilen sayfalar; diğer istekler dile göre TR ya da EN formunu alır
-const NAMED_PAGES = ['consent', 'rich', 'ja', 'zh', 'ar', 'picker', 'frames', 'frames-cross-origin', 'cross-frame', 'no-fields'];
+const NAMED_PAGES = ['consent', 'rich', 'ja', 'zh', 'ar', 'picker', 'frames', 'frames-cross-origin', 'cross-frame', 'no-fields',
+    'de', 'fr', 'es', 'pt', 'ru', 'id', 'vi', 'hi', 'bn', 'ur'];
 
 export const chromeAvailable = () => Boolean(findChrome());
 

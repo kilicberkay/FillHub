@@ -3,6 +3,13 @@
 All notable changes to FillHub are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.2] - 2026-10-25
+
+Store listing only; the extension code is unchanged.
+
+### Changed
+- The short description in Urdu now reads as realistic data, not as real data.
+
 ## [1.4.1] - 2026-10-21
 
 ### Fixed

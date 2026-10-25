@@ -11,7 +11,7 @@
   <rect width="440" height="280" fill="url(#grid)"/>
   <image x="36" y="46" width="64" height="64" xlink:href="ICON_HREF"/>
   <text x="36" y="150" font-family="Geist, DejaVu Sans, sans-serif" font-size="40" font-weight="700" fill="#ffffff" letter-spacing="-0.8">FillHub</text>
-  <text x="36" y="182" font-family="Geist, DejaVu Sans, sans-serif" font-size="16" fill="#ffffff" fill-opacity="0.92">Realistic, consistent fake data for</text>
-  <text x="36" y="204" font-family="Geist, DejaVu Sans, sans-serif" font-size="16" fill="#ffffff" fill-opacity="0.92">web forms in 15 languages.</text>
-  <text x="36" y="250" font-family="Geist Mono, DejaVu Sans Mono, monospace" font-size="11" fill="#ffffff" fill-opacity="0.85" letter-spacing="1.6">OPEN SOURCE · MIT · PRIVACY-SAFE MODE</text>
+  <text x="36" y="182" font-family="Geist, DejaVu Sans, sans-serif" font-size="16" fill="#ffffff" fill-opacity="0.92">@L1@</text>
+  <text x="36" y="204" font-family="Geist, DejaVu Sans, sans-serif" font-size="16" fill="#ffffff" fill-opacity="0.92">@L2@</text>
+  <text x="36" y="250" font-family="Geist Mono, DejaVu Sans Mono, monospace" font-size="11" fill="#ffffff" fill-opacity="0.85" letter-spacing="1.6">@FOOTER@</text>
 </svg>
