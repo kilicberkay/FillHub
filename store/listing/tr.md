@@ -113,7 +113,7 @@ Açıklamalar (sırayla):
 ## Varlıklar
 
 - Simge: `store/assets/store-icon-128.png`
-- Küçük tanıtım kutusu: `store/assets/promo-small-440x280.png`
-- Marquee: `store/assets/promo-marquee-1400x560.png`
+- Küçük tanıtım kutusu: `store/assets/promo/<locale>/promo-small-440x280.png`
+- Marquee: `store/assets/promo/<locale>/promo-marquee-1400x560.png`
 - GitHub sosyal önizleme: `store/assets/social-preview-1280x640.png`
 - Ekran görüntüleri (1280×800): `store/assets/screenshots/tr/`
