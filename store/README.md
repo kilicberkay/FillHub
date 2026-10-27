@@ -31,7 +31,7 @@ machine needs fonts for every script the languages use (CJK, Arabic, Devanagari,
 
 1. Build the package: `npm run build`. The archive is `dist/fillhub-<version>.zip`.
 2. Open the [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole) and
-   create a new item. Upload the zip.
+   open the existing item. Upload the zip.
 3. Fill in the listing from `listing/en.md` (default language). For each other language, paste the description
    from `listing/<locale>.md`. The summary comes from the extension's `extDescription`, which must match the
    summary in every listing file.

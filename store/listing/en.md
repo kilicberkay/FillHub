@@ -110,7 +110,7 @@ Captions (in order):
 ## Assets
 
 - Icon: `store/assets/store-icon-128.png`
-- Small promo tile: `store/assets/promo-small-440x280.png`
-- Marquee: `store/assets/promo-marquee-1400x560.png`
+- Small promo tile: `store/assets/promo/<locale>/promo-small-440x280.png`
+- Marquee: `store/assets/promo/<locale>/promo-marquee-1400x560.png`
 - GitHub social preview: `store/assets/social-preview-1280x640.png`
 - Screenshots (1280×800): `store/assets/screenshots/en/`
